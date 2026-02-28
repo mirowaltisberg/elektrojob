@@ -161,7 +161,8 @@ export function HomepageSeoContent() {
           </h2>
           <nav aria-label="Beliebte Stellenangebote nach Beruf und Kanton">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {TOP_LANDING_PAGES.map((item) => (
+              {/* SEO-DECISION: Show top 18 landing pages on homepage — enough for internal link equity without overwhelming the page */}
+              {TOP_LANDING_PAGES.slice(0, 18).map((item) => (
                 <Link
                   key={`${item.role}-${item.canton}`}
                   href={getLandingPath(item)}

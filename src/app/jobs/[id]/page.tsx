@@ -456,7 +456,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
               <nav aria-label="Beliebte Stellenangebote" className="bg-white border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
                 <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Beliebte Suchseiten</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {TOP_LANDING_PAGES.map((item) => (
+                  {TOP_LANDING_PAGES.slice(0, 8).map((item) => (
                     <Link
                       key={`${item.role}-${item.canton}`}
                       href={getLandingPath(item)}
