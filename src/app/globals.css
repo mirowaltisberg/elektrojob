@@ -65,7 +65,7 @@
   --secondary-foreground: oklch(0.17 0.02 265);
   /* muted: slate-100 */
   --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.48 0 0);
   /* accent: lighter amber */
   --accent: oklch(0.92 0.08 75);
   --accent-foreground: oklch(0.17 0.02 265);
@@ -174,21 +174,13 @@
 }
 
 @keyframes badge-pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 oklch(0.795 0.155 75 / 0%);
-  }
-  50% {
-    box-shadow: 0 0 0 5px oklch(0.795 0.155 75 / 25%);
-  }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.04); }
 }
 
 @keyframes badge-pulse-red {
-  0%, 100% {
-    box-shadow: 0 0 0 0 oklch(0.577 0.245 27.325 / 0%);
-  }
-  50% {
-    box-shadow: 0 0 0 5px oklch(0.577 0.245 27.325 / 25%);
-  }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(1.04); }
 }
 
 @keyframes modal-in {
@@ -227,14 +219,8 @@
   }
 }
 
-@keyframes shimmer-slide {
-  from {
-    background-position: -200% center;
-  }
-  to {
-    background-position: 200% center;
-  }
-}
+/* shimmer-slide removed — was non-composited (background-position).
+   skeleton-shimmer below uses composited transform instead. */
 
 /* ----------------------------------------------------------
    Utility animation classes
@@ -317,7 +303,7 @@
     box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1),
     transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
     border-color 0.2s ease;
-  will-change: transform, box-shadow;
+  will-change: transform;
 }
 
 .job-card:hover {
@@ -437,26 +423,30 @@
   animation: results-fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Skeleton shimmer for loading state */
+/* Skeleton shimmer — uses composited transform: translateX instead of background-position */
 @keyframes skeleton-shimmer {
-  0% {
-    background-position: -400px 0;
-  }
-  100% {
-    background-position: 400px 0;
-  }
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
 }
 
 .skeleton-card {
+  position: relative;
+  overflow: hidden;
+  background: oklch(0.96 0 0);
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   background: linear-gradient(
     90deg,
-    oklch(0.96 0 0) 0%,
-    oklch(0.98 0 0) 40%,
-    oklch(0.96 0 0) 80%
+    transparent 0%,
+    oklch(0.99 0 0 / 0.85) 50%,
+    transparent 100%
   );
-  background-size: 800px 100%;
   animation: skeleton-shimmer 1.6s ease-in-out infinite;
-  border-radius: var(--radius-lg);
 }
 
 /* Results counter number animation */
@@ -479,14 +469,10 @@
   animation: count-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Search button loading state pulse */
+/* Search button loading state pulse — uses composited opacity instead of box-shadow */
 @keyframes search-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 oklch(0.795 0.155 75 / 0%);
-  }
-  50% {
-    box-shadow: 0 0 0 8px oklch(0.795 0.155 75 / 15%);
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
 }
 
 .search-loading {

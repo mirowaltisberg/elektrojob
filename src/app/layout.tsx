@@ -7,6 +7,8 @@ import "./globals.css";
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://elektrojob.ch";
