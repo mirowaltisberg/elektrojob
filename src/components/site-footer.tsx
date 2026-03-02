@@ -127,14 +127,31 @@ export function SiteFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-slate-800 pt-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+        <div className="border-t border-slate-800 pt-6 mt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+          <div className="flex flex-col sm:flex-row items-center gap-3">
             <p>© {new Date().getFullYear()} elektrojob.ch — Alle Rechte vorbehalten.</p>
             <nav aria-label="Branchenverbände" className="flex items-center gap-4">
               <a href="https://www.eit.swiss" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">EIT.swiss</a>
               <a href="https://www.electrosuisse.ch" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Electrosuisse</a>
               <a href="https://www.esti.admin.ch" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">ESTI</a>
             </nav>
+          </div>
+          <div className="flex items-center gap-4">
+            <a href="https://facebook.com/elektrojob" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-slate-400 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+            </a>
+            <a href="https://instagram.com/elektrojob" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-slate-400 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+            </a>
+            <a href="https://twitter.com/elektrojob" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" className="text-slate-400 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+            </a>
+            <a href="https://linkedin.com/company/elektrojob" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-slate-400 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+            </a>
+            <a href="https://youtube.com/@elektrojob" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="text-slate-400 hover:text-white transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 7.1C2.5 5 4.5 3 7 3h10c2.5 0 4.5 2 4.5 4.1v9.8c0 2.1-2 4.1-4.5 4.1H7c-2.5 0-4.5-2-4.5-4.1V7.1z"></path><path d="m10 8 5 4-5 4V8z"></path></svg>
+            </a>
           </div>
         </div>
       </div>

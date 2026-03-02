@@ -47,6 +47,25 @@ const CITY_COORDINATES: Record<string, Coordinate> = {
   martigny: { lat: 46.1026, lon: 7.0732 },
 };
 
+interface RegionEntry {
+  coordinate: Coordinate;
+  defaultRadiusKm: number;
+}
+
+const REGION_COORDINATES: Record<string, RegionEntry> = {
+  "grossraum zurich": { coordinate: { lat: 47.38, lon: 8.55 }, defaultRadiusKm: 50 },
+  "grossraum zuerich": { coordinate: { lat: 47.38, lon: 8.55 }, defaultRadiusKm: 50 },
+  zentralschweiz: { coordinate: { lat: 46.97, lon: 8.47 }, defaultRadiusKm: 50 },
+  nordwestschweiz: { coordinate: { lat: 47.43, lon: 7.74 }, defaultRadiusKm: 50 },
+  ostschweiz: { coordinate: { lat: 47.28, lon: 9.17 }, defaultRadiusKm: 80 },
+  mittelland: { coordinate: { lat: 46.94, lon: 7.41 }, defaultRadiusKm: 50 },
+  "westschweiz romandie": { coordinate: { lat: 46.79, lon: 6.76 }, defaultRadiusKm: 80 },
+  westschweiz: { coordinate: { lat: 46.79, lon: 6.76 }, defaultRadiusKm: 80 },
+  romandie: { coordinate: { lat: 46.79, lon: 6.76 }, defaultRadiusKm: 80 },
+  tessin: { coordinate: { lat: 46.3, lon: 8.9 }, defaultRadiusKm: 50 },
+  wallis: { coordinate: { lat: 46.23, lon: 7.45 }, defaultRadiusKm: 50 },
+};
+
 const CANTON_CENTROIDS: Record<string, Coordinate> = {
   zh: { lat: 47.366, lon: 8.55 },
   zürich: { lat: 47.366, lon: 8.55 },
@@ -160,9 +179,33 @@ function resolveCantonCoordinate(canton: string): Coordinate | null {
   return CANTON_CENTROIDS[normalizedCanton] ?? null;
 }
 
+function resolveRegionCoordinate(input: string): Coordinate | null {
+  const normalized = normalizeToken(input);
+  if (!normalized) {
+    return null;
+  }
+
+  const region = REGION_COORDINATES[normalized];
+  return region?.coordinate ?? null;
+}
+
+export function getRegionRadius(location: string): number | null {
+  const normalized = normalizeToken(location);
+  if (!normalized) {
+    return null;
+  }
+
+  return REGION_COORDINATES[normalized]?.defaultRadiusKm ?? null;
+}
+
 export function resolveLocationCoordinate(location: string): Coordinate | null {
   if (!location.trim()) {
     return null;
+  }
+
+  const regionCoordinate = resolveRegionCoordinate(location);
+  if (regionCoordinate) {
+    return regionCoordinate;
   }
 
   const cityCandidate = firstMunicipality(location.replace(/\b\d{4}\b/g, " "));

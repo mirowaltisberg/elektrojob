@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import Script from "next/script";
 import { JsonLd } from "@/components/json-ld";
 import "./globals.css";
 
@@ -18,11 +20,11 @@ export const metadata: Metadata = {
   title: {
     // SEO-DECISION: Domain removed from default title per Seobility audit —
     // domain in title is penalized. Template keeps "elektrojob.ch" for inner pages.
-    default: "Elektrojobs Schweiz — Offene Stellen für Elektro-Fachkräfte",
+    default: "Elektrojobs Schweiz — Offene Stellen für Elektroinstallateur & Co.",
     template: "%s | elektrojob.ch",
   },
   description:
-    "Finde aktuelle Elektrojobs in der ganzen Schweiz — Elektroinstallateur, Montage-Elektriker, Projektleiter Elektro und mehr. Jetzt Stellen vergleichen und direkt bewerben auf elektrojob.ch.",
+    "Aktuelle Elektrojobs in der Schweiz! Finde offene Stellen als Elektroinstallateur (Vollzeit/Teilzeit Pensum), Montage-Elektriker u.v.m. Jetzt bewerben!",
   keywords: [
     "Elektrojobs",
     "Elektrojobs Schweiz",
@@ -41,9 +43,9 @@ export const metadata: Metadata = {
     "Stellen Elektrobranche Schweiz",
   ],
   openGraph: {
-    title: "Elektrojobs Schweiz — Offene Stellen für Elektro-Fachkräfte",
+    title: "Elektrojobs Schweiz — Offene Stellen für Elektroinstallateur & Co.",
     description:
-      "Finde aktuelle Elektrojobs in der ganzen Schweiz — Elektroinstallateur, Montage-Elektriker, Projektleiter Elektro und mehr. Jetzt Stellen vergleichen und direkt bewerben.",
+      "Aktuelle Elektrojobs in der Schweiz! Finde offene Stellen als Elektroinstallateur (Vollzeit/Teilzeit Pensum), Montage-Elektriker u.v.m. Jetzt bewerben!",
     type: "website",
     url: "/",
     siteName: "elektrojob.ch",
@@ -51,9 +53,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Elektrojobs Schweiz | Offene Stellen für Elektro-Fachkräfte",
+    title: "Elektrojobs Schweiz | Offene Stellen für Elektroinstallateur & Co.",
     description:
-      "Finde aktuelle Elektrojobs in der ganzen Schweiz — Elektroinstallateur, Montage-Elektriker, Projektleiter Elektro und mehr.",
+      "Aktuelle Elektrojobs in der Schweiz! Finde offene Stellen als Elektroinstallateur (Vollzeit/Teilzeit Pensum), Montage-Elektriker u.v.m. Jetzt bewerben!",
   },
   alternates: {
     canonical: "/",
@@ -113,6 +115,26 @@ const websiteSchema = {
   },
 };
 
+// SEO-DECISION: LocalBusiness schema to improve visibility for local search intent
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  name: "elektrojob.ch",
+  image: `${SITE_URL}/logo.svg`,
+  url: SITE_URL,
+  telephone: "",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Zürich",
+    addressCountry: "CH",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: 47.3769,
+    longitude: 8.5417,
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -120,11 +142,30 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
+      <head>
+        {/* Facebook Pixel */}
+        <Script id="fb-pixel" strategy="afterInteractive">
+          {`
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', process.env.NEXT_PUBLIC_FB_PIXEL_ID || '00000000000');
+            fbq('track', 'PageView');
+          `}
+        </Script>
+      </head>
       <body lang="de" className={`${plusJakarta.variable} antialiased font-sans bg-slate-50`}>
         <JsonLd data={organizationSchema} />
         <JsonLd data={websiteSchema} />
+        <JsonLd data={localBusinessSchema} />
         {children}
         <Analytics />
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"} />
       </body>
     </html>
   );

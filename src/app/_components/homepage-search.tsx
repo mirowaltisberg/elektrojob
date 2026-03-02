@@ -32,7 +32,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import { trackEvent } from "@/lib/analytics";
 import { TOP_LANDING_PAGES, getLandingPath } from "@/lib/landing-pages";
-import { calculateDistanceKm, resolveLocationCoordinate, type Coordinate } from "@/lib/location-distance";
+import { calculateDistanceKm, getRegionRadius, resolveLocationCoordinate, type Coordinate } from "@/lib/location-distance";
 import { estimateSalary, formatSalaryRange } from "@/lib/salary-estimates";
 
 const JOB_SUGGESTIONS = [
@@ -67,6 +67,14 @@ const LOCATION_SUGGESTIONS = [
   "Fribourg, FR",
   "Lausanne, VD",
   "Lugano, TI",
+  "Grossraum Zürich",
+  "Zentralschweiz",
+  "Nordwestschweiz",
+  "Ostschweiz",
+  "Mittelland",
+  "Westschweiz / Romandie",
+  "Tessin",
+  "Wallis",
   "Ganze Schweiz",
 ];
 
@@ -362,6 +370,14 @@ export function HomepageSearch() {
       .then((data: string[]) => setPlzSuggestions(data))
       .catch(() => { });
     return () => controller.abort();
+  }, [location]);
+
+  // Auto-set radius when a region is selected
+  useEffect(() => {
+    const regionRadius = getRegionRadius(location);
+    if (regionRadius !== null) {
+      setRadiusKm(String(regionRadius));
+    }
   }, [location]);
 
   const locationDropdownSuggestions = useMemo(() => {

@@ -12817,6 +12817,25 @@ const SWISS_POSTAL_CODE_SEARCH_INDEX: SwissPostalCodeSearchEntry[] = Object.entr
   }
 );
 
+const REGION_NAMES = [
+  "Grossraum Zürich",
+  "Zentralschweiz",
+  "Nordwestschweiz",
+  "Ostschweiz",
+  "Mittelland",
+  "Westschweiz / Romandie",
+  "Tessin",
+  "Wallis",
+];
+
+const REGION_SEARCH_ENTRIES = REGION_NAMES.map((name) => ({
+  label: name,
+  searchable: name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase(),
+}));
+
 export function searchSwissPostalCodes(query: string, limit = 12): string[] {
   const normalizedQuery = query.trim().toLowerCase();
   if (!normalizedQuery) {
@@ -12825,6 +12844,15 @@ export function searchSwissPostalCodes(query: string, limit = 12): string[] {
 
   const looksLikePlz = /^\d{1,4}$/.test(normalizedQuery);
   const matches: string[] = [];
+
+  // Search regions first (only for text searches, not PLZ)
+  if (!looksLikePlz) {
+    for (const region of REGION_SEARCH_ENTRIES) {
+      if (region.searchable.includes(normalizedQuery)) {
+        matches.push(region.label);
+      }
+    }
+  }
 
   for (const entry of SWISS_POSTAL_CODE_SEARCH_INDEX) {
     const isMatch = looksLikePlz
