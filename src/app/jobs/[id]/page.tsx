@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -293,7 +292,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
       <header className="border-b sticky top-0 z-30 header-blur animate-header">
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center shrink-0">
-            <Image src="/logo.svg" alt="elektrojob.ch — Elektrojobs in der Schweiz" width={200} height={32} className="h-7 sm:h-8 w-auto" />
+            <img src="/logo.svg" alt="elektrojob.ch — Elektrojobs in der Schweiz" width={200} height={32} className="h-7 sm:h-8 w-auto" />
           </Link>
           <nav className="shrink-0">
             <Button variant="ghost" size="sm" asChild className="text-sm px-2 sm:px-4 h-9 sm:h-10 btn-interactive">

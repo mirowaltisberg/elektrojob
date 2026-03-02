@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { TOP_LANDING_PAGES, getLandingPath } from "@/lib/landing-pages";
@@ -19,7 +18,7 @@ export default function NotFound() {
       <header className="border-b header-blur">
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center">
           <Link href="/" className="flex items-center shrink-0">
-            <Image
+            <img
               src="/logo.svg"
               alt="elektrojob.ch — Elektrojobs in der Schweiz"
               width={200}

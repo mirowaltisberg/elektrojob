@@ -18,8 +18,6 @@ import {
 import { searchJobListings } from "@/lib/job-catalog";
 import type { JobListing } from "@/lib/job-types";
 import { estimateSalary, formatSalaryRange } from "@/lib/salary-estimates";
-import Image from "next/image";
-
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://elektrojob.ch";
 
 interface LandingPageProps {
@@ -165,7 +163,7 @@ export default async function LandingRolePage({ params }: LandingPageProps) {
       <header className="border-b header-blur sticky top-0 z-30">
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center shrink-0">
-            <Image
+            <img
               src="/logo.svg"
               alt="elektrojob.ch — Elektrojobs in der Schweiz"
               width={200}
