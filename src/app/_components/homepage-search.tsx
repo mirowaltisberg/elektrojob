@@ -937,7 +937,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
 
             {!isLoading && !errorMessage && jobs.length > 0 && (
               <>
-                <StaggeredList className="space-y-3 sm:space-y-4" baseDelayMs={60} staggerMs={80} triggerKey={searchKey}>
+                <StaggeredList className="space-y-3 sm:space-y-4" baseDelayMs={0} staggerMs={30} triggerKey={searchKey}>
                   {jobs.map((job, index) => {
                     const href = isGeneratedJob(job)
                       ? {

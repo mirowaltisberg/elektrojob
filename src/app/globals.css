@@ -228,15 +228,15 @@
 
 /* Hero entrance — runs immediately on page load */
 .animate-hero-title {
-  animation: hero-slide-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: hero-slide-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-hero-subtitle {
-  animation: hero-slide-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+  animation: hero-slide-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
 }
 
 .animate-hero-search {
-  animation: hero-slide-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.24s both;
+  animation: hero-slide-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
 }
 
 .animate-header {
@@ -246,10 +246,10 @@
 /* Scroll-triggered: elements start invisible; JS adds .is-visible */
 .animate-on-scroll {
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(12px);
   transition:
-    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .animate-on-scroll.is-visible {
@@ -260,10 +260,10 @@
 /* Staggered job cards — delay is applied via inline style */
 .animate-card {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(10px);
   transition:
-    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .animate-card.is-visible {
@@ -419,7 +419,7 @@
 }
 
 .results-enter {
-  animation: results-fade-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: results-fade-in 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Skeleton shimmer — uses composited transform: translateX instead of background-position */

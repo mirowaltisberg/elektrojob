@@ -1,9 +1,8 @@
-import { cache } from "react";
+import { cache, Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft,
   Building2,
   CalendarDays,
   CheckCircle2,
@@ -13,7 +12,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getJobListingById, getSimilarJobListings } from "@/lib/job-catalog";
@@ -278,6 +276,57 @@ export async function generateMetadata(props: JobDetailsPageProps): Promise<Meta
   };
 }
 
+/** Async server component — streams in after main content */
+async function SimilarJobsSection({
+  job,
+  query,
+  location,
+}: {
+  job: JobListing;
+  query: string;
+  location: string;
+}) {
+  const similarJobs = await getSimilarJobListings(job, 4);
+
+  if (similarJobs.length === 0) {
+    return null;
+  }
+
+  return (
+    <nav aria-label="Ähnliche Stellenangebote" className="bg-white border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
+      <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Ähnliche Jobs</h2>
+      <div className="space-y-2">
+        {similarJobs.map((item) => (
+          <Link
+            key={`${item.source}-${item.id}`}
+            href={buildJobHref(item, query, location)}
+            className="block rounded-lg border border-slate-200 px-3 py-2 hover:border-primary/40 hover:bg-primary/5 transition-colors"
+          >
+            <p className="text-sm font-semibold text-slate-900 line-clamp-1">{item.title}</p>
+            <p className="text-xs text-slate-500 line-clamp-1">{item.location}</p>
+          </Link>
+        ))}
+      </div>
+    </nav>
+  );
+}
+
+function SimilarJobsSkeleton() {
+  return (
+    <div className="bg-white border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
+      <div className="h-5 w-32 rounded bg-slate-200 mb-3" />
+      <div className="space-y-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="rounded-lg border border-slate-200 px-3 py-2">
+            <div className="h-4 w-3/4 rounded bg-slate-100 mb-1" />
+            <div className="h-3 w-1/2 rounded bg-slate-100" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default async function JobDetailsPage(props: JobDetailsPageProps) {
   const { job, query, location } = await getJobPageData(props);
 
@@ -285,7 +334,6 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
     notFound();
   }
 
-  const similarJobs = await getSimilarJobListings(job, 4);
   const currentHref = buildJobHref(job, query, location);
 
   return (
@@ -317,157 +365,139 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           <div className="flex-1 min-w-0 space-y-6 sm:space-y-8">
-            <AnimateOnScroll>
-              <article className="bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border shadow-sm">
-                <div className="flex flex-col gap-4 mb-6">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <Badge
-                        variant="outline"
-                        className={job.source === "scraped" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}
-                      >
-                        <Building2 className="h-3 w-3" />
-                        {job.source === "scraped" ? "Live-Stelle" : "Demo-Stelle"}
+            {/* Main job content — renders instantly, no animation wrapper */}
+            <article className="bg-white p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl border shadow-sm">
+              <div className="flex flex-col gap-4 mb-6">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <Badge
+                      variant="outline"
+                      className={job.source === "scraped" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}
+                    >
+                      <Building2 className="h-3 w-3" />
+                      {job.source === "scraped" ? "Live-Stelle" : "Demo-Stelle"}
+                    </Badge>
+                    {job.isRemote === true && (
+                      <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-700">
+                        Remote
                       </Badge>
-                      {job.isRemote === true && (
-                        <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-700">
-                          Remote
-                        </Badge>
-                      )}
+                    )}
+                  </div>
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 mb-3 sm:mb-4 break-words">
+                    {job.title}
+                  </h1>
+                  {/* Structured info grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-slate-100 rounded-xl border border-slate-200 overflow-hidden">
+                    <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+                        <MapPin className="h-4 w-4 text-primary shrink-0" />
+                        {job.location}
+                      </span>
+                      <span className="text-[11px] text-slate-400 uppercase tracking-wide">Ort</span>
                     </div>
-                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 mb-3 sm:mb-4 break-words">
-                      {job.title}
-                    </h1>
-                    {/* Structured info grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-slate-100 rounded-xl border border-slate-200 overflow-hidden">
-                      <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
-                        <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-                          <MapPin className="h-4 w-4 text-primary shrink-0" />
-                          {job.location}
-                        </span>
-                        <span className="text-[11px] text-slate-400 uppercase tracking-wide">Ort</span>
-                      </div>
-                      <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
-                        <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-                          <Wallet className="h-4 w-4 text-primary shrink-0" />
-                          {job.salary || (() => {
-                            const est = estimateSalary(job.title);
-                            return est ? `~${formatSalaryRange(est)}` : "–";
-                          })()}
-                        </span>
-                        <span className="text-[11px] text-slate-400 uppercase tracking-wide">Lohn, CHF/Jahr</span>
-                      </div>
-                      <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
-                        <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-                          <Clock className="h-4 w-4 text-primary shrink-0" />
-                          {job.workload}
-                        </span>
-                        <span className="text-[11px] text-slate-400 uppercase tracking-wide">Pensum</span>
-                      </div>
-                      <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
-                        <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-                          <CalendarDays className="h-4 w-4 text-primary shrink-0" />
-                          {job.type}
-                        </span>
-                        <span className="text-[11px] text-slate-400 uppercase tracking-wide">Anstellungsart</span>
-                      </div>
+                    <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+                        <Wallet className="h-4 w-4 text-primary shrink-0" />
+                        {job.salary || (() => {
+                          const est = estimateSalary(job.title);
+                          return est ? `~${formatSalaryRange(est)}` : "–";
+                        })()}
+                      </span>
+                      <span className="text-[11px] text-slate-400 uppercase tracking-wide">Lohn, CHF/Jahr</span>
+                    </div>
+                    <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+                        <Clock className="h-4 w-4 text-primary shrink-0" />
+                        {job.workload}
+                      </span>
+                      <span className="text-[11px] text-slate-400 uppercase tracking-wide">Pensum</span>
+                    </div>
+                    <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+                        <CalendarDays className="h-4 w-4 text-primary shrink-0" />
+                        {job.type}
+                      </span>
+                      <span className="text-[11px] text-slate-400 uppercase tracking-wide">Anstellungsart</span>
                     </div>
                   </div>
-
-                  <JobShareActions job={job} />
                 </div>
 
-                <div className="prose prose-slate max-w-none">
-                  <p className="text-base sm:text-lg text-slate-700 leading-relaxed mb-6 sm:mb-8">
-                    {job.description}
-                  </p>
+                <JobShareActions job={job} />
+              </div>
 
-                  {job.responsibilities.length > 0 && (
-                    <>
-                      <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Deine Aufgaben</h2>
-                      <ul className="space-y-2.5 sm:space-y-3 mb-8">
-                        {job.responsibilities.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2.5 sm:gap-3">
-                            <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0 mt-0.5" />
-                            <span className="text-slate-700">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
+              <div className="prose prose-slate max-w-none">
+                <p className="text-base sm:text-lg text-slate-700 leading-relaxed mb-6 sm:mb-8">
+                  {job.description}
+                </p>
 
-                  {job.requirements.length > 0 && (
-                    <>
-                      <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Dein Profil</h2>
-                      <ul className="space-y-2.5 sm:space-y-3 mb-8">
-                        {job.requirements.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2.5 sm:gap-3">
-                            <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0 mt-0.5" />
-                            <span className="text-slate-700">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
+                {job.responsibilities.length > 0 && (
+                  <>
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Deine Aufgaben</h2>
+                    <ul className="space-y-2.5 sm:space-y-3 mb-8">
+                      {job.responsibilities.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2.5 sm:gap-3">
+                          <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0 mt-0.5" />
+                          <span className="text-slate-700">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
 
-                  {job.benefits.length > 0 && (
-                    <>
-                      <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Was wir bieten</h2>
-                      <ul className="space-y-2.5 sm:space-y-3">
-                        {job.benefits.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2.5 sm:gap-3">
-                            <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-accent shrink-0 mt-0.5" />
-                            <span className="text-slate-700">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  )}
-                </div>
-              </article>
-            </AnimateOnScroll>
+                {job.requirements.length > 0 && (
+                  <>
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Dein Profil</h2>
+                    <ul className="space-y-2.5 sm:space-y-3 mb-8">
+                      {job.requirements.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2.5 sm:gap-3">
+                          <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0 mt-0.5" />
+                          <span className="text-slate-700">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
 
-            <AnimateOnScroll delay={80}>
-              <nav aria-label="Ähnliche Stellenangebote" className="bg-white border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
-                <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Ähnliche Jobs</h2>
-                <div className="space-y-2">
-                  {similarJobs.map((item) => (
-                    <Link
-                      key={`${item.source}-${item.id}`}
-                      href={buildJobHref(item, query, location)}
-                      className="block rounded-lg border border-slate-200 px-3 py-2 hover:border-primary/40 hover:bg-primary/5 transition-colors"
-                    >
-                      <p className="text-sm font-semibold text-slate-900 line-clamp-1">{item.title}</p>
-                      <p className="text-xs text-slate-500 line-clamp-1">{item.location}</p>
-                    </Link>
-                  ))}
-                </div>
-              </nav>
-            </AnimateOnScroll>
+                {job.benefits.length > 0 && (
+                  <>
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Was wir bieten</h2>
+                    <ul className="space-y-2.5 sm:space-y-3">
+                      {job.benefits.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2.5 sm:gap-3">
+                          <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-accent shrink-0 mt-0.5" />
+                          <span className="text-slate-700">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </div>
+            </article>
 
-            <AnimateOnScroll delay={100}>
-              <RecentlyViewedJobs currentJob={job} currentHref={currentHref} />
-            </AnimateOnScroll>
+            {/* Similar jobs — streamed in via Suspense, does NOT block main content */}
+            <Suspense fallback={<SimilarJobsSkeleton />}>
+              <SimilarJobsSection job={job} query={query} location={location} />
+            </Suspense>
 
-            <AnimateOnScroll delay={120}>
-              <nav aria-label="Beliebte Stellenangebote" className="bg-white border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
-                <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Beliebte Suchseiten</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {TOP_LANDING_PAGES.slice(0, 8).map((item) => (
-                    <Link
-                      key={`${item.role}-${item.canton}`}
-                      href={getLandingPath(item)}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:border-primary/40 hover:text-primary transition-colors"
-                    >
-                      {item.role} in {item.canton}
-                    </Link>
-                  ))}
-                </div>
-              </nav>
-            </AnimateOnScroll>
+            <RecentlyViewedJobs currentJob={job} currentHref={currentHref} />
+
+            <nav aria-label="Beliebte Stellenangebote" className="bg-white border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Beliebte Suchseiten</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {TOP_LANDING_PAGES.slice(0, 8).map((item) => (
+                  <Link
+                    key={`${item.role}-${item.canton}`}
+                    href={getLandingPath(item)}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:border-primary/40 hover:text-primary transition-colors"
+                  >
+                    {item.role} in {item.canton}
+                  </Link>
+                ))}
+              </div>
+            </nav>
           </div>
 
-          <AnimateOnScroll delay={120} className="hidden lg:block lg:w-80 shrink-0">
+          <div className="hidden lg:block lg:w-80 shrink-0">
             <aside className="bg-white p-6 rounded-2xl border shadow-sm sticky top-24">
               <div className="mb-6">
                 <h2 className="font-bold text-slate-900 mb-2">Interessiert an dieser Stelle?</h2>
@@ -503,7 +533,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
                 </div>
               </div>
             </aside>
-          </AnimateOnScroll>
+          </div>
         </div>
       </main>
 

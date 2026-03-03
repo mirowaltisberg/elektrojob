@@ -117,8 +117,19 @@ export async function loadScrapedJobs(): Promise<ScrapedJob[]> {
   return loadFromJson();
 }
 
-/** Get a single job by ID with full description */
+/** Get a single job by ID with full description.
+ *  Checks the in-memory cache first to avoid a DB round-trip
+ *  when loadScrapedJobs has already been called recently.
+ */
 export async function getScrapedJobById(id: string): Promise<ScrapedJob | null> {
+  // Fast path: check in-memory cache first (avoids Supabase round-trip)
+  if (cachedJobs && Date.now() - cachedAt < CACHE_TTL_MS) {
+    const cached = cachedJobs.find((j) => j.id === id);
+    if (cached) {
+      return cached;
+    }
+  }
+
   try {
     const { data, error } = await supabase
       .from("jobs")

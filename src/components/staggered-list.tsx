@@ -17,7 +17,7 @@ interface StaggeredListProps {
 export function StaggeredList({
   children,
   className,
-  staggerMs = 75,
+  staggerMs = 30,
   baseDelayMs = 0,
   triggerKey,
 }: StaggeredListProps) {
@@ -47,31 +47,31 @@ export function StaggeredList({
       return;
     }
 
-    // Force a reflow so the reset takes effect before re-animating
-    void container.offsetHeight;
+    // Use rAF instead of forced reflow for the reset to take effect
+    requestAnimationFrame(() => {
+      // Clean up previous observer
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
 
-    // Clean up previous observer
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              items.forEach((item, i) => {
+                item.style.transitionDelay = `${baseDelayMs + i * staggerMs}ms`;
+                item.classList.add("is-visible");
+              });
+              observer.unobserve(container);
+            }
+          });
+        },
+        { threshold: 0.02, rootMargin: "0px 0px -20px 0px" }
+      );
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            items.forEach((item, i) => {
-              item.style.transitionDelay = `${baseDelayMs + i * staggerMs}ms`;
-              item.classList.add("is-visible");
-            });
-            observer.unobserve(container);
-          }
-        });
-      },
-      { threshold: 0.02, rootMargin: "0px 0px -20px 0px" }
-    );
-
-    observerRef.current = observer;
-    observer.observe(container);
+      observerRef.current = observer;
+      observer.observe(container);
+    });
   }, [staggerMs, baseDelayMs]);
 
   // Re-trigger on children change or explicit triggerKey change
