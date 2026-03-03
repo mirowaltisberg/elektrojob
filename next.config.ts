@@ -6,7 +6,13 @@ const nextConfig: NextConfig = {
 
   experimental: {
     // Tree-shake icon/analytics packages — eliminates unused JS (24 KiB savings)
-    optimizePackageImports: ["lucide-react", "@vercel/analytics", "radix-ui"],
+    optimizePackageImports: [
+      "lucide-react",
+      "@vercel/analytics",
+      "@vercel/speed-insights",
+      "radix-ui",
+      "class-variance-authority",
+    ],
   },
 
   async headers() {

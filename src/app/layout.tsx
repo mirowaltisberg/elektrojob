@@ -143,8 +143,18 @@ export default function RootLayout({
   return (
     <html lang="de">
       <head>
-        {/* Facebook Pixel */}
-        <Script id="fb-pixel" strategy="afterInteractive">
+        <link rel="dns-prefetch" href="https://connect.facebook.net" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      </head>
+      <body lang="de" className={`${plusJakarta.variable} antialiased font-sans bg-slate-50`}>
+        <JsonLd data={organizationSchema} />
+        <JsonLd data={websiteSchema} />
+        <JsonLd data={localBusinessSchema} />
+        <HapticProvider>{children}</HapticProvider>
+        <Analytics />
+        <SpeedInsights />
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"} />
+        <Script id="fb-pixel" strategy="lazyOnload">
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -158,15 +168,6 @@ export default function RootLayout({
             fbq('track', 'PageView');
           `}
         </Script>
-      </head>
-      <body lang="de" className={`${plusJakarta.variable} antialiased font-sans bg-slate-50`}>
-        <JsonLd data={organizationSchema} />
-        <JsonLd data={websiteSchema} />
-        <JsonLd data={localBusinessSchema} />
-        <HapticProvider>{children}</HapticProvider>
-        <Analytics />
-        <SpeedInsights />
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"} />
       </body>
     </html>
   );

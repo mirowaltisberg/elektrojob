@@ -19,7 +19,7 @@ export default function NotFound() {
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center">
           <Link href="/" className="flex items-center shrink-0">
             <img
-              src="/logo.png"
+              src="/logo.svg"
               alt="elektrojob.ch — Elektrojobs in der Schweiz"
               width={142}
               height={29}
