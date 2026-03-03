@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useHaptic } from "@/hooks/use-haptic";
 import Link from "next/link";
 import {
   ArrowUpWideNarrow,
@@ -320,6 +321,7 @@ function isScrapedJob(job: JobListing): boolean {
 }
 
 export function HomepageSearch() {
+  const { trigger } = useHaptic();
   const [query, setQuery] = useState("");
   const [location, setLocation] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
@@ -723,7 +725,7 @@ export function HomepageSearch() {
                       id="radius-km"
                       className="h-12 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 md:min-w-[200px] md:w-auto md:border-none md:bg-transparent md:shadow-none md:focus:ring-0"
                       value={radiusKm}
-                      onChange={(event) => setRadiusKm(event.target.value)}
+                      onChange={(event) => { trigger("selection"); setRadiusKm(event.target.value); }}
                       disabled={!hasLocationDraft}
                     >
                       {RADIUS_OPTIONS.map((option) => (
@@ -788,7 +790,7 @@ export function HomepageSearch() {
               <select
                 className={filterSelectClass}
                 value={typeFilter}
-                onChange={(event) => setTypeFilter(event.target.value)}
+                onChange={(event) => { trigger("selection"); setTypeFilter(event.target.value); }}
               >
                 <option value="all">Vertragsart</option>
                 {facets.types.map((item) => (
@@ -801,7 +803,7 @@ export function HomepageSearch() {
               <select
                 className={filterSelectClass}
                 value={workloadFilter}
-                onChange={(event) => setWorkloadFilter(event.target.value)}
+                onChange={(event) => { trigger("selection"); setWorkloadFilter(event.target.value); }}
               >
                 <option value="all">Pensum</option>
                 {facets.workloads.map((item) => (
@@ -814,7 +816,7 @@ export function HomepageSearch() {
               <select
                 className={filterSelectClass}
                 value={remoteFilter}
-                onChange={(event) => setRemoteFilter(event.target.value as RemoteFilter)}
+                onChange={(event) => { trigger("selection"); setRemoteFilter(event.target.value as RemoteFilter); }}
               >
                 <option value="any">Remote</option>
                 <option value="true">Nur Remote</option>
@@ -824,7 +826,7 @@ export function HomepageSearch() {
               <select
                 className={filterSelectClass}
                 value={postedWithinDays}
-                onChange={(event) => setPostedWithinDays(event.target.value)}
+                onChange={(event) => { trigger("selection"); setPostedWithinDays(event.target.value); }}
               >
                 <option value="7">Letzte 7 Tage</option>
                 <option value="14">Letzte 14 Tage</option>
@@ -835,7 +837,7 @@ export function HomepageSearch() {
               <select
                 className={filterSelectClass}
                 value={sortBy}
-                onChange={(event) => setSortBy(event.target.value as JobSort)}
+                onChange={(event) => { trigger("selection"); setSortBy(event.target.value as JobSort); }}
               >
                 <option value="newest">Neueste zuerst</option>
                 <option value="relevance">Relevanz</option>
@@ -919,13 +921,14 @@ export function HomepageSearch() {
                         key={`${job.source}-${job.id}-${index}`}
                         href={href}
                         className="block group"
-                        onClick={() =>
+                        onClick={() => {
+                          trigger("light");
                           trackEvent("job_open", {
                             job_id: job.id,
                             source: job.source,
                             position: index + 1,
-                          })
-                        }
+                          });
+                        }}
                       >
                         <Card className="job-card hover:border-primary/50 active:border-primary/40">
                           <CardContent className="p-4 sm:p-6">
@@ -1094,7 +1097,7 @@ export function HomepageSearch() {
                     <select
                       className={filterSelectClass}
                       value={radiusKm}
-                      onChange={(event) => setRadiusKm(event.target.value)}
+                      onChange={(event) => { trigger("selection"); setRadiusKm(event.target.value); }}
                     >
                       {RADIUS_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -1106,7 +1109,7 @@ export function HomepageSearch() {
                   <select
                     className={filterSelectClass}
                     value={typeFilter}
-                    onChange={(event) => setTypeFilter(event.target.value)}
+                    onChange={(event) => { trigger("selection"); setTypeFilter(event.target.value); }}
                   >
                     <option value="all">Vertragsart</option>
                     {facets.types.map((item) => (
@@ -1118,7 +1121,7 @@ export function HomepageSearch() {
                   <select
                     className={filterSelectClass}
                     value={workloadFilter}
-                    onChange={(event) => setWorkloadFilter(event.target.value)}
+                    onChange={(event) => { trigger("selection"); setWorkloadFilter(event.target.value); }}
                   >
                     <option value="all">Pensum</option>
                     {facets.workloads.map((item) => (
@@ -1130,7 +1133,7 @@ export function HomepageSearch() {
                   <select
                     className={filterSelectClass}
                     value={remoteFilter}
-                    onChange={(event) => setRemoteFilter(event.target.value as RemoteFilter)}
+                    onChange={(event) => { trigger("selection"); setRemoteFilter(event.target.value as RemoteFilter); }}
                   >
                     <option value="any">Remote</option>
                     <option value="true">Nur Remote</option>
@@ -1139,7 +1142,7 @@ export function HomepageSearch() {
                   <select
                     className={filterSelectClass}
                     value={postedWithinDays}
-                    onChange={(event) => setPostedWithinDays(event.target.value)}
+                    onChange={(event) => { trigger("selection"); setPostedWithinDays(event.target.value); }}
                   >
                     <option value="7">Letzte 7 Tage</option>
                     <option value="14">Letzte 14 Tage</option>
@@ -1181,6 +1184,7 @@ export function HomepageSearch() {
                         : "border-slate-200 text-slate-700 hover:border-slate-300"
                         }`}
                       onClick={() => {
+                        trigger("selection");
                         setSortBy(item.value as JobSort);
                         setIsSortSheetOpen(false);
                       }}

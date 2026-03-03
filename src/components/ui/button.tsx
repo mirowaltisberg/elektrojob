@@ -1,8 +1,11 @@
+"use client"
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import * as Slot from "@radix-ui/react-slot"
 
 import { cn } from "@/lib/utils"
+import { useHaptic, type HapticStyle } from "@/hooks/use-haptic"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -38,17 +41,39 @@ const buttonVariants = cva(
   }
 )
 
+const VARIANT_HAPTIC: Record<string, HapticStyle> = {
+  default: "light",
+  destructive: "nudge",
+  outline: "selection",
+  secondary: "selection",
+  ghost: "selection",
+  link: "selection",
+}
+
 function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
+  haptic,
+  onClick,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
+    haptic?: HapticStyle | false
   }) {
+  const { trigger } = useHaptic()
   const Comp = asChild ? Slot.Root : "button"
+
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      const style = haptic === false ? null : (haptic ?? VARIANT_HAPTIC[variant ?? "default"] ?? "light")
+      if (style) trigger(style)
+      onClick?.(e)
+    },
+    [haptic, variant, trigger, onClick],
+  )
 
   return (
     <Comp
@@ -56,6 +81,7 @@ function Button({
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
+      onClick={handleClick}
       {...props}
     />
   )

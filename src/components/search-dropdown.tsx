@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useId } from "react";
 import { cn } from "@/lib/utils";
+import { useHaptic } from "@/hooks/use-haptic";
 
 interface SearchDropdownProps {
   value: string;
@@ -22,6 +23,7 @@ export function SearchDropdown({
   maxLength = 80,
   className,
 }: SearchDropdownProps) {
+  const { trigger } = useHaptic();
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,12 +41,13 @@ export function SearchDropdown({
 
   const select = useCallback(
     (item: string) => {
+      trigger("selection");
       onChange(item);
       setIsOpen(false);
       setHighlightedIndex(-1);
       inputRef.current?.blur();
     },
-    [onChange]
+    [onChange, trigger]
   );
 
   // Scroll highlighted item into view
