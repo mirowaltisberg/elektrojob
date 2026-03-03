@@ -317,7 +317,13 @@ function toMockListing(job: Job): JobListing {
   };
 }
 
+let cachedCurated: JobListing[] | null = null;
+let cachedCuratedAt = 0;
+const CURATED_TTL_MS = 120_000;
+
 async function buildCuratedScrapedListings(): Promise<JobListing[]> {
+  if (cachedCurated && Date.now() - cachedCuratedAt < CURATED_TTL_MS) return cachedCurated;
+
   const deduped = new Map<string, JobListing>();
 
   for (const job of await loadScrapedJobs()) {
@@ -344,7 +350,10 @@ async function buildCuratedScrapedListings(): Promise<JobListing[]> {
     }
   }
 
-  return [...deduped.values()];
+  const result = [...deduped.values()];
+  cachedCurated = result;
+  cachedCuratedAt = Date.now();
+  return result;
 }
 
 function isValueInFilter(fieldValue: string, selectedValue: string): boolean {
@@ -565,9 +574,11 @@ function normalizeSearchParams(params: JobSearchParams): NormalizedParams {
 }
 
 async function getSourceJobs(query: string, location: string): Promise<SourceBundle> {
-  const meta = await getScrapedMeta();
+  const [meta, curatedScraped] = await Promise.all([
+    getScrapedMeta(),
+    buildCuratedScrapedListings(),
+  ]);
   const scrapedAt = meta?.scrapedAt ?? null;
-  const curatedScraped = await buildCuratedScrapedListings();
 
   // Always generate supplemental jobs so every search returns results
   const context = normalizeSearchInput(

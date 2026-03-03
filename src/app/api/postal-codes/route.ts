@@ -7,5 +7,7 @@ export async function GET(request: Request) {
   const limit = Number(searchParams.get("limit") ?? "14");
 
   const results = searchSwissPostalCodes(q, limit);
-  return NextResponse.json(results);
+  return NextResponse.json(results, {
+    headers: { "Cache-Control": "s-maxage=86400, stale-while-revalidate=604800" },
+  });
 }

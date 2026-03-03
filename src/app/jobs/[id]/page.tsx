@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -44,6 +45,8 @@ function getDisplayJobId(job: JobListing): string {
   }
   return `ELK-${job.id.padStart(4, "0")}`;
 }
+
+export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://elektrojob.ch";
 
@@ -229,11 +232,11 @@ function buildJobHref(job: JobListing, fallbackQuery: string, fallbackLocation: 
   return queryString ? `/jobs/${job.id}?${queryString}` : `/jobs/${job.id}`;
 }
 
-async function getJobPageData({ params, searchParams }: JobDetailsPageProps): Promise<{
+const getJobPageData = cache(async ({ params, searchParams }: JobDetailsPageProps): Promise<{
   job: JobListing | null;
   query: string;
   location: string;
-}> {
+}> => {
   const { id } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const query = readParam(resolvedSearchParams.q);
@@ -246,7 +249,7 @@ async function getJobPageData({ params, searchParams }: JobDetailsPageProps): Pr
   });
 
   return { job, query, location };
-}
+});
 
 export async function generateMetadata(props: JobDetailsPageProps): Promise<Metadata> {
   const { job } = await getJobPageData(props);

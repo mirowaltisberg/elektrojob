@@ -20,5 +20,8 @@ export async function GET(request: Request, context: RouteContext) {
   }
 
   const similarJobs = await getSimilarJobListings(job, 4);
-  return NextResponse.json({ job, similarJobs });
+  return NextResponse.json(
+    { job, similarJobs },
+    { headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=3600" } },
+  );
 }
