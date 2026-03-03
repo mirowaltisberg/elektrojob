@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Script from "next/script";
 import { JsonLd } from "@/components/json-ld";
+import { HapticProvider } from "@/components/haptic-provider";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -163,7 +164,7 @@ export default function RootLayout({
         <JsonLd data={organizationSchema} />
         <JsonLd data={websiteSchema} />
         <JsonLd data={localBusinessSchema} />
-        {children}
+        <HapticProvider>{children}</HapticProvider>
         <Analytics />
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"} />
       </body>

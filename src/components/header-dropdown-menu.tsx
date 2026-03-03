@@ -5,6 +5,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useHaptic } from "@/hooks/use-haptic";
 
 interface HeaderDropdownItem {
   label: string;
@@ -22,6 +23,7 @@ export function HeaderDropdownMenu({
   items,
   className,
 }: HeaderDropdownMenuProps) {
+  const { trigger } = useHaptic();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -89,7 +91,7 @@ export function HeaderDropdownMenu({
               href={item.href}
               role="menuitem"
               className="search-dropdown-item block px-4 py-2.5 text-sm text-slate-700 outline-none focus:bg-primary/10 focus:text-slate-900"
-              onClick={closeMenu}
+              onClick={() => { trigger("selection"); closeMenu(); }}
             >
               {item.label}
             </Link>

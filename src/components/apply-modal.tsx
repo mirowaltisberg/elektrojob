@@ -5,6 +5,7 @@ import { UploadCloud, CheckCircle2, Loader2, Zap, X, FileText, AlertCircle } fro
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useHaptic } from "@/hooks/use-haptic";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ interface ApplyModalProps {
 }
 
 export function ApplyModal({ jobId, jobTitle, company, onOpen }: ApplyModalProps) {
+  const { trigger } = useHaptic();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -72,9 +74,11 @@ export function ApplyModal({ jobId, jobTitle, company, onOpen }: ApplyModalProps
   const handleFileSelect = (file: File) => {
     const fileError = validateFile(file);
     if (fileError) {
+      trigger("error");
       setError(fileError);
       return;
     }
+    trigger("selection");
     setError(null);
     setCvFile(file);
   };
@@ -135,6 +139,7 @@ export function ApplyModal({ jobId, jobTitle, company, onOpen }: ApplyModalProps
 
       setIsSubmitting(false);
       setIsSuccess(true);
+      trigger("success");
 
       setTimeout(() => {
         setIsOpen(false);
@@ -142,6 +147,7 @@ export function ApplyModal({ jobId, jobTitle, company, onOpen }: ApplyModalProps
       }, 2500);
     } catch (err) {
       setIsSubmitting(false);
+      trigger("error");
       setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten.");
     }
   };
@@ -259,6 +265,7 @@ export function ApplyModal({ jobId, jobTitle, company, onOpen }: ApplyModalProps
                       <button
                         type="button"
                         onClick={() => {
+                          trigger("selection");
                           setCvFile(null);
                           if (fileInputRef.current) fileInputRef.current.value = "";
                         }}

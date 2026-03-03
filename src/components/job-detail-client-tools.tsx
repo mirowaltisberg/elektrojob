@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ApplyModal } from "@/components/apply-modal";
 import type { JobListing } from "@/lib/job-types";
 import { trackEvent } from "@/lib/analytics";
+import { useHaptic } from "@/hooks/use-haptic";
 
 const RECENT_KEY = "elektrojob:recent-jobs";
 
@@ -66,6 +67,7 @@ interface JobShareActionsProps {
 }
 
 export function JobShareActions({ job }: JobShareActionsProps) {
+  const { trigger } = useHaptic();
   const [isCopied, setIsCopied] = useState(false);
   const pageUrl = typeof window === "undefined" ? "" : window.location.href;
 
@@ -84,6 +86,7 @@ export function JobShareActions({ job }: JobShareActionsProps) {
     }
 
     await navigator.clipboard.writeText(pageUrl);
+    trigger("success");
     setIsCopied(true);
     trackEvent("share_copy_link", { job_id: job.id, source: job.source });
     window.setTimeout(() => setIsCopied(false), 1400);
