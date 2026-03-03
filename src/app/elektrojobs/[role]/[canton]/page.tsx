@@ -171,7 +171,7 @@ export default async function LandingRolePage({ params }: LandingPageProps) {
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center shrink-0">
             <img
-              src="/logo.svg"
+              src="/logo.png"
               alt="elektrojob.ch — Elektrojobs in der Schweiz"
               width={142}
               height={29}

@@ -679,7 +679,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
       <header className="border-b header-blur sticky top-0 z-30 animate-header">
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center shrink-0" onClick={resetToHome}>
-            <img src="/logo.svg" alt="elektrojob.ch — Elektrojobs in der Schweiz" width={142} height={29} className="h-7 sm:h-8 w-auto" />
+            <img src="/logo.png" alt="elektrojob.ch — Elektrojobs in der Schweiz" width={142} height={29} className="h-7 sm:h-8 w-auto" />
           </Link>
           <nav className="flex items-center gap-1 sm:gap-2 shrink-0">
             <HeaderDropdownMenu
