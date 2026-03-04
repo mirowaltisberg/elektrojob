@@ -29,7 +29,6 @@ import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { StaggeredList } from "@/components/staggered-list";
 import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import { trackEvent } from "@/lib/analytics";
-import { TOP_LANDING_PAGES, getLandingPath } from "@/lib/landing-pages";
 import { calculateDistanceKm, getRegionRadius, resolveLocationCoordinate, type Coordinate } from "@/lib/location-distance";
 import { estimateSalary, formatSalaryRange } from "@/lib/salary-estimates";
 
@@ -680,7 +679,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
       <header className="border-b header-blur sticky top-0 z-30 animate-header">
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center shrink-0" onClick={resetToHome}>
-            <Image src="/logo.png" alt="elektrojob.ch — Elektrojobs in der Schweiz" width={142} height={29} className="h-7 sm:h-8 w-auto" priority />
+            <Image src="/logo.svg" alt="elektrojob.ch — Elektrojobs in der Schweiz" width={142} height={29} className="h-7 sm:h-8 w-auto" priority />
           </Link>
           <nav className="flex items-center gap-1 sm:gap-2 shrink-0">
             <HeaderDropdownMenu
@@ -821,62 +820,82 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
             </AnimateOnScroll>
 
             <AnimateOnScroll className="hidden md:grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
-              <select
-                className={filterSelectClass}
-                value={typeFilter}
-                onChange={(event) => { trigger("selection"); setTypeFilter(event.target.value); }}
-              >
-                <option value="all">Vertragsart</option>
-                {facets.types.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.value} ({item.count})
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label htmlFor="filter-type" className="sr-only">Vertragsart</label>
+                <select
+                  id="filter-type"
+                  className={filterSelectClass}
+                  value={typeFilter}
+                  onChange={(event) => { trigger("selection"); setTypeFilter(event.target.value); }}
+                >
+                  <option value="all">Vertragsart</option>
+                  {facets.types.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.value} ({item.count})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              <select
-                className={filterSelectClass}
-                value={workloadFilter}
-                onChange={(event) => { trigger("selection"); setWorkloadFilter(event.target.value); }}
-              >
-                <option value="all">Pensum</option>
-                {facets.workloads.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.value} ({item.count})
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label htmlFor="filter-workload" className="sr-only">Pensum</label>
+                <select
+                  id="filter-workload"
+                  className={filterSelectClass}
+                  value={workloadFilter}
+                  onChange={(event) => { trigger("selection"); setWorkloadFilter(event.target.value); }}
+                >
+                  <option value="all">Pensum</option>
+                  {facets.workloads.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.value} ({item.count})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-              <select
-                className={filterSelectClass}
-                value={remoteFilter}
-                onChange={(event) => { trigger("selection"); setRemoteFilter(event.target.value as RemoteFilter); }}
-              >
-                <option value="any">Remote</option>
-                <option value="true">Nur Remote</option>
-                <option value="false">Nur vor Ort</option>
-              </select>
+              <div>
+                <label htmlFor="filter-remote" className="sr-only">Remote-Arbeit</label>
+                <select
+                  id="filter-remote"
+                  className={filterSelectClass}
+                  value={remoteFilter}
+                  onChange={(event) => { trigger("selection"); setRemoteFilter(event.target.value as RemoteFilter); }}
+                >
+                  <option value="any">Remote</option>
+                  <option value="true">Nur Remote</option>
+                  <option value="false">Nur vor Ort</option>
+                </select>
+              </div>
 
-              <select
-                className={filterSelectClass}
-                value={postedWithinDays}
-                onChange={(event) => { trigger("selection"); setPostedWithinDays(event.target.value); }}
-              >
-                <option value="7">Letzte 7 Tage</option>
-                <option value="14">Letzte 14 Tage</option>
-                <option value="30">Letzte 30 Tage</option>
-                <option value="all">Alle Zeiträume</option>
-              </select>
+              <div>
+                <label htmlFor="filter-posted" className="sr-only">Zeitraum</label>
+                <select
+                  id="filter-posted"
+                  className={filterSelectClass}
+                  value={postedWithinDays}
+                  onChange={(event) => { trigger("selection"); setPostedWithinDays(event.target.value); }}
+                >
+                  <option value="7">Letzte 7 Tage</option>
+                  <option value="14">Letzte 14 Tage</option>
+                  <option value="30">Letzte 30 Tage</option>
+                  <option value="all">Alle Zeiträume</option>
+                </select>
+              </div>
 
-              <select
-                className={filterSelectClass}
-                value={sortBy}
-                onChange={(event) => { trigger("selection"); setSortBy(event.target.value as JobSort); }}
-              >
-                <option value="newest">Neueste zuerst</option>
-                <option value="relevance">Relevanz</option>
-                <option value="oldest">Älteste zuerst</option>
-              </select>
+              <div>
+                <label htmlFor="filter-sort" className="sr-only">Sortierung</label>
+                <select
+                  id="filter-sort"
+                  className={filterSelectClass}
+                  value={sortBy}
+                  onChange={(event) => { trigger("selection"); setSortBy(event.target.value as JobSort); }}
+                >
+                  <option value="newest">Neueste zuerst</option>
+                  <option value="relevance">Relevanz</option>
+                  <option value="oldest">Älteste zuerst</option>
+                </select>
+              </div>
             </AnimateOnScroll>
 
             {fallbackUsed && (
@@ -1085,20 +1104,6 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
               </>
             )}
 
-            <AnimateOnScroll className="mt-10 sm:mt-12">
-              <h3 className="text-lg font-bold text-slate-900 mb-3">Beliebte Suchseiten</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {TOP_LANDING_PAGES.slice(0, 12).map((item) => (
-                  <Link
-                    key={`${item.role}-${item.canton}`}
-                    href={getLandingPath(item)}
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:border-primary/40 hover:text-primary transition-colors"
-                  >
-                    {item.role} in {item.canton}
-                  </Link>
-                ))}
-              </div>
-            </AnimateOnScroll>
           </div>
         </section>
       </main>

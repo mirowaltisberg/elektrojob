@@ -35,6 +35,18 @@ const nextConfig: NextConfig = {
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
         ],
       },
+      {
+        source: "/_next/static/(.*)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        source: "/(.*\\.(?:svg|png|jpg|webp|ico|woff2))",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=86400" },
+        ],
+      },
     ];
   },
 };

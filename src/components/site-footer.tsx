@@ -37,11 +37,12 @@ export function SiteFooter() {
           {/* Brand */}
           <div>
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="elektrojob.ch — Jobbörse für Elektro-Fachkräfte in der Schweiz"
               width={142}
               height={29}
               className="h-8 w-auto brightness-0 invert mb-4"
+              loading="lazy"
             />
             <p className="text-sm leading-relaxed">
               Die spezialisierte Jobbörse für Elektro-Fachkräfte in der Schweiz.

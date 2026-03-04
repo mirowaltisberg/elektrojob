@@ -16,6 +16,9 @@ export default function robots(): MetadataRoute.Robots {
           "/*?*remote=",
           "/*?*postedWithinDays=",
           "/*?*offset=",     // Pagination parameter URLs
+          "/*?*q=",          // Search query parameter URLs — duplicate content
+          "/*?*loc=",
+          "/*?*radiusKm=",
         ],
       },
     ],

@@ -11,6 +11,7 @@ function toAbsolute(path: string): string {
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const jobs = await getIndexableJobListings(400);
   const now = new Date();
+  const landingPageDate = new Date("2025-06-01");
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -21,8 +22,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...TOP_LANDING_PAGES.map((page) => ({
       url: toAbsolute(getLandingPath(page)),
-      lastModified: now,
-      changeFrequency: "daily" as const,
+      lastModified: landingPageDate,
+      changeFrequency: "weekly" as const,
       priority: 0.8,
     })),
   ];

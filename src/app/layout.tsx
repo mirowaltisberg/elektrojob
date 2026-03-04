@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import Script from "next/script";
 import { JsonLd } from "@/components/json-ld";
 import { HapticProvider } from "@/components/haptic-provider";
@@ -151,7 +150,7 @@ export default function RootLayout({
     <html lang="de">
       <head>
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
       </head>
       <body lang="de" className={`${plusJakarta.variable} antialiased font-sans bg-slate-50`}>
         <JsonLd data={organizationSchema} />
@@ -160,7 +159,18 @@ export default function RootLayout({
         <HapticProvider>{children}</HapticProvider>
         <Analytics />
         <SpeedInsights />
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"} />
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"}`}
+          strategy="lazyOnload"
+        />
+        <Script id="gtag-init" strategy="lazyOnload">
+          {`
+            window.dataLayer=window.dataLayer||[];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js',new Date());
+            gtag('config','${process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"}');
+          `}
+        </Script>
         <Script id="fb-pixel" strategy="lazyOnload">
           {`
             !function(f,b,e,v,n,t,s)
