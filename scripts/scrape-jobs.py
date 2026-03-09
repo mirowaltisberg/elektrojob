@@ -505,7 +505,7 @@ def normalize_job(raw: dict, idx: int) -> dict | None:
 
     # Stable ID from job URL so dedup works across runs
     url_hash = hashlib.md5(job_url.encode()).hexdigest()[:12]
-    stable_id = f"scraped-{url_hash}"
+    stable_id = f"scraped-elektro-{url_hash}"
 
     return {
         "id": stable_id,
@@ -678,7 +678,7 @@ def load_existing_jobs() -> tuple[list[dict], set[str]]:
                     seen_urls.add(url)
                     # Regenerate stable ID from URL
                     url_hash = hashlib.md5(url.encode()).hexdigest()[:12]
-                    job["id"] = f"scraped-{url_hash}"
+                    job["id"] = f"scraped-elektro-{url_hash}"
                     # Store as a pseudo-raw record so save_results can re-normalize
                     all_raw.append({
                         "_already_normalized": True,
