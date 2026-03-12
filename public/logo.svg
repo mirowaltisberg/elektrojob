@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 228 48" fill="none">
   <!-- Lightning bolt mark -->
-  <path d="M15.5 3L5.5 23h8L9.5 45 26 21h-8.5l5-18z" fill="#fba918"/>
+  <g transform="translate(0, 9) scale(0.667)">
+    <path d="M15.5 3L5.5 23h8L9.5 45 26 21h-8.5l5-18z" fill="#fba918"/>
+  </g>
 
   <!-- "Elektrojob.ch" wordmark — path outlines (Nunito Black + Regular, no external font dependency) -->
   <g transform="translate(36,36)">
