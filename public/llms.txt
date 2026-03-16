@@ -6,9 +6,9 @@ elektrojob.ch ist eine Nischen-Jobbörse für die Schweizer Elektrobranche. Die 
 
 ## Wichtige Seiten
 
-- [Startseite](https://elektrojob.ch/): Jobsuche mit Filtern nach Beruf, Ort, Umkreis, Pensum
-- [Elektroinstallateur EFZ Jobs Zürich](https://elektrojob.ch/elektrojobs/elektroinstallateur-efz/zh): Beispiel-Landingpage
-- [Sitemap](https://elektrojob.ch/sitemap.xml): Alle verfügbaren Seiten
+- [Startseite](https://www.elektrojob.ch/): Jobsuche mit Filtern nach Beruf, Ort, Umkreis, Pensum
+- [Elektroinstallateur EFZ Jobs Zürich](https://www.elektrojob.ch/elektrojobs/elektroinstallateur-efz/zh): Beispiel-Landingpage
+- [Sitemap](https://www.elektrojob.ch/sitemap.xml): Alle verfügbaren Seiten
 
 ## Kerninformationen
 
@@ -29,5 +29,5 @@ elektrojob.ch ist eine Nischen-Jobbörse für die Schweizer Elektrobranche. Die 
 
 ## Kontakt
 
-- **Website**: https://elektrojob.ch
+- **Website**: https://www.elektrojob.ch
 - **Branche**: Personalvermittlung / Jobbörse — Elektrobranche Schweiz
