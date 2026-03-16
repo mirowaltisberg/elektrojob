@@ -275,7 +275,7 @@ function buildLandingConfig(roleKey: string, cantonKey: string): LandingPageConf
     role: roleKey,
     canton: cantonKey,
     title: `${role.label} Jobs in ${canton.name}`,
-    description: `Aktuelle ${role.label} Stellen im Kanton ${canton.name}. ${role.roleDescription.split(".")[0]}. Jetzt bewerben auf elektrojob.ch.`,
+    description: `${role.label} Jobs im Kanton ${canton.name} — offene Stellen auf elektrojob.ch. Jetzt bewerben.`,
     intro: `Als ${role.label} in ${canton.name} findest du auf elektrojob.ch alle aktuellen Stellenangebote in deiner Region. ${role.roleDescription} ${canton.context} Die Nachfrage nach qualifizierten ${role.label}-Fachkräften im Kanton ${canton.name} ist hoch — Arbeitgeber suchen gezielt nach Kandidaten mit ${role.requirements.split(",")[0].toLowerCase()}. Das durchschnittliche Jahresgehalt für ${role.label} in der Schweiz liegt bei ${role.salaryRange}. Verwandte Berufe wie ${relatedRolesList} bieten zusätzliche Karrieremöglichkeiten in der Elektrobranche. ${role.career} Nutze unsere smarte Filterung nach Pensum, Umkreis und Anstellungsart, um die passende Stelle zu finden. Bewirb dich direkt online und lade deinen Lebenslauf hoch.`,
     faqs: [
       {

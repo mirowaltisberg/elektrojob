@@ -61,6 +61,7 @@ export const metadata: Metadata = {
     languages: {
       "de-CH": "/",
       "de": "/",
+      "x-default": "/",
     },
   },
   robots: {
