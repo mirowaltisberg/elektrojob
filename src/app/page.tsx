@@ -5,13 +5,22 @@ import { searchJobListings } from "@/lib/job-catalog";
 import { JsonLd } from "@/components/json-ld";
 import { buildJobPostingSchema } from "@/lib/job-schema";
 
-// SEO-DECISION: This page is a server component that:
-// 1. Fetches initial jobs server-side so Google crawler sees real job titles in HTML
-// 2. Passes SSR jobs to the client-side search interface for hydration
-// 3. Renders FAQPage schema + JobPosting schema for Rich Results
-// 4. Server-rendered SEO content (intro, FAQ, salary table, links)
-
 export const revalidate = 3600;
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
+
+const homepageBreadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Startseite",
+      item: SITE_URL,
+    },
+  ],
+};
 
 export default async function HomePage() {
   const initialData = await searchJobListings({
@@ -22,12 +31,24 @@ export default async function HomePage() {
     sort: "newest",
   });
 
+  // Strip heavy arrays not needed by the client-side search component
+  const liteData = {
+    ...initialData,
+    jobs: initialData.jobs.map(({ responsibilities, requirements, benefits, fullDescription, ...rest }) => ({
+      ...rest,
+      responsibilities: [] as string[],
+      requirements: [] as string[],
+      benefits: [] as string[],
+    })),
+  };
+
   return (
     <>
+      <JsonLd data={homepageBreadcrumbSchema} />
       {initialData.jobs.map((job) => (
         <JsonLd key={`schema-${job.source}-${job.id}`} data={buildJobPostingSchema(job)} />
       ))}
-      <HomepageSearch initialData={initialData} />
+      <HomepageSearch initialData={liteData} />
       <HomepageSeoContent />
       <SiteFooter />
     </>
