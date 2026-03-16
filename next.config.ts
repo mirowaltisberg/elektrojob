@@ -3,9 +3,9 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
+  trailingSlash: false,
 
   experimental: {
-    // Tree-shake icon/analytics packages — eliminates unused JS (24 KiB savings)
     optimizePackageImports: [
       "lucide-react",
       "@vercel/analytics",
@@ -13,6 +13,18 @@ const nextConfig: NextConfig = {
       "radix-ui",
       "class-variance-authority",
     ],
+  },
+
+  async redirects() {
+    return [
+      // www → non-www canonical redirect
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.elektrojob.ch" }],
+        destination: "https://elektrojob.ch/:path*",
+        permanent: true,
+      },
+    ];
   },
 
   async headers() {

@@ -198,12 +198,6 @@ function buildJobBreadcrumbSchema(job: JobListing) {
       {
         "@type": "ListItem",
         position: 2,
-        name: "Elektrojobs",
-        item: `${SITE_URL}/`,
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
         name: job.title,
         item: `${SITE_URL}/jobs/${job.id}`,
       },
@@ -260,19 +254,21 @@ export async function generateMetadata(props: JobDetailsPageProps): Promise<Meta
     };
   }
 
-  const description = job.description.slice(0, 160);
+  const description = `${job.title} bei ${job.company} in ${job.location}. ${job.description.slice(0, 120)}`;
 
   return {
-    title: `${job.title} | elektrojob.ch`,
+    title: `${job.title} — ${job.company} | elektrojob.ch`,
     description,
     alternates: {
       canonical: `/jobs/${job.id}`,
     },
     openGraph: {
-      title: `${job.title}`,
+      title: `${job.title} — ${job.company}`,
       description,
       type: "article",
       url: `/jobs/${job.id}`,
+      siteName: "elektrojob.ch",
+      locale: "de_CH",
     },
   };
 }

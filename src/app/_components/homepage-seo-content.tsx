@@ -159,15 +159,14 @@ export function HomepageSeoContent() {
           </div>
         </div>
 
-        {/* Landing page links — crawlable internal links */}
+        {/* Landing page links — crawlable internal links for ALL role/canton combos */}
         <div className="mb-8">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
-            Beliebte Suchseiten
+            Alle Elektrojobs nach Beruf und Kanton
           </h2>
-          <nav aria-label="Beliebte Stellenangebote nach Beruf und Kanton">
+          <nav aria-label="Alle Stellenangebote nach Beruf und Kanton">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {/* SEO-DECISION: Show top 18 landing pages on homepage — enough for internal link equity without overwhelming the page */}
-              {TOP_LANDING_PAGES.slice(0, 18).map((item) => (
+              {TOP_LANDING_PAGES.map((item) => (
                 <Link
                   key={`${item.role}-${item.canton}`}
                   href={getLandingPath(item)}

@@ -54,12 +54,6 @@ function buildBreadcrumbSchema(config: LandingPageConfig) {
       {
         "@type": "ListItem",
         position: 2,
-        name: "Elektrojobs",
-        item: `${SITE_URL}/`,
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
         name: config.title,
         item: `${SITE_URL}${getLandingPath(config)}`,
       },
@@ -125,17 +119,24 @@ export async function generateMetadata({ params }: LandingPageProps): Promise<Me
     };
   }
 
+  const landingPath = getLandingPath(config);
   return {
     title: config.title,
     description: config.description,
     alternates: {
-      canonical: getLandingPath(config),
+      canonical: landingPath,
+      languages: {
+        "de-CH": landingPath,
+        "de": landingPath,
+      },
     },
     openGraph: {
       title: `${config.title} | elektrojob.ch`,
       description: config.description,
-      url: getLandingPath(config),
+      url: landingPath,
       type: "website",
+      siteName: "elektrojob.ch",
+      locale: "de_CH",
     },
   };
 }
