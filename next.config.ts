@@ -15,18 +15,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  async redirects() {
-    return [
-      // www → non-www canonical redirect
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.elektrojob.ch" }],
-        destination: "https://elektrojob.ch/:path*",
-        permanent: true,
-      },
-    ];
-  },
-
   async headers() {
     const securityHeaders = [
       { key: "X-Content-Type-Options", value: "nosniff" },
