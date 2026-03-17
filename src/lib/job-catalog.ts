@@ -54,13 +54,7 @@ const POSITIVE_KEYWORDS = [
   "solartechnik",
   "inbetriebnahme",
   "servicetechniker",
-  "heizung",
-  "lüftung",
-  "klima",
-  "sanitär",
-  "gebäudetechnik",
-  "haustechnik",
-  "brandschutz",
+  "brandmelde",
   "monteur",
   "installat",
   "wartung",
@@ -115,17 +109,6 @@ const CORE_TITLE_KEYWORDS = [
   "techniker",
   "projektleiter",
   "bauleiter",
-  "heizung",
-  "lüftung",
-  "klima",
-  "kälte",
-  "sanitär",
-  "hlk",
-  "hkls",
-  "hvac",
-  "haustechnik",
-  "gebäudetechnik",
-  "brandschutz",
   "brandmelde",
   "freileitungs",
   "starkstrom",
@@ -136,7 +119,6 @@ const CORE_TITLE_KEYWORDS = [
   "energie",
   "netz",
   "trafo",
-  "spengler",
   "installat",
   "wartung",
 ];
@@ -166,6 +148,83 @@ const HARD_NEGATIVE_TITLE_KEYWORDS = [
   "data",
   "hr",
   "human resources",
+];
+
+/** Keywords that uniquely identify THIS trade (elektro) */
+const TRADE_IDENTITY_KEYWORDS = [
+  "elektro",
+  "elektriker",
+  "elektroinstallateur",
+  "montage-elektriker",
+  "elektromonteur",
+  "elektroniker",
+  "automatiker",
+  "automatikmonteur",
+  "betriebselektriker",
+  "schaltanlagen",
+  "schaltschrank",
+  "gebäudeautomation",
+  "gebaeudeautomation",
+  "photovoltaik",
+  "solartechnik",
+  "netzelektriker",
+  "starkstrom",
+  "schwachstrom",
+  "sps",
+  "msr",
+  "mechatron",
+  "bahntechnik",
+  "freileitungs",
+  "trafo",
+  "emr",
+  "elektrotechnik",
+  "brandmelde",
+];
+
+/** Primary keywords from OTHER trades — reject if title matches these without any TRADE_IDENTITY match */
+const OTHER_TRADE_KEYWORDS = [
+  "sanitär",
+  "sanitaer",
+  "sanitärinstallateur",
+  "sanitärmonteur",
+  "heizung",
+  "heizungsinstallateur",
+  "heizungsmonteur",
+  "heizungstechniker",
+  "klima",
+  "klimatechniker",
+  "kälte",
+  "kältetechniker",
+  "kälteanlagenbauer",
+  "lüftung",
+  "lüftungsmonteur",
+  "lüftungsanlagenbauer",
+  "spengler",
+  "bauspengler",
+  "fassadenspengler",
+  "dachdecker",
+  "dachdeckerin",
+  "zimmermann",
+  "holzbau",
+  "holzkonstruktion",
+  "schreiner",
+  "schreinerei",
+  "tischler",
+  "möbel",
+  "möbelschreiner",
+  "bodenleger",
+  "parkettleger",
+  "plattenleger",
+  "fliesen",
+  "fliesenleger",
+  "estrich",
+  "terrazzo",
+  "gärtner",
+  "gaertner",
+  "garten",
+  "landschaftsgärtner",
+  "baumpflege",
+  "gartenbau",
 ];
 
 interface NormalizedParams {
@@ -229,10 +288,17 @@ function scoreScrapedJob(job: ScrapedJob): number {
     `${job.description} ${job.fullDescription} ${requirements.join(" ")} ${responsibilities.join(" ")}`
   );
 
+  const titleTradeIdentityHits = countKeywordHits(title, TRADE_IDENTITY_KEYWORDS);
+  const titleOtherTradeHits = countKeywordHits(title, OTHER_TRADE_KEYWORDS);
   const titleSignalHits = countKeywordHits(title, CORE_TITLE_KEYWORDS);
   const hardNegativeTitleHits = countKeywordHits(title, HARD_NEGATIVE_TITLE_KEYWORDS);
   const bodySignalHits = countKeywordHits(body, POSITIVE_KEYWORDS);
   const bodyNegativeHits = countKeywordHits(body, NEGATIVE_KEYWORDS);
+
+  // Title mentions another trade but NOT this trade → reject
+  if (titleOtherTradeHits > 0 && titleTradeIdentityHits === 0) {
+    return -100;
+  }
 
   if (hardNegativeTitleHits > 0 && titleSignalHits === 0) {
     return -100;
