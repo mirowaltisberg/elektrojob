@@ -127,7 +127,6 @@ export async function generateMetadata({ params }: LandingPageProps): Promise<Me
       canonical: landingPath,
       languages: {
         "de-CH": landingPath,
-        "de": landingPath,
       },
     },
     openGraph: {

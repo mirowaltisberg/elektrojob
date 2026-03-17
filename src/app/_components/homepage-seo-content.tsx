@@ -172,7 +172,7 @@ export function HomepageSeoContent() {
               }, {})
             ).map(([role, pages]) => (
               <div key={role}>
-                <h3 className="text-sm font-semibold text-slate-800 mb-1.5">{role}</h3>
+                <p className="text-sm font-semibold text-slate-800 mb-1.5">{role}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {pages.map((item) => (
                     <Link
