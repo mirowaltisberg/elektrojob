@@ -155,7 +155,6 @@ export default function RootLayout({
     <html lang="de">
       <head>
         <link rel="dns-prefetch" href="https://connect.facebook.net" />
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
       </head>
       <body lang="de" className={`${plusJakarta.variable} antialiased font-sans bg-slate-50`}>
         <JsonLd data={organizationSchema} />
@@ -166,9 +165,9 @@ export default function RootLayout({
         <SpeedInsights />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"}`}
-          strategy="lazyOnload"
+          strategy="worker"
         />
-        <Script id="gtag-init" strategy="lazyOnload">
+        <Script id="gtag-init" strategy="worker">
           {`
             window.dataLayer=window.dataLayer||[];
             function gtag(){dataLayer.push(arguments);}
@@ -176,7 +175,7 @@ export default function RootLayout({
             gtag('config','${process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"}');
           `}
         </Script>
-        <Script id="fb-pixel" strategy="lazyOnload">
+        <Script id="fb-pixel" strategy="worker">
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?

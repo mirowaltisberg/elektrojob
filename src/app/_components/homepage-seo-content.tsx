@@ -159,23 +159,33 @@ export function HomepageSeoContent() {
           </div>
         </div>
 
-        {/* Landing page links — crawlable internal links for ALL role/canton combos */}
+        {/* Landing page links — grouped by role to reduce DOM size while keeping all 144 links crawlable */}
         <div className="mb-8">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
             Alle Elektrojobs nach Beruf und Kanton
           </h2>
-          <nav aria-label="Alle Stellenangebote nach Beruf und Kanton">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {TOP_LANDING_PAGES.map((item) => (
-                <Link
-                  key={`${item.role}-${item.canton}`}
-                  href={getLandingPath(item)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:border-primary/40 hover:text-primary transition-colors"
-                >
-                  {item.role} in {item.canton}
-                </Link>
-              ))}
-            </div>
+          <nav aria-label="Alle Stellenangebote nach Beruf und Kanton" className="space-y-4">
+            {Object.entries(
+              TOP_LANDING_PAGES.reduce<Record<string, typeof TOP_LANDING_PAGES>>((acc, item) => {
+                (acc[item.role] ??= []).push(item);
+                return acc;
+              }, {})
+            ).map(([role, pages]) => (
+              <div key={role}>
+                <h3 className="text-sm font-semibold text-slate-800 mb-1.5">{role}</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {pages.map((item) => (
+                    <Link
+                      key={`${item.role}-${item.canton}`}
+                      href={getLandingPath(item)}
+                      className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 hover:border-primary/40 hover:text-primary transition-colors"
+                    >
+                      {item.canton}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
           </nav>
         </div>
       </div>
