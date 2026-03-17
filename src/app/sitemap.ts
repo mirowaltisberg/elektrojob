@@ -12,6 +12,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const jobs = await getIndexableJobListings(400);
   const now = new Date();
 
+  // Only include scraped jobs with valid IDs and recent dates (max 90 days old)
+  const cutoffMs = now.getTime() - 90 * 24 * 60 * 60 * 1000;
+  const validJobs = jobs.filter((job) => {
+    if (!job.id || !job.title) return false;
+    const postedMs = job.datePosted ? Date.parse(job.datePosted) : 0;
+    return postedMs > cutoffMs;
+  });
+
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
@@ -39,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  const jobRoutes: MetadataRoute.Sitemap = jobs.map((job) => ({
+  const jobRoutes: MetadataRoute.Sitemap = validJobs.map((job) => ({
     url: toAbsolute(`/jobs/${job.id}`),
     lastModified: job.datePosted ? new Date(job.datePosted) : now,
     changeFrequency: "daily",
