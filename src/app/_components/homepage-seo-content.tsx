@@ -83,17 +83,16 @@ export function HomepageSeoContent() {
         {/* SEO intro paragraph — AI-citeable, entity-rich */}
         <div className="mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
-            Elektrojobs in der Schweiz finden
+            Alle offenen Elektro Jobs in der Schweiz
           </h2>
           <p className="text-slate-600 text-base sm:text-lg leading-relaxed mb-4">
-            Auf elektrojob.ch finden Elektro-Fachkräfte aktuelle offene Stellen in der ganzen Schweiz
+            Auf elektrojob.ch findest du alle offenen Stellen für Elektro-Fachkräfte in der Schweiz
             — von Elektroinstallateur EFZ über Montage-Elektriker und Projektleiter Elektro bis hin zu
-            Automatiker, Elektroplaner und Photovoltaik-Spezialisten. Ob du deinen nächsten Elektrojob
-            in Zürich, Bern oder Basel suchst — unsere spezialisierte Jobbörse
+            Automatiker, Elektroplaner und Photovoltaik-Spezialisten. Unsere spezialisierte Jobbörse
             richtet sich an alle Berufsleute der Elektrobranche.
           </p>
           <p className="text-slate-600 text-base leading-relaxed">
-            Ob du in Zürich, Bern, Basel, Luzern, St. Gallen oder einem anderen Schweizer Kanton
+            Ob du Elektro Jobs in Zürich, Bern, Basel, Luzern, St. Gallen oder einem anderen Schweizer Kanton
             suchst — mit unserer smarten Filterung nach Beruf, Ort, Umkreis und Pensum findest du
             schnell die passende Stelle. Bewirb dich direkt über die Plattform mit wenigen Klicks.
           </p>

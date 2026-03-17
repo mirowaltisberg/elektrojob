@@ -13,6 +13,11 @@ export interface LandingPageConfig {
   title: string;
   description: string;
   intro: string;
+  roleDescription: string;
+  salaryRange: string;
+  requirements: string;
+  career: string;
+  cantonContext: string;
   faqs: LandingFaq[];
 }
 
@@ -276,23 +281,32 @@ function buildLandingConfig(roleKey: string, cantonKey: string): LandingPageConf
     canton: cantonKey,
     title: `${role.label} Jobs in ${canton.name}`,
     description: `${role.label} Jobs im Kanton ${canton.name} — offene Stellen auf elektrojob.ch. Jetzt bewerben.`,
-    intro: `Als ${role.label} in ${canton.name} findest du auf elektrojob.ch alle aktuellen Stellenangebote in deiner Region. ${role.roleDescription} ${canton.context} Die Nachfrage nach qualifizierten ${role.label}-Fachkräften im Kanton ${canton.name} ist hoch — Arbeitgeber suchen gezielt nach Kandidaten mit ${role.requirements.split(",")[0].toLowerCase()}. Das durchschnittliche Jahresgehalt für ${role.label} in der Schweiz liegt bei ${role.salaryRange}. Verwandte Berufe wie ${relatedRolesList} bieten zusätzliche Karrieremöglichkeiten in der Elektrobranche. ${role.career} Nutze unsere smarte Filterung nach Pensum, Umkreis und Anstellungsart, um die passende Stelle zu finden. Bewirb dich direkt online und lade deinen Lebenslauf hoch.`,
+    intro: `Als ${role.label} in ${canton.name} findest du auf elektrojob.ch alle aktuellen Stellenangebote in deiner Region. ${canton.context} Die Nachfrage nach qualifizierten ${role.label}-Fachkräften im Kanton ${canton.name} ist hoch — Arbeitgeber suchen gezielt nach Kandidaten mit ${role.requirements.split(",")[0].toLowerCase()}. Nutze unsere smarte Filterung nach Pensum, Umkreis und Anstellungsart, um die passende Stelle zu finden.`,
+    roleDescription: role.roleDescription,
+    salaryRange: role.salaryRange,
+    requirements: role.requirements,
+    career: role.career,
+    cantonContext: canton.context,
     faqs: [
       {
         question: `Was verdient ein ${role.label} im Kanton ${canton.name}?`,
-        answer: `Ein ${role.label} verdient in der Schweiz durchschnittlich ${role.salaryRange} pro Jahr. Im Kanton ${canton.name} können die Löhne je nach Arbeitgeber, Erfahrung und Spezialisierung variieren.`,
+        answer: `Ein ${role.label} verdient in der Schweiz durchschnittlich ${role.salaryRange} pro Jahr. Im Kanton ${canton.name} können die Löhne je nach Arbeitgeber, Erfahrung und Spezialisierung variieren. ${canton.context}`,
       },
       {
         question: `Welche Voraussetzungen braucht man als ${role.label}?`,
-        answer: role.requirements,
+        answer: `${role.requirements} Für ${role.label}-Stellen im Kanton ${canton.name} werden zudem gute Deutschkenntnisse und regionale Ortskenntnis geschätzt.`,
       },
       {
-        question: `Welche Karrieremöglichkeiten hat ein ${role.label}?`,
-        answer: role.career,
+        question: `Welche Karrieremöglichkeiten hat ein ${role.label} in ${canton.name}?`,
+        answer: `${role.career} Im Kanton ${canton.name} bieten sich besonders gute Chancen, da ${canton.context.split(".")[0].toLowerCase()}.`,
       },
       {
-        question: `Wie viele ${role.label} Jobs gibt es in ${canton.name}?`,
-        answer: `Auf elektrojob.ch findest du aktuelle ${role.label} Stellen im Kanton ${canton.name}. Die Anzahl verfügbarer Jobs variiert — nutze unsere Suche für die aktuellsten Ergebnisse.`,
+        question: `Wie finde ich ${role.label} Jobs in ${canton.name}?`,
+        answer: `Auf elektrojob.ch findest du aktuelle ${role.label} Stellen im Kanton ${canton.name}. Nutze die Filteroptionen nach Pensum, Umkreis und Anstellungsart. Verwandte Berufe wie ${relatedRolesList} findest du ebenfalls auf unserer Plattform.`,
+      },
+      {
+        question: `Wie ist der Arbeitsmarkt für ${role.label} in ${canton.name}?`,
+        answer: `${canton.context} Die Nachfrage nach qualifizierten ${role.label}-Fachkräften im Kanton ${canton.name} ist hoch. Das Durchschnittsgehalt liegt bei ${role.salaryRange} pro Jahr. Arbeitgeber suchen gezielt nach Kandidaten mit ${role.requirements.split(",")[0].toLowerCase()}.`,
       },
     ],
   };
