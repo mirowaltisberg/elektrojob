@@ -244,6 +244,11 @@ export async function generateMetadata(props: JobDetailsPageProps): Promise<Meta
       siteName: "elektrojob.ch",
       locale: "de_CH",
     },
+    twitter: {
+      card: "summary_large_image",
+      title: `${job.title} | elektrojob.ch`,
+      description,
+    },
   };
 }
 
