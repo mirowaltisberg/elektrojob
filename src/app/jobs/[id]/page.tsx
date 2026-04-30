@@ -151,8 +151,7 @@ function buildJobPostingSchema(job: JobListing): Record<string, any> {
     employmentType: mapEmploymentType(job.type),
     hiringOrganization: {
       "@type": "Organization",
-      name: job.company?.trim() || "Arbeitgeber auf elektrojob.ch",
-      ...(job.companyUrl ? { sameAs: job.companyUrl } : {}),
+      name: "Arbeitgeber via elektrojob.ch",
     },
     jobLocation: {
       "@type": "Place",
@@ -254,17 +253,17 @@ export async function generateMetadata(props: JobDetailsPageProps): Promise<Meta
     };
   }
 
-  const descParts = `${job.title} bei ${job.company} in ${job.location}. ${job.description}`;
+  const descParts = `${job.title} in ${job.location}. ${job.description}`;
   const description = descParts.length > 155 ? descParts.slice(0, 152) + "..." : descParts;
 
   return {
-    title: `${job.title} — ${job.company}`,
+    title: `${job.title} | elektrojob.ch`,
     description,
     alternates: {
       canonical: `/jobs/${job.id}`,
     },
     openGraph: {
-      title: `${job.title} — ${job.company}`,
+      title: `${job.title} | elektrojob.ch`,
       description,
       type: "article",
       url: `/jobs/${job.id}`,
