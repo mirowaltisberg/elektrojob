@@ -19,7 +19,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch"
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Elektro Jobs Schweiz 2026 | Offene Stellen finden",
+    default: "1042 Elektro Jobs Schweiz 2026 | Offene Stellen finden",
     template: "%s | elektrojob.ch",
   },
   description:
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     "Stellen Elektrobranche Schweiz",
   ],
   openGraph: {
-    title: "Elektro Jobs Schweiz 2026 | Offene Stellen finden",
+    title: "1042 Elektro Jobs Schweiz 2026 | Offene Stellen finden",
     description:
       "Finde aktuelle Elektro Jobs in der Schweiz. Stellen für Elektroinstallateur EFZ, Montage-Elektriker, Servicetechniker & mehr. Jetzt Lebenslauf einreichen.",
     type: "website",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Elektro Jobs Schweiz 2026 | Offene Stellen finden",
+    title: "1042 Elektro Jobs Schweiz 2026 | Offene Stellen finden",
     description:
       "Finde aktuelle Elektro Jobs in der Schweiz. Stellen für Elektroinstallateur EFZ, Montage-Elektriker, Servicetechniker & mehr. Jetzt Lebenslauf einreichen.",
   },
