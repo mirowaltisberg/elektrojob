@@ -7,9 +7,9 @@ import { JsonLd } from "@/components/json-ld";
 import { buildJobPostingSchema } from "@/lib/job-schema";
 
 export const metadata: Metadata = {
-  title: "1042 Elektro Jobs Schweiz 2026 | Offene Stellen finden",
+  title: "Elektriker Jobs Schweiz 2026 | Stellen & Lohn für Elektriker",
   description:
-    "Finde aktuelle Elektro Jobs in der Schweiz. Stellen für Elektroinstallateur EFZ, Montage-Elektriker, Servicetechniker & mehr. Jetzt Lebenslauf einreichen.",
+    "Elektriker Jobs in der ganzen Schweiz: Elektroinstallateur, Montage-Elektriker, Elektroniker, Elektroplaner. Stellen für Elektriker mit Lohnband, Pensum-Filter und Bewerbung in 2 Klicks.",
   alternates: {
     canonical: "/",
   },

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import { TOP_LANDING_PAGES, getLandingPath, toRoleSlug, toCantonSlug } from "@/lib/landing-pages";
+import { toRoleSlug, toCantonSlug } from "@/lib/landing-pages";
 
 const FOOTER_ROLES = [
   "Elektroinstallateur EFZ",
   "Montage-Elektriker EFZ",
+  "Elektroniker",
   "Servicetechniker Elektro",
   "Projektleiter Elektro",
   "Automatiker EFZ",
@@ -38,15 +39,15 @@ export function SiteFooter() {
           <div>
             <Image
               src="/logo.svg"
-              alt="elektrojob.ch — Jobbörse für Elektro-Fachkräfte in der Schweiz"
+              alt="elektrojob.ch — Elektriker Jobs in der Schweiz"
               width={142}
               height={29}
               className="h-8 w-auto brightness-0 invert mb-4"
               loading="lazy"
             />
             <p className="text-sm leading-relaxed">
-              Die spezialisierte Jobbörse für Elektro-Fachkräfte in der Schweiz.
-              Finde offene Stellen, vergleiche Arbeitgeber und bewirb dich direkt.
+              Die spezialisierte Jobbörse für Elektriker in der Schweiz.
+              Finde offene Stellen für Elektriker, Elektroinstallateure und Montage-Elektriker, vergleiche Arbeitgeber und bewirb dich direkt.
             </p>
           </div>
 
@@ -90,21 +91,56 @@ export function SiteFooter() {
 
           {/* Landing pages + info */}
           <div>
-            <nav aria-label="Beliebte Suchseiten">
+            <nav aria-label="Elektriker Themen-Hubs">
               <h3 className="text-white font-semibold text-sm uppercase tracking-wider mb-3">
-                Top-Suchseiten
+                Elektriker Schweiz
               </h3>
               <ul className="space-y-1.5">
-                {TOP_LANDING_PAGES.slice(0, 6).map((page) => (
-                  <li key={`${page.role}-${page.canton}`}>
-                    <Link
-                      href={getLandingPath(page)}
-                      className="text-sm hover:text-white transition-colors duration-150"
-                    >
-                      {page.role} in {page.canton}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Link href="/lohn-elektriker-schweiz" className="text-sm hover:text-white transition-colors duration-150">
+                    Lohn Elektriker Schweiz
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/elektriker-ausbildung" className="text-sm hover:text-white transition-colors duration-150">
+                    Elektriker Ausbildung
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/elektriker-in-der-naehe" className="text-sm hover:text-white transition-colors duration-150">
+                    Elektriker in der Nähe
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/elektroinstallateur-jobs" className="text-sm hover:text-white transition-colors duration-150">
+                    Elektroinstallateur Jobs
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/montage-elektriker-jobs" className="text-sm hover:text-white transition-colors duration-150">
+                    Montage-Elektriker Jobs
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/elektroplaner-jobs" className="text-sm hover:text-white transition-colors duration-150">
+                    Elektroplaner Jobs
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/elektroniker-jobs" className="text-sm hover:text-white transition-colors duration-150">
+                    Elektroniker Jobs
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/elektriker-jobs/zuerich" className="text-sm hover:text-white transition-colors duration-150">
+                    Elektriker Jobs Zürich
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/elektriker-jobs/basel" className="text-sm hover:text-white transition-colors duration-150">
+                    Elektriker Jobs Basel
+                  </Link>
+                </li>
               </ul>
             </nav>
             <div className="mt-6">
@@ -138,10 +174,10 @@ export function SiteFooter() {
             Weitere Jobbörsen
           </h3>
           <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-            <a href="https://sanitaerjob.ch" target="_blank" rel="noopener" className="text-sm hover:text-white transition-colors">Sanitärjobs</a>
+            <a href="https://www.sanitaerjobs.ch" target="_blank" rel="noopener" className="text-sm hover:text-white transition-colors">Sanitärjobs</a>
             <a href="https://heizungjob.ch" target="_blank" rel="noopener" className="text-sm hover:text-white transition-colors">Heizungsjobs</a>
             <a href="https://spenglerjob.ch" target="_blank" rel="noopener" className="text-sm hover:text-white transition-colors">Spenglerjobs</a>
-            <a href="https://dachdeckerjob.ch" target="_blank" rel="noopener" className="text-sm hover:text-white transition-colors">Dachdeckerjobs</a>
+            <a href="https://www.dachdeckerjobs.ch" target="_blank" rel="noopener" className="text-sm hover:text-white transition-colors">Dachdeckerjobs</a>
             <a href="https://schreinerjob.ch" target="_blank" rel="noopener" className="text-sm hover:text-white transition-colors">Schreinerjobs</a>
             <a href="https://zimmermannjob.ch" target="_blank" rel="noopener" className="text-sm hover:text-white transition-colors">Zimmermannjobs</a>
             <a href="https://bodenlegerjob.ch" target="_blank" rel="noopener" className="text-sm hover:text-white transition-colors">Bodenlegerjobs</a>
