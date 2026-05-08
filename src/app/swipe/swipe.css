@@ -1,0 +1,138 @@
+/* =============================================================
+   SWIPE FEATURE — scoped styles
+   Imported by src/app/swipe/layout.tsx so they only load on
+   /swipe and its child routes.
+   All motion respects prefers-reduced-motion.
+   ============================================================= */
+
+.swipe-stage {
+  /* The deck lives in a calm light stage. A barely-visible amber wash
+     at the top hints at the brand without competing with cards. */
+  background:
+    radial-gradient(
+      120% 60% at 50% -10%,
+      oklch(0.795 0.155 75 / 0.10) 0%,
+      transparent 60%
+    ),
+    var(--background);
+  min-height: 100dvh;
+  min-height: 100svh;
+}
+
+/* ---- Hero number "01 / 02 / 03" on landing page ---- */
+.swipe-step-num {
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  letter-spacing: -0.04em;
+  color: oklch(0.795 0.155 75); /* amber */
+}
+
+/* ---- Animated underline used on landing CTA ---- */
+@keyframes swipe-arrow-nudge {
+  0%, 100% { transform: translateX(0); }
+  60%      { transform: translateX(4px); }
+}
+.swipe-arrow {
+  animation: swipe-arrow-nudge 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ---- Step card reveal — staggered on page load ---- */
+@keyframes swipe-step-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.swipe-step {
+  animation: swipe-step-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.swipe-step-0 { animation-delay: 0.10s; }
+.swipe-step-1 { animation-delay: 0.20s; }
+.swipe-step-2 { animation-delay: 0.30s; }
+
+/* ---- Hint chip pulse on the landing hero ---- */
+@keyframes swipe-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.85); }
+}
+.swipe-pulse-dot {
+  animation: swipe-pulse-dot 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ---- Onboarding form — section reveal ---- */
+@keyframes swipe-section-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.swipe-section {
+  animation: swipe-section-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---- Card stamp overlay (BEWERBEN / WEITER) ---- */
+.swipe-stamp {
+  position: absolute;
+  top: 28px;
+  font-weight: 800;
+  font-size: clamp(1.6rem, 6vw, 2.1rem);
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 3px solid currentColor;
+  pointer-events: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-feature-settings: "ss01" 1;
+}
+.swipe-stamp-right {
+  right: 24px;
+  color: oklch(0.62 0.18 145);
+  transform: rotate(-10deg);
+  background: oklch(1 0 0 / 0.7);
+}
+.swipe-stamp-left {
+  left: 24px;
+  color: oklch(0.55 0.18 25);
+  transform: rotate(10deg);
+  background: oklch(1 0 0 / 0.7);
+}
+
+/* ---- Live toast above the deck ---- */
+@keyframes swipe-toast-in {
+  from { opacity: 0; transform: translate(-50%, 8px) scale(0.96); }
+  to   { opacity: 1; transform: translate(-50%, 0)   scale(1);    }
+}
+.swipe-toast {
+  animation: swipe-toast-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---- Empty / finished state float ---- */
+@keyframes swipe-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.swipe-float { animation: swipe-float 4s ease-in-out infinite; }
+
+/* ---- Counter pip row at the top of the deck ---- */
+.swipe-pip {
+  height: 3px;
+  border-radius: 999px;
+  background: oklch(0.92 0 0);
+  transition: background-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.swipe-pip-active {
+  background: oklch(0.795 0.155 75);
+}
+
+/* ---- Reduced motion overrides ---- */
+@media (prefers-reduced-motion: reduce) {
+  .swipe-arrow,
+  .swipe-step,
+  .swipe-pulse-dot,
+  .swipe-section,
+  .swipe-toast,
+  .swipe-float {
+    animation: none !important;
+  }
+  .swipe-step,
+  .swipe-section {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
