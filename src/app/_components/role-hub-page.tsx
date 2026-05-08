@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Wallet } from "lucide-react";
 import type { RoleHubConfig } from "@/lib/role-hubs";
 import { searchJobListings } from "@/lib/job-catalog";
-import { buildJobSlug } from "@/lib/job-slug";
 import { buildJobPostingSchema } from "@/lib/job-schema";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
@@ -62,7 +61,7 @@ export async function RoleHubPage({ config }: Props) {
     itemListElement: result.jobs.slice(0, 15).map((job, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `${SITE_URL}/jobs/${buildJobSlug(job)}`,
+      url: `${SITE_URL}/jobs/${job.id}`,
       name: job.title,
     })),
   };
@@ -134,7 +133,7 @@ export async function RoleHubPage({ config }: Props) {
                         href={
                           job.source === "generated"
                             ? `/jobs/${job.id}?q=${encodeURIComponent(config.searchQuery)}`
-                            : `/jobs/${buildJobSlug(job)}`
+                            : `/jobs/${job.id}`
                         }
                         className="hover:text-primary"
                       >

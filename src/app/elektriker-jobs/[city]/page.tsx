@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ELEKTRIKER_CITIES, findElektrikerCity } from "@/lib/elektriker-cities";
 import { searchJobListings } from "@/lib/job-catalog";
-import { buildJobSlug } from "@/lib/job-slug";
 import { buildJobPostingSchema } from "@/lib/job-schema";
 import { MapPin, Wallet } from "lucide-react";
 
@@ -93,7 +92,7 @@ export default async function ElektrikerCityPage({ params }: PageProps) {
     itemListElement: result.jobs.slice(0, 15).map((job, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `${SITE_URL}/jobs/${buildJobSlug(job)}`,
+      url: `${SITE_URL}/jobs/${job.id}`,
       name: job.title,
     })),
   };
@@ -186,7 +185,7 @@ export default async function ElektrikerCityPage({ params }: PageProps) {
                         href={
                           job.source === "generated"
                             ? `/jobs/${job.id}?q=Elektriker&loc=${encodeURIComponent(city.name)}`
-                            : `/jobs/${buildJobSlug(job)}`
+                            : `/jobs/${job.id}`
                         }
                         className="hover:text-primary"
                       >
