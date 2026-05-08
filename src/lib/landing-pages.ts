@@ -117,6 +117,17 @@ const ROLE_CONTENT: Record<string, RoleContent> = {
       "Weiterbildung zum Elektroinstallateur EFZ, Vorarbeiter oder Spezialisierung auf einen Fachbereich.",
     related: ["Montage-Elektriker EFZ", "Elektroinstallateur EFZ", "Servicetechniker Elektro"],
   },
+  "Elektroniker": {
+    label: "Elektroniker EFZ",
+    roleDescription:
+      "Elektroniker EFZ entwickeln, prüfen und reparieren elektronische Geräte, Steuerungen und Mikrocontroller. Sie arbeiten in Werkstätten, Labors und Entwicklungsabteilungen — bei Medizintechnik-, Maschinenbau- und Industrieunternehmen.",
+    salaryRange: "CHF 70'000 – 105'000",
+    requirements:
+      "Abgeschlossene 4-jährige Lehre als Elektroniker EFZ, Grundlagen Mikrocontroller-Programmierung, sicherer Umgang mit Mess- und Prüfgeräten.",
+    career:
+      "Weiterbildung zum dipl. Techniker HF Elektrotechnik, Bachelor FH Elektrotechnik oder Spezialist für EMV, Embedded Software und Power Electronics.",
+    related: ["Automatiker EFZ", "Servicetechniker Elektro", "Schaltanlagenbauer"],
+  },
   "Gebäudetechniker": {
     label: "Gebäudetechniker",
     roleDescription:
@@ -325,7 +336,7 @@ function normalizeSlug(value: string): string {
     .replace(/ä/g, "ae")
     .replace(/ö/g, "oe")
     .replace(/ü/g, "ue")
-    .replace(/ß/g, "ss")
+    .replace(/\u00df/g, "ss")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }

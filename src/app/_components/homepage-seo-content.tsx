@@ -13,9 +13,9 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch"
 // get summarized away. The 134-167 range survives both ends intact.
 const HOMEPAGE_FAQS = [
   {
-    question: "Welche Elektrojobs gibt es auf elektrojob.ch?",
+    question: "Welche Elektriker Jobs gibt es auf elektrojob.ch?",
     answer:
-      "Auf elektrojob.ch findest du alle relevanten Stellenprofile der Schweizer Elektrobranche. Dazu gehören die EFZ-Lehrabschluss-Berufe Elektroinstallateur, Montage-Elektriker, Automatiker, Netzelektriker und Telematiker, dazu Service- und Aussendienst-Profile wie Servicetechniker Elektro, Betriebselektriker und Smart-Home-Techniker. Auf der Planungs- und Projektebene listen wir Elektroplaner, Gebäudetechnikplaner, Bauleiter Elektro und Projektleiter Elektro. Spezialisierte Profile wie Photovoltaik-Spezialisten, Schaltanlagenbauer, Sicherheitsberater nach NIV sowie Ladeinfrastruktur-Techniker sind ebenfalls regelmässig vertreten. Auf der Führungsebene findest du Niederlassungsleiter, Elektro-Fachvorgesetzte und Geschäftsführende von Elektrobetrieben. Lehrstellen, Trainee-Programme und Wiedereinsteigerangebote sind separat ausgewiesen, damit Berufsanfängerinnen, Quereinsteiger und Wiedereinsteigende die für sie passenden Inserate schnell finden. Über die Kartenansicht lokalisierst du Stellen zusätzlich nach Postleitzahl und Pendelradius — besonders nützlich in ländlichen Regionen mit wechselnder Baustellenlogik. Die Stellen werden täglich aktualisiert und aus über 26'000 öffentlichen Inseraten gefiltert. Sie verteilen sich auf alle 26 Schweizer Kantone, mit besonderer Dichte in Zürich, Bern, Aargau, Basel-Stadt und der Ostschweiz.",
+      "Auf elektrojob.ch findest du alle relevanten Elektriker Stellen der Schweizer Elektrobranche. Dazu gehören die EFZ-Lehrabschluss-Berufe Elektroinstallateur, Montage-Elektriker, Elektroniker, Automatiker, Netzelektriker und Telematiker, dazu Service- und Aussendienst-Profile wie Servicetechniker Elektro, Betriebselektriker und Smart-Home-Techniker. Auf der Planungs- und Projektebene listen wir Elektroplaner, Gebäudetechnikplaner, Bauleiter Elektro und Projektleiter Elektro. Spezialisierte Elektriker Profile wie Photovoltaik-Spezialisten, Schaltanlagenbauer, Sicherheitsberater nach NIV sowie Ladeinfrastruktur-Techniker sind ebenfalls regelmässig vertreten. Auf der Führungsebene findest du Niederlassungsleiter, Elektro-Fachvorgesetzte und Geschäftsführende von Elektrobetrieben. Lehrstellen für Elektriker, Trainee-Programme und Wiedereinsteigerangebote sind separat ausgewiesen, damit Berufsanfängerinnen, Quereinsteiger und Wiedereinsteigende die passenden Inserate schnell finden. Über die Kartenansicht lokalisierst du Stellen zusätzlich nach Postleitzahl und Pendelradius. Die Stellen werden täglich aktualisiert und aus über 26'000 öffentlichen Inseraten gefiltert. Sie verteilen sich auf alle 26 Schweizer Kantone, mit besonderer Dichte in Zürich, Bern, Aargau, Basel-Stadt und der Ostschweiz.",
   },
   {
     question: "Was verdient ein Elektroinstallateur in der Schweiz?",
@@ -23,12 +23,12 @@ const HOMEPAGE_FAQS = [
       "Ein Elektroinstallateur EFZ verdient in der Schweiz im Durchschnitt CHF 75'000 bis 95'000 pro Jahr. Das Gehalt variiert deutlich nach Kanton, Berufserfahrung, Arbeitgebergrösse und Spezialisierung. Im Kanton Zürich, in Zug und in Basel-Stadt liegen die Löhne tendenziell 5 bis 10 Prozent über dem Schweizer Mittel; in ländlicheren Kantonen wie Freiburg, Solothurn oder Graubünden 5 bis 8 Prozent darunter. Berufsanfänger nach EFZ-Abschluss starten meist im Bereich CHF 65'000 bis 72'000, mit drei bis fünf Jahren Erfahrung verschiebt sich der Marktwert in den Bereich CHF 80'000 bis 90'000. Spezialisierungen auf Smart-Building, Photovoltaik oder Brandmeldeanlagen bringen zusätzliche 5 bis 12 Prozent. Vorarbeiter, Serviceeinsatz mit Pikett und Sicherheitsberaterausweis nach NIV heben das Salärband weiter. Im Vergleich zum Nachbarland Deutschland liegen die Schweizer Bruttolöhne durchschnittlich 60 bis 80 Prozent höher; allerdings sind Lebenshaltungskosten und Krankenkassenprämien ebenfalls deutlich höher, sodass sich der direkte Nettovergleich nur über einen detaillierten Lohnrechner lohnt. Der 13. Monatslohn ist in der Elektrobranche Standard. Die vollständige Lohnübersicht für alle Elektroberufe findest du auf dieser Startseite.",
   },
   {
-    question: "Wie finde ich einen Job als Elektriker in der Schweiz?",
+    question: "Wie finde ich einen Elektriker Job in der Schweiz?",
     answer:
       "Auf elektrojob.ch suchst du gezielt mit drei Filtern nach passenden Stellen: Beruf (12 EFZ- und Spezialisten-Profile), Standort (alle 26 Schweizer Kantone plus Ortssuche mit Umkreis-Radius in Kilometern) und Pensum (Vollzeit, 80–100%, 60–80%, Teilzeit). Du kannst zusätzlich nach Anstellungsart (Festanstellung, Temporär, Praktikum, Lehre) filtern und Stellen mit konkretem Lohnband gezielt aufrufen. Der Bewerbungsprozess läuft direkt über die Plattform: Lebenslauf als PDF hochladen, Anschreiben in das Formular tippen oder ebenfalls als PDF beifügen, Sprache und Verfügbarkeit angeben, abschicken. Wir leiten dein Dossier anonymisiert an den Arbeitgeber weiter. Du kannst Suchprofile speichern und erhältst dann eine Benachrichtigung, sobald neue passende Stellen aufgeschaltet werden. Für regional konzentrierte Suchen empfehlen wir die Karte mit Umkreis-Filter — so findest du Stellen innerhalb deines bevorzugten Pendelradius. Berufsmessen wie die ineltec, das EnergyDay-Forum oder regionale Berufsbildungsmessen bieten zusätzliche Direktkontakte zu Arbeitgebern; viele Betriebe haben offene Stellen, die sie noch nicht öffentlich ausgeschrieben haben.",
   },
   {
-    question: "Welche Kantone haben die meisten Elektrojobs?",
+    question: "In welchen Kantonen gibt es die meisten Elektriker Jobs?",
     answer:
       "Die mit Abstand meisten offenen Stellen für Elektro-Fachkräfte gibt es in den Kantonen Zürich, Bern, Aargau, Waadt und Basel-Stadt. Diese fünf Kantone vereinen rund 60 Prozent aller publizierten Elektro-Stellenausschreibungen in der Schweiz. Im Mittelfeld folgen St. Gallen, Luzern, Genf, Thurgau und Solothurn. Ländlichere Kantone wie Uri, Glarus, Appenzell Innerrhoden oder Jura haben deutlich weniger offene Stellen, dafür weniger Konkurrenz unter Bewerbern. Die regionale Verteilung folgt Wirtschaftswachstum und Bautätigkeit: Wo Wohnungsbau, Gewerbe- und Industrieprojekte zunehmen, steigt auch die Nachfrage nach Elektro-Installateuren, Servicetechnikern und Planern. Für Pendlerregionen lohnt sich ein Blick auf die Nachbarkantone — Aargauer Betriebe rekrutieren häufig in Solothurn und Luzern, Basler in Baselland und Solothurn, Zürcher in Schaffhausen, Thurgau und Schwyz. Eine zweisprachige Bewerbung (Deutsch und Französisch) öffnet zusätzlich den Markt im Kanton Wallis, in der Region Biel/Bienne und in Teilen von Fribourg. Die täglich aktualisierten Stellenzahlen pro Kanton siehst du in unserem Filter.",
   },
@@ -39,7 +39,7 @@ const HOMEPAGE_FAQS = [
       "Der Unterschied liegt in Lehrdauer, Befähigung und Gehaltsband. Der Elektroinstallateur EFZ absolviert eine 4-jährige Lehre und darf eigenständig Anlagen planen, in Betrieb nehmen und nach NIN / NIV prüfen. Mit dem Zusatzausweis Sicherheitsberater übernimmt er die volle Verantwortung für Schlusskontrollen. Der Montage-Elektriker EFZ macht eine 3-jährige Lehre und ist auf die ausführende Tätigkeit fokussiert: Kabelzug, Apparatemontage, Verdrahtung von Verteilungen, Endkontrolle nach Vorgabe. Beide Berufe sind in der Schweiz gefragt, der Lohnabstand beträgt durchschnittlich CHF 5'000 bis 10'000 pro Jahr zugunsten des Elektroinstallateurs. Wechsel ist gut möglich: Über die zweijährige verkürzte Zusatzlehre wird der Montage-Elektriker zum Elektroinstallateur EFZ. Viele Lehrbetriebe finanzieren diesen Weg mit, weil Fachkräfte mit voller Befähigung knapp sind. Aktuell entstehen zudem hybride Profile wie der Solarteur (Fokus Photovoltaik-Montage), der für Berufseinsteiger eine Alternative zum klassischen Installateur-Pfad darstellt. Welcher Beruf besser passt, hängt von Lust auf Eigenverantwortung versus Teamarbeit auf der Baustelle ab — eine Berufsberatung in deinem Wohnkanton hilft bei der konkreten Wahl.",
   },
   {
-    question: "Gibt es auf elektrojob.ch auch Teilzeitstellen?",
+    question: "Gibt es auf elektrojob.ch auch Teilzeitstellen für Elektriker?",
     answer:
       "Ja, ein wachsender Teil der Stellen auf elektrojob.ch ist Teilzeitarbeit oder mit reduziertem Pensum verfügbar. Im Filter wählst du zwischen Vollzeit (90–100%), 80–100%, 60–80% oder Teilzeit unter 60%. Teilzeitmodelle sind besonders bei Servicetechnikern, Elektroplanern und in der Gebäudetechnik verbreitet — Elternzeit-Modelle, schrittweiser Wiedereinstieg nach Pause und Vorruhestand mit Reduzierung auf 60 oder 80 Prozent sind in der Schweizer Elektrobranche zunehmend Standard. Auf der Baustellenseite (Elektroinstallateur, Montage-Elektriker) bleibt Vollzeit dominant, weil Equipen meist vollständig disponiert werden. In den Bereichen Planung, Projektleitung und Kundendienst ist Teilzeit hingegen gut etabliert. Job-Sharing-Modelle (zwei Personen teilen sich eine Stelle) werden ebenfalls vereinzelt angeboten. Wer Elternzeit-Wiedereinstieg sucht, profitiert von einer wachsenden Akzeptanz für gestaffelte Pensumserhöhungen — also Start mit 60 Prozent und schrittweise Anhebung über 12 bis 24 Monate. Frage in Erstgesprächen explizit nach diesem Modell, viele Betriebe bieten es ohne aktive Werbung an. Wir kennzeichnen jedes Inserat klar mit dem akzeptierten Pensumband, damit du auf einen Blick siehst, welche Stelle zu deiner gewünschten Arbeitszeit passt.",
   },
@@ -80,25 +80,35 @@ const SALARY_TABLE = [
  */
 export function HomepageSeoContent() {
   return (
-    <section className="bg-white border-t" aria-label="Informationen für Elektro-Fachkräfte">
+    <section className="bg-white border-t" aria-label="Informationen für Elektriker in der Schweiz">
       <JsonLd data={faqPageSchema} />
 
       <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 max-w-5xl">
         {/* SEO intro paragraph — AI-citeable, entity-rich */}
         <div className="mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
-            Alle offenen Elektro Jobs in der Schweiz
+            Elektriker Jobs Schweiz — alle offenen Stellen für Elektriker
           </h2>
           <p className="text-slate-600 text-base sm:text-lg leading-relaxed mb-4">
-            Auf elektrojob.ch findest du alle offenen Stellen für Elektro-Fachkräfte in der Schweiz
-            — von Elektroinstallateur EFZ über Montage-Elektriker und Projektleiter Elektro bis hin zu
-            Automatiker, Elektroplaner und Photovoltaik-Spezialisten. Unsere spezialisierte Jobbörse
-            richtet sich an alle Berufsleute der Elektrobranche.
+            Auf elektrojob.ch findest du alle offenen Stellen für Elektriker in der Schweiz —
+            vom Elektroinstallateur EFZ über den Montage-Elektriker und Elektroniker bis zum
+            Elektroplaner, Servicetechniker und Projektleiter Elektro. Unsere spezialisierte
+            Jobbörse für Elektriker richtet sich an alle Berufsleute der Schweizer Elektrobranche.
           </p>
           <p className="text-slate-600 text-base leading-relaxed">
-            Ob du Elektro Jobs in Zürich, Bern, Basel, Luzern, St. Gallen oder einem anderen Schweizer Kanton
-            suchst — mit unserer smarten Filterung nach Beruf, Ort, Umkreis und Pensum findest du
-            schnell die passende Stelle. Bewirb dich direkt über die Plattform mit wenigen Klicks.
+            Egal ob du Elektriker Jobs in Zürich, Basel, Bern, Luzern oder St. Gallen suchst —
+            mit der smarten Filterung nach Beruf, Ort, Umkreis und Pensum findest du als
+            Elektriker Schweiz-weit schnell die passende Stelle. Bewirb dich direkt über die
+            Plattform mit wenigen Klicks.
+          </p>
+
+          <p className="text-slate-600 text-base leading-relaxed mt-4">
+            Zusätzlich findest du Festanstellungen, Temporärstellen, Teilzeitpensen, Lehrstellen
+            und Elektriker Stellenangebote mit Lohnband. Besonders gesucht werden Elektriker
+            mit EFZ/EBA, Erfahrung im Service, in der Montage oder Projektleitung sowie
+            regionaler Mobilität. Damit eignet sich die Suche für klassische Stellen für
+            Elektriker in der Schweiz ebenso wie für spezialisierte Profile wie
+            Elektroinstallateur Jobs, Montage-Elektriker, Elektroniker und Elektroplaner Jobs.
           </p>
         </div>
 
@@ -106,10 +116,10 @@ export function HomepageSeoContent() {
         {/* sections on category pages deep-link via /#loehne. */}
         <div id="loehne" className="mb-12 scroll-mt-24">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">
-            Lohnübersicht Elektroberufe Schweiz
+            Lohn Elektriker Schweiz — Lohnübersicht aller Elektroberufe
           </h2>
           <p className="text-slate-500 text-sm mb-4">
-            Durchschnittliche Jahresgehälter für Elektro-Fachkräfte in der Schweiz (2025/2026, Richtwerte).
+            Durchschnittliche Jahresgehälter für Elektriker in der Schweiz (2025/2026, Richtwerte).
             Quellen:{" "}
             <a href="https://www.eit.swiss" target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-700">EIT.swiss</a>,{" "}
             <a href="https://www.electrosuisse.ch" target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-700">Electrosuisse</a>,{" "}
@@ -200,6 +210,51 @@ export function HomepageSeoContent() {
           </details>
         </div>
 
+        {/* Topical hubs — internal links to new SEO content */}
+        <div className="mb-12">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">
+            Mehr zum Thema Elektriker Schweiz
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <Link href="/lohn-elektriker-schweiz" className="rounded-lg border border-slate-200 bg-slate-50 p-4 hover:border-primary/40 hover:bg-white transition">
+              <p className="font-semibold text-slate-900 mb-1">Lohn Elektriker Schweiz</p>
+              <p className="text-xs text-slate-600">Lohnbänder nach Beruf, Erfahrung und Kanton — Stand 2026.</p>
+            </Link>
+            <Link href="/elektriker-ausbildung" className="rounded-lg border border-slate-200 bg-slate-50 p-4 hover:border-primary/40 hover:bg-white transition">
+              <p className="font-semibold text-slate-900 mb-1">Elektriker Ausbildung</p>
+              <p className="text-xs text-slate-600">Lehre, EFZ, EBA und Weiterbildung — der vollständige Guide.</p>
+            </Link>
+            <Link href="/elektriker-in-der-naehe" className="rounded-lg border border-slate-200 bg-slate-50 p-4 hover:border-primary/40 hover:bg-white transition">
+              <p className="font-semibold text-slate-900 mb-1">Elektriker in der Nähe</p>
+              <p className="text-xs text-slate-600">Stellen in deiner Region — Grossraum Zürich, Basel, Bern, Zentralschweiz, Ostschweiz.</p>
+            </Link>
+            <Link href="/elektroinstallateur-jobs" className="rounded-lg border border-slate-200 bg-slate-50 p-4 hover:border-primary/40 hover:bg-white transition">
+              <p className="font-semibold text-slate-900 mb-1">Elektroinstallateur Jobs</p>
+              <p className="text-xs text-slate-600">Alle Stellen für Elektroinstallateure EFZ in der Schweiz.</p>
+            </Link>
+            <Link href="/montage-elektriker-jobs" className="rounded-lg border border-slate-200 bg-slate-50 p-4 hover:border-primary/40 hover:bg-white transition">
+              <p className="font-semibold text-slate-900 mb-1">Montage-Elektriker Jobs</p>
+              <p className="text-xs text-slate-600">Stellen für Montage-Elektriker EFZ in der ganzen Schweiz.</p>
+            </Link>
+            <Link href="/elektroplaner-jobs" className="rounded-lg border border-slate-200 bg-slate-50 p-4 hover:border-primary/40 hover:bg-white transition">
+              <p className="font-semibold text-slate-900 mb-1">Elektroplaner Jobs</p>
+              <p className="text-xs text-slate-600">Planungsbüros, Generalplaner und Bauherrenberatung.</p>
+            </Link>
+            <Link href="/elektroniker-jobs" className="rounded-lg border border-slate-200 bg-slate-50 p-4 hover:border-primary/40 hover:bg-white transition">
+              <p className="font-semibold text-slate-900 mb-1">Elektroniker Jobs</p>
+              <p className="text-xs text-slate-600">Hardware, Embedded und Service in Schweizer Industrie.</p>
+            </Link>
+            <Link href="/elektriker-jobs/zuerich" className="rounded-lg border border-slate-200 bg-slate-50 p-4 hover:border-primary/40 hover:bg-white transition">
+              <p className="font-semibold text-slate-900 mb-1">Elektriker Jobs Zürich</p>
+              <p className="text-xs text-slate-600">Grossraum Zürich — höchste Stellenwahl der Schweiz.</p>
+            </Link>
+            <Link href="/elektriker-jobs/basel" className="rounded-lg border border-slate-200 bg-slate-50 p-4 hover:border-primary/40 hover:bg-white transition">
+              <p className="font-semibold text-slate-900 mb-1">Elektriker Jobs Basel</p>
+              <p className="text-xs text-slate-600">Pharma, Chemie und Industrie in der Nordwestschweiz.</p>
+            </Link>
+          </div>
+        </div>
+
         {/* FAQ section — conversational query targets */}
         <div className="mb-12">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-4">
@@ -231,9 +286,9 @@ export function HomepageSeoContent() {
         {/* Landing page links — grouped by role to reduce DOM size while keeping all 144 links crawlable */}
         <div className="mb-8">
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
-            Alle Elektrojobs nach Beruf und Kanton
+            Elektriker Jobs nach Beruf und Kanton
           </h2>
-          <nav aria-label="Alle Stellenangebote nach Beruf und Kanton" className="space-y-4">
+          <nav aria-label="Alle Stellen für Elektriker nach Beruf und Kanton" className="space-y-4">
             {Object.entries(
               TOP_LANDING_PAGES.reduce<Record<string, typeof TOP_LANDING_PAGES>>((acc, item) => {
                 (acc[item.role] ??= []).push(item);
