@@ -99,7 +99,7 @@ export default async function ElektrikerCityPage({ params }: PageProps) {
   const FAQS = [
     {
       question: `Wie viele Elektriker Stellen gibt es aktuell in ${city.name}?`,
-      answer: `In ${city.name} und Umgebung sind regelmässig zwischen 30 und 150 offene Elektriker Stellen ausgeschrieben. Die genaue Zahl schwankt mit Saison, Bautätigkeit und Auftragslage der lokalen Elektrobetriebe. Auf elektrojob.ch siehst du die aktuell offenen Inserate täglich aktualisiert — mit Filtern nach Pensum, Anstellungsart und Berufsprofil. Pendelbereite Elektriker erweitern den Suchradius typischerweise auf die Gemeinden ${city.commuterTowns.slice(0, 3).join(", ")} und finden so 2- bis 3-mal mehr passende Stellen.`,
+      answer: `Die Zahl ändert sich mit Saison, Bautätigkeit und Auftragslage. Auf elektrojob.ch siehst du die derzeit verfügbaren Inserate mit Filtern nach Pensum, Anstellungsart und Berufsprofil. Wenn du den Suchradius auf Pendlerorte wie ${city.commuterTowns.slice(0, 3).join(", ")} erweiterst, beziehst du zusätzliche Stellen aus der Region ein.`,
     },
     {
       question: `Was verdient ein Elektriker in ${city.name}?`,

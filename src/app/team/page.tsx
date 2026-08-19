@@ -148,9 +148,9 @@ export default function TeamPage() {
             </h2>
             <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
               Inserate werden auf elektrojob.ch grundsätzlich anonymisiert
-              dargestellt — der konkrete Arbeitgeber wird im persönlichen
-              Erstgespräch offengelegt. Diese Praxis schützt sowohl Bewerbende
-              als auch einstellende Betriebe vor unerwünschter Reichweite.
+              dargestellt. Öffentliche Seiten nennen weder Firmennamen noch
+              direkte Arbeitgeber-URLs. Bewerbungsangaben werden nur für die
+              gewählte Stelle erfasst und nie in öffentlichen Jobdaten ausgegeben.
             </p>
           </article>
         </section>
