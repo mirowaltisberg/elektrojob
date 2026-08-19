@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SiteFooter } from "@/components/site-footer";
 
 export const metadata: Metadata = {
-  title: "Preise & Pakete — Stelle ausschreiben auf elektrojob.ch",
+  title: "Preise für Elektro-Stelleninserate",
   description:
     "Publizieren Sie Elektro-Stellenangebote auf elektrojob.ch — der spezialisierten Jobbörse für Elektro-Fachkräfte in der Schweiz. Einzelinserate und Firmenpakete.",
   alternates: {

@@ -6,7 +6,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 
 export const metadata: Metadata = {
-  title: "Über die Redaktion | elektrojob.ch",
+  title: "Über die Redaktion",
   description:
     "Wer hinter den redaktionellen Inhalten von elektrojob.ch steht: Recherche, Quellen, Methodik und unser Anspruch an Schweizer Lohn- und Branchendaten.",
   alternates: {

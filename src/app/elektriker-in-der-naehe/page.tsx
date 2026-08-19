@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Elektriker in der Nähe | Stellen in deiner Region — Schweiz",
+  title: "Elektriker Jobs in der Nähe Schweiz",
   description:
     "Elektriker Jobs in deiner Nähe: Stellen in allen Schweizer Regionen — Grossraum Zürich, Nordwestschweiz, Zentralschweiz, Ostschweiz, Romandie. Mit Umkreis-Filter.",
   alternates: { canonical: "/elektriker-in-der-naehe" },

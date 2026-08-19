@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = `Offene Elektriker Stellen in ${city.name} (${city.cantonAbbr}): Elektroinstallateur, Montage-Elektriker, Servicetechniker, Elektroplaner. Lohn ${city.salaryBand}, tägliche Updates.`;
 
   return {
-    title,
+    title: `Elektriker Jobs ${city.name} 2026`,
     description,
     alternates: { canonical: `/elektriker-jobs/${city.slug}` },
     openGraph: {

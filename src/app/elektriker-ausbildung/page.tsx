@@ -5,9 +5,9 @@ import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Elektriker Ausbildung Schweiz | Lehre, EFZ, Weiterbildung 2026",
+  title: "Elektriker Ausbildung Schweiz 2026",
   description:
-    "Alles zur Elektriker Ausbildung in der Schweiz: 3- und 4-jährige Lehre (EFZ/EBA), Lehrlingslohn, Weiterbildungen zum Elektro-Sicherheitsberater, Projektleiter und Installationsmeister.",
+    "Elektriker-Ausbildung in der Schweiz: EFZ- und EBA-Lehren, Lehrlingslohn sowie Weiterbildungen zum Elektro-Sicherheitsberater, Projektleiter und Meister.",
   alternates: { canonical: "/elektriker-ausbildung" },
 };
 

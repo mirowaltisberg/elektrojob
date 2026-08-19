@@ -70,7 +70,7 @@ export async function generateMetadata(props: JobDetailsPageProps): Promise<Meta
 
   if (!job) {
     return {
-      title: "Stelle nicht gefunden | elektrojob.ch",
+      title: "Stelle nicht gefunden",
       description: "Die gewünschte Stelle konnte nicht gefunden werden.",
       robots: {
         index: false,
@@ -83,7 +83,7 @@ export async function generateMetadata(props: JobDetailsPageProps): Promise<Meta
   const description = descParts.length > 155 ? descParts.slice(0, 152) + "..." : descParts;
 
   return {
-    title: `${job.title} | elektrojob.ch`,
+    title: job.title,
     description,
     alternates: {
       canonical: `/jobs/${job.id}`,

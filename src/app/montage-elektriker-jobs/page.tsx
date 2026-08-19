@@ -9,7 +9,7 @@ export const revalidate = 3600;
 export function generateMetadata(): Metadata {
   const config = findRoleHub(SLUG)!;
   return {
-    title: config.title,
+    title: `${config.displayName} Schweiz 2026`,
     description: config.description,
     alternates: { canonical: `/${SLUG}` },
     openGraph: {

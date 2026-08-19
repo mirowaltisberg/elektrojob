@@ -218,8 +218,9 @@ export function ApplyModal({ jobId, jobTitle, onOpen }: ApplyModalProps) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Lebenslauf / CV</Label>
+                  <Label htmlFor="apply-cv">Lebenslauf / CV</Label>
                   <input
+                    id="apply-cv"
                     ref={fileInputRef}
                     type="file"
                     accept=".pdf,.doc,.docx"

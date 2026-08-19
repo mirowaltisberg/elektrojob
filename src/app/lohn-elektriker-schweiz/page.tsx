@@ -5,10 +5,25 @@ import { SiteFooter } from "@/components/site-footer";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Lohn Elektriker Schweiz 2026 | Gehalt nach Beruf, Kanton & Erfahrung",
+  title: "Lohn Elektriker Schweiz 2026",
   description:
-    "Wie viel verdient ein Elektriker in der Schweiz? Lohn nach Beruf (Elektroinstallateur, Montage-Elektriker, Elektroplaner), Kanton, Erfahrung und Spezialisierung — Daten 2026.",
+    "Lohn für Elektriker in der Schweiz 2026 nach Beruf, Erfahrung und Kanton: vom Elektroinstallateur und Montage-Elektriker bis zum Elektroplaner.",
   alternates: { canonical: "/lohn-elektriker-schweiz" },
+  openGraph: {
+    title: "Lohn Elektriker Schweiz 2026 | elektrojob.ch",
+    description:
+      "Lohn für Elektriker in der Schweiz 2026 nach Beruf, Erfahrung und Kanton: vom Elektroinstallateur und Montage-Elektriker bis zum Elektroplaner.",
+    url: "/lohn-elektriker-schweiz",
+    type: "article",
+    siteName: "elektrojob.ch",
+    locale: "de_CH",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lohn Elektriker Schweiz 2026 | elektrojob.ch",
+    description:
+      "Lohn für Elektriker in der Schweiz 2026 nach Beruf, Erfahrung und Kanton: vom Elektroinstallateur und Montage-Elektriker bis zum Elektroplaner.",
+  },
 };
 
 export const revalidate = 86400;
