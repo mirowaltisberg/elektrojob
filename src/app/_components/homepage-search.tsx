@@ -82,6 +82,32 @@ const EMPLOYER_MENU_ITEMS = [
 ];
 
 const PAGE_SIZE = 12;
+const SWISS_DATE_TIME_FORMATTER = new Intl.DateTimeFormat("de-CH", {
+  timeZone: "Europe/Zurich",
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hourCycle: "h23",
+});
+const SWISS_DATE_FORMATTER = new Intl.DateTimeFormat("de-CH", {
+  timeZone: "Europe/Zurich",
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+});
+
+function formatSwissDateTime(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "unbekannt" : SWISS_DATE_TIME_FORMATTER.format(date);
+}
+
+function formatSwissDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "–" : SWISS_DATE_FORMATTER.format(date);
+}
 const SCRAPE_STALE_HOURS = 72;
 const DEFAULT_RADIUS_KM = "25";
 const REGION_RADIUS_KM: Record<string, string> = {
@@ -655,7 +681,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                 )}
                 {scrapedAt && (
                   <p className="text-xs text-slate-500 mt-1">
-                    Datenstand: {new Date(scrapedAt).toLocaleString("de-CH")}
+                    Datenstand: {formatSwissDateTime(scrapedAt)}
                   </p>
                 )}
               </div>
@@ -750,7 +776,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
 
             {!isLoading && staleData && (
               <div className="mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
-                <p className="font-semibold">Datenstand: {scrapedAt ? new Date(scrapedAt).toLocaleString("de-CH") : "unbekannt"}</p>
+                <p className="font-semibold">Datenstand: {scrapedAt ? formatSwissDateTime(scrapedAt) : "unbekannt"}</p>
                 <p className="mt-1">Die Stellen werden gerade aktualisiert. Bis dahin bleiben die zuletzt geprüften realen Inserate sichtbar.</p>
               </div>
             )}
@@ -883,7 +909,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                                 </Badge>
                                 <span className="text-xs text-slate-600 flex items-center gap-1 whitespace-nowrap">
                                   <CalendarDays className="h-3 w-3" />
-                                  {new Date(job.datePosted).toLocaleDateString("de-CH")}
+                                  {formatSwissDate(job.datePosted)}
                                 </span>
                               </div>
                             </div>
