@@ -4,7 +4,6 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { CalendarDays, Clock, MapPin, Wallet } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -21,7 +20,6 @@ import {
 import { searchJobListings } from "@/lib/job-catalog";
 import type { JobListing } from "@/lib/job-types";
 import { estimateSalary, formatSalaryRange } from "@/lib/salary-estimates";
-import { buildJobPostingSchema } from "@/lib/job-schema";
 import { getEditorialContent } from "@/data/editorial/elektrojob";
 import { EditorialIntro } from "@/app/_components/editorial-intro";
 
@@ -31,17 +29,6 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch"
 
 interface LandingPageProps {
   params: Promise<{ role: string; canton: string }>;
-}
-
-function buildJobHref(job: JobListing, role: string, canton: string): string {
-  if (job.source !== "generated") {
-    return `/jobs/${job.id}`;
-  }
-
-  const query = job.searchContext?.query ?? role;
-  const location = job.searchContext?.location ?? canton;
-  const params = new URLSearchParams({ q: query, loc: location });
-  return `/jobs/${job.id}?${params.toString()}`;
 }
 
 function buildBreadcrumbSchema(config: LandingPageConfig) {
@@ -171,9 +158,6 @@ export default async function LandingRolePage({ params }: LandingPageProps) {
       <JsonLd data={buildBreadcrumbSchema(config)} />
       <JsonLd data={buildItemListSchema(result.jobs, config)} />
       {faqSchema && <JsonLd data={faqSchema} />}
-      {result.jobs.slice(0, 20).map((job) => (
-        <JsonLd key={`jp-${job.source}-${job.id}`} data={buildJobPostingSchema(job)} />
-      ))}
 
       {/* Header */}
       <header className="border-b header-blur sticky top-0 z-30">
@@ -228,31 +212,19 @@ export default async function LandingRolePage({ params }: LandingPageProps) {
         <section aria-label="Stellenangebote" className="space-y-3 sm:space-y-4">
           {result.jobs.map((job) => (
             <article key={`${job.source}-${job.id}`}>
-              <Link href={buildJobHref(job, config.role, config.canton)} className="block group">
+              <Link href={`/jobs/${job.id}`} className="block group">
                 <Card className="job-card hover:border-primary/50">
                   <CardContent className="p-4 sm:p-5">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-primary line-clamp-1">
-                        {job.title}
-                      </h3>
-                      <Badge
-                        variant="outline"
-                        className={
-                          job.source === "scraped"
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                            : "border-slate-200 bg-slate-50 text-slate-600"
-                        }
-                      >
-                        {job.source === "scraped" ? "Live" : "Demo"}
-                      </Badge>
-                    </div>
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-primary line-clamp-1 mb-2">
+                      {job.title}
+                    </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-slate-100 rounded-lg border border-slate-200 overflow-hidden">
                       <div className="bg-white px-2.5 py-2 flex flex-col gap-0.5">
                         <span className="flex items-center gap-1 text-sm font-semibold text-slate-900 truncate">
                           <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
                           {job.location}
                         </span>
-                        <span className="text-[11px] text-slate-400 uppercase tracking-wide">Ort</span>
+                        <span className="text-[11px] text-slate-600 uppercase tracking-wide">Ort</span>
                       </div>
                       <div className="bg-white px-2.5 py-2 flex flex-col gap-0.5">
                         <span className="flex items-center gap-1 text-sm font-semibold text-slate-900 truncate">
@@ -263,7 +235,7 @@ export default async function LandingRolePage({ params }: LandingPageProps) {
                               return est ? `~${formatSalaryRange(est)}` : "–";
                             })()}
                         </span>
-                        <span className="text-[11px] text-slate-400 uppercase tracking-wide">
+                        <span className="text-[11px] text-slate-600 uppercase tracking-wide">
                           Lohn, CHF/Jahr
                         </span>
                       </div>
@@ -272,14 +244,14 @@ export default async function LandingRolePage({ params }: LandingPageProps) {
                           <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
                           {job.workload}
                         </span>
-                        <span className="text-[11px] text-slate-400 uppercase tracking-wide">Pensum</span>
+                        <span className="text-[11px] text-slate-600 uppercase tracking-wide">Pensum</span>
                       </div>
                       <div className="bg-white px-2.5 py-2 flex flex-col gap-0.5">
                         <span className="flex items-center gap-1 text-sm font-semibold text-slate-900 truncate">
                           <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
                           {job.type}
                         </span>
-                        <span className="text-[11px] text-slate-400 uppercase tracking-wide">
+                        <span className="text-[11px] text-slate-600 uppercase tracking-wide">
                           Anstellungsart
                         </span>
                       </div>
@@ -303,15 +275,15 @@ export default async function LandingRolePage({ params }: LandingPageProps) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Jahreslohn</p>
+              <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Jahreslohn</p>
               <p className="text-sm font-semibold text-slate-900">{config.salaryRange}</p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Voraussetzungen</p>
+              <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Voraussetzungen</p>
               <p className="text-sm text-slate-700">{config.requirements.split(",")[0]}</p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-xs text-slate-400 uppercase tracking-wide mb-1">Karriere</p>
+              <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Karriere</p>
               <p className="text-sm text-slate-700">{config.career.split(".")[0]}.</p>
             </div>
           </div>

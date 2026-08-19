@@ -6,7 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import {
-  Building2,
   CalendarDays,
   Clock,
   FilterX,
@@ -16,7 +15,6 @@ import {
   RefreshCw,
   Search,
   Wallet,
-  WifiOff,
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,11 +23,8 @@ import { HeaderDropdownMenu } from "@/components/header-dropdown-menu";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { JobFacets, JobListing, JobSort, RemoteFilter } from "@/lib/job-types";
-import { AnimateOnScroll } from "@/components/animate-on-scroll";
-import { StaggeredList } from "@/components/staggered-list";
 import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import { trackEvent } from "@/lib/analytics";
-import { calculateDistanceKm, getRegionRadius, resolveLocationCoordinate, type Coordinate } from "@/lib/location-distance";
 import { estimateSalary, formatSalaryRange } from "@/lib/salary-estimates";
 
 const MobileFilterBar = dynamic(() => import("./mobile-filter-bar"), {
@@ -87,11 +82,21 @@ const EMPLOYER_MENU_ITEMS = [
 ];
 
 const PAGE_SIZE = 12;
-const INITIAL_MOBILE_PAGE_SIZE = 5;
-const MOBILE_LOAD_MORE_SIZE = 12;
-const FALLBACK_GENERATED_COUNT = 150;
 const SCRAPE_STALE_HOURS = 72;
 const DEFAULT_RADIUS_KM = "25";
+const REGION_RADIUS_KM: Record<string, string> = {
+  "grossraum zürich": "50",
+  "grossraum zurich": "50",
+  zentralschweiz: "50",
+  nordwestschweiz: "50",
+  ostschweiz: "80",
+  mittelland: "50",
+  "westschweiz / romandie": "80",
+  westschweiz: "80",
+  romandie: "80",
+  tessin: "50",
+  wallis: "50",
+};
 const COUNTRY_WIDE_LOCATIONS = new Set([
   "schweiz",
   "ganze schweiz",
@@ -128,7 +133,6 @@ interface JobsApiResponse {
   limit: number;
   facets: JobFacets;
   scrapedAt: string | null;
-  fallbackUsed: boolean;
 }
 
 function normalize(value: string): string {
@@ -148,156 +152,8 @@ function normalizeLocationFilter(value: string): string {
   return trimmed;
 }
 
-function parseRadiusKm(value: string): number | null {
-  if (!value || value === "all") {
-    return null;
-  }
-
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return null;
-  }
-
-  return parsed;
-}
-
-function getCoordinate(cache: Map<string, Coordinate | null>, value: string): Coordinate | null {
-  const key = normalize(value);
-  if (!key) {
-    return null;
-  }
-
-  if (cache.has(key)) {
-    return cache.get(key) ?? null;
-  }
-
-  const coordinate = resolveLocationCoordinate(value);
-  cache.set(key, coordinate);
-  return coordinate;
-}
-
-function matchesLocationWithRadius(
-  jobLocation: string,
-  activeLocation: string,
-  radiusKm: string,
-  coordinateCache: Map<string, Coordinate | null>
-): boolean {
-  if (!activeLocation) {
-    return true;
-  }
-
-  const radius = parseRadiusKm(radiusKm);
-  if (!radius) {
-    return matchesTextFilter(jobLocation, activeLocation);
-  }
-
-  const originCoordinate = getCoordinate(coordinateCache, activeLocation);
-  if (!originCoordinate) {
-    return matchesTextFilter(jobLocation, activeLocation);
-  }
-
-  const jobCoordinate = getCoordinate(coordinateCache, jobLocation);
-  if (!jobCoordinate) {
-    return matchesTextFilter(jobLocation, activeLocation);
-  }
-
-  return calculateDistanceKm(originCoordinate, jobCoordinate) <= radius;
-}
-
-function matchesTextFilter(value: string, filter: string): boolean {
-  const normalizedFilter = normalize(filter);
-  if (!normalizedFilter || normalizedFilter === "all") {
-    return true;
-  }
-
-  return normalize(value).includes(normalizedFilter);
-}
-
-function matchesRemoteFilter(job: JobListing, remote: RemoteFilter): boolean {
-  if (remote === "any") {
-    return true;
-  }
-  if (remote === "true") {
-    return job.isRemote === true;
-  }
-  return job.isRemote === false;
-}
-
-function matchesPostedWithin(job: JobListing, postedWithinDays: string): boolean {
-  if (!postedWithinDays || postedWithinDays === "all") {
-    return true;
-  }
-
-  const days = Number(postedWithinDays);
-  if (!Number.isFinite(days) || days <= 0) {
-    return true;
-  }
-
-  const postedDate = Date.parse(job.datePosted);
-  if (!Number.isFinite(postedDate)) {
-    return false;
-  }
-
-  const threshold = Date.now() - days * 24 * 60 * 60 * 1000;
-  return postedDate >= threshold;
-}
-
-function sortJobs(jobs: JobListing[], sort: JobSort): JobListing[] {
-  return [...jobs].sort((a, b) => {
-    if (sort === "oldest") {
-      return Date.parse(a.datePosted) - Date.parse(b.datePosted);
-    }
-
-    if (sort === "relevance") {
-      const relevanceDiff = (b.relevanceScore ?? 0) - (a.relevanceScore ?? 0);
-      if (relevanceDiff !== 0) {
-        return relevanceDiff;
-      }
-    }
-
-    return Date.parse(b.datePosted) - Date.parse(a.datePosted);
-  });
-}
-
-function buildFacets(jobs: JobListing[]): JobFacets {
-  const typeMap = new Map<string, number>();
-  const workloadMap = new Map<string, number>();
-  const remote = {
-    true: 0,
-    false: 0,
-    unknown: 0,
-  };
-
-  for (const job of jobs) {
-    const type = job.type.trim();
-    const workload = job.workload.trim();
-
-    if (type) {
-      typeMap.set(type, (typeMap.get(type) ?? 0) + 1);
-    }
-    if (workload) {
-      workloadMap.set(workload, (workloadMap.get(workload) ?? 0) + 1);
-    }
-
-    if (job.isRemote === true) {
-      remote.true += 1;
-    } else if (job.isRemote === false) {
-      remote.false += 1;
-    } else {
-      remote.unknown += 1;
-    }
-  }
-
-  const toFacetArray = (map: Map<string, number>) =>
-    [...map.entries()]
-      .map(([value, count]) => ({ value, count }))
-      .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "de-CH"));
-
-  return {
-    types: toFacetArray(typeMap),
-    workloads: toFacetArray(workloadMap),
-    remote,
-  };
+function getRegionRadius(location: string): string | null {
+  return REGION_RADIUS_KM[normalize(location)] ?? null;
 }
 
 function isScrapedStale(scrapedAt: string | null): boolean {
@@ -313,14 +169,6 @@ function isScrapedStale(scrapedAt: string | null): boolean {
   return Date.now() - parsed > SCRAPE_STALE_HOURS * 60 * 60 * 1000;
 }
 
-function isGeneratedJob(job: JobListing): boolean {
-  return job.source === "generated";
-}
-
-function isScrapedJob(job: JobListing): boolean {
-  return job.source === "scraped";
-}
-
 interface InitialJobData {
   jobs: JobListing[];
   total: number;
@@ -328,7 +176,6 @@ interface InitialJobData {
   limit: number;
   facets: JobFacets;
   scrapedAt: string | null;
-  fallbackUsed: boolean;
 }
 
 interface HomepageSearchProps {
@@ -347,8 +194,8 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
   const [totalJobs, setTotalJobs] = useState(initialData?.total ?? 0);
   const [facets, setFacets] = useState<JobFacets>(initialData?.facets ?? DEFAULT_FACETS);
   const [scrapedAt, setScrapedAt] = useState<string | null>(initialData?.scrapedAt ?? null);
-  const [fallbackUsed, setFallbackUsed] = useState(initialData?.fallbackUsed ?? false);
   const [searchKey, setSearchKey] = useState(0);
+  const [searchRevision, setSearchRevision] = useState(0);
 
   const [typeFilter, setTypeFilter] = useState("all");
   const [workloadFilter, setWorkloadFilter] = useState("all");
@@ -358,14 +205,17 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
   const [sortBy, setSortBy] = useState<JobSort>("newest");
 
   const [isLoading, setIsLoading] = useState(!initialData);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const hasTrackedFilterChange = useRef(false);
-  const coordinateCacheRef = useRef<Map<string, Coordinate | null>>(new Map());
   const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
-  const isMobileRef = useRef(false);
+  const hasVisibleJobsRef = useRef(Boolean(initialData?.jobs.length));
+  const searchAbortRef = useRef<AbortController | null>(null);
+  const searchRequestRef = useRef(0);
+  const loadMoreInFlightRef = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
 
   const [plzSuggestions, setPlzSuggestions] = useState<string[]>([]);
@@ -424,11 +274,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
-    const update = () => {
-      const mobile = mq.matches;
-      isMobileRef.current = mobile;
-      setIsMobile(mobile);
-    };
+    const update = () => setIsMobile(mq.matches);
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
@@ -436,102 +282,95 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
 
   const runSearch = useCallback(
     async (append: boolean, offsetOverride = 0) => {
+      if (append && loadMoreInFlightRef.current) {
+        return;
+      }
+
       const nextOffset = append ? offsetOverride : 0;
       const scopedLocation = normalizeLocationFilter(activeLocation);
-      const mobile = isMobileRef.current;
-      const limit = append
-        ? (mobile ? MOBILE_LOAD_MORE_SIZE : PAGE_SIZE)
-        : (mobile ? INITIAL_MOBILE_PAGE_SIZE : PAGE_SIZE);
+      const requestId = searchRequestRef.current + 1;
+      searchRequestRef.current = requestId;
+      searchAbortRef.current?.abort();
+      const controller = new AbortController();
+      searchAbortRef.current = controller;
 
       setErrorMessage(null);
       if (append) {
+        loadMoreInFlightRef.current = true;
         setIsLoadingMore(true);
+      } else if (hasVisibleJobsRef.current) {
+        setIsRefreshing(true);
       } else {
         setIsLoading(true);
       }
 
       try {
-        if (FEATURE_FLAGS.apiSearch) {
-          const params = new URLSearchParams({
-            q: activeQuery,
-            loc: scopedLocation,
-            limit: String(limit),
-            offset: String(nextOffset),
-            sort: sortBy,
-            remote: remoteFilter,
-          });
+        const params = new URLSearchParams({
+          q: activeQuery,
+          loc: scopedLocation,
+          limit: String(PAGE_SIZE),
+          offset: String(nextOffset),
+          sort: sortBy,
+          remote: remoteFilter,
+        });
 
-          if (typeFilter !== "all") {
-            params.set("type", typeFilter);
-          }
-          if (workloadFilter !== "all") {
-            params.set("workload", workloadFilter);
-          }
-          if (postedWithinDays !== "all") {
-            params.set("postedWithinDays", postedWithinDays);
-          }
-          if (scopedLocation && radiusKm !== "all") {
-            params.set("radiusKm", radiusKm);
-          }
-
-          const response = await fetch(`/api/jobs?${params.toString()}`);
-          if (!response.ok) {
-            throw new Error("Die Jobs konnten nicht geladen werden.");
-          }
-
-          const data = (await response.json()) as JobsApiResponse;
-          setJobs((prev) => (append ? [...prev, ...data.jobs] : data.jobs));
-          setTotalJobs(data.total);
-          setFacets(data.facets ?? DEFAULT_FACETS);
-          setScrapedAt(data.scrapedAt ?? null);
-          setFallbackUsed(Boolean(data.fallbackUsed));
-        } else {
-          const { normalizeSearchInput, generateFakeJobs } = await import("@/lib/job-generator");
-          const context = normalizeSearchInput(activeQuery, scopedLocation);
-          const fallbackJobs = generateFakeJobs({
-            query: context.query,
-            location: context.location,
-            count: FALLBACK_GENERATED_COUNT,
-          }).map((job) => ({ ...job, source: "generated", relevanceScore: 1 }) as JobListing);
-
-          const queryScoped = fallbackJobs.filter(
-            (job) =>
-              matchesTextFilter(job.title, activeQuery) &&
-              matchesLocationWithRadius(
-                job.location,
-                scopedLocation,
-                radiusKm,
-                coordinateCacheRef.current
-              )
-          );
-          const clientFacets = buildFacets(queryScoped);
-
-          const filtered = queryScoped.filter(
-            (job) =>
-              matchesTextFilter(job.type, typeFilter) &&
-              matchesTextFilter(job.workload, workloadFilter) &&
-              matchesRemoteFilter(job, remoteFilter) &&
-              matchesPostedWithin(job, postedWithinDays)
-          );
-
-          const sorted = sortJobs(filtered, sortBy);
-          const paged = sorted.slice(nextOffset, nextOffset + limit);
-
-          setJobs((prev) => (append ? [...prev, ...paged] : paged));
-          setTotalJobs(sorted.length);
-          setFacets(clientFacets);
-          setScrapedAt(null);
-          setFallbackUsed(true);
+        if (typeFilter !== "all") {
+          params.set("type", typeFilter);
         }
+        if (workloadFilter !== "all") {
+          params.set("workload", workloadFilter);
+        }
+        if (postedWithinDays !== "all") {
+          params.set("postedWithinDays", postedWithinDays);
+        }
+        if (scopedLocation && radiusKm !== "all") {
+          params.set("radiusKm", radiusKm);
+        }
+
+        const response = await fetch("/api/jobs?" + params.toString(), {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error("Die Jobs konnten nicht geladen werden.");
+        }
+
+        const data = (await response.json()) as JobsApiResponse;
+        if (requestId !== searchRequestRef.current) {
+          return;
+        }
+
+        setJobs((previousJobs) => {
+          if (!append) {
+            hasVisibleJobsRef.current = data.jobs.length > 0;
+            return data.jobs;
+          }
+
+          const existingIds = new Set(previousJobs.map((job) => job.id));
+          const nextJobs = [
+            ...previousJobs,
+            ...data.jobs.filter((job) => !existingIds.has(job.id)),
+          ];
+          hasVisibleJobsRef.current = nextJobs.length > 0;
+          return nextJobs;
+        });
+        setTotalJobs(data.total);
+        setFacets(data.facets ?? DEFAULT_FACETS);
+        setScrapedAt(data.scrapedAt ?? null);
 
         if (!append) {
-          setSearchKey((prev) => prev + 1);
+          setSearchKey((previous) => previous + 1);
         }
       } catch (error) {
-        setErrorMessage(error instanceof Error ? error.message : "Unbekannter Fehler");
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          setErrorMessage(error instanceof Error ? error.message : "Unbekannter Fehler");
+        }
       } finally {
-        setIsLoading(false);
-        setIsLoadingMore(false);
+        if (requestId === searchRequestRef.current) {
+          setIsLoading(false);
+          setIsRefreshing(false);
+          setIsLoadingMore(false);
+          loadMoreInFlightRef.current = false;
+        }
       }
     },
     [
@@ -547,6 +386,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
   );
 
   const urlParamsApplied = useRef(false);
+  const skipInitialSearch = useRef(Boolean(initialData?.jobs.length));
 
   useEffect(() => {
     if (!urlParamsApplied.current) {
@@ -557,6 +397,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
       const urlRadiusKm = params.get("radiusKm") ?? "";
 
       if (urlQuery || urlLocation || urlRadiusKm) {
+        skipInitialSearch.current = false;
         setQuery(urlQuery);
         setLocation(urlLocation);
         setActiveQuery(urlQuery);
@@ -568,8 +409,16 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
         return;
       }
     }
+
+    if (skipInitialSearch.current) {
+      skipInitialSearch.current = false;
+      return;
+    }
+
     void runSearch(false);
-  }, [runSearch]);
+  }, [runSearch, searchRevision]);
+
+  useEffect(() => () => searchAbortRef.current?.abort(), []);
 
   useEffect(() => {
     if (!hasTrackedFilterChange.current) {
@@ -595,6 +444,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
     setHasSearched(true);
     setActiveQuery(normalizedQuery);
     setActiveLocation(normalizedLocation);
+    setSearchRevision((revision) => revision + 1);
     trackEvent("search_submit", {
       query: normalizedQuery,
       location: normalizedLocation,
@@ -622,7 +472,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
     return map;
   }, [jobs]);
 
-  const staleData = !fallbackUsed && isScrapedStale(scrapedAt);
+  const staleData = isScrapedStale(scrapedAt);
   const normalizedLocationDraft = normalizeLocationFilter(location);
   const normalizedActiveLocation = normalizeLocationFilter(activeLocation);
   const hasLocationDraft = Boolean(normalizedLocationDraft);
@@ -675,8 +525,8 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
     "h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/30";
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b header-blur sticky top-0 z-30 animate-header">
+    <div className="min-h-screen flex flex-col overflow-x-clip">
+      <header className="border-b header-blur sticky top-0 z-30">
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center shrink-0" onClick={resetToHome}>
             <Image src="/logo.svg" alt="elektrojob.ch — Elektrojobs in der Schweiz" width={142} height={29} className="h-7 sm:h-8 w-auto" priority />
@@ -708,23 +558,23 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
             : "pt-10 sm:pt-14 md:pt-20 pb-5 sm:pb-7 md:pb-9"
             }`}
         >
-          <div className="container mx-auto px-4 sm:px-6 text-center">
-            <h1 className="animate-hero-title text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-4 sm:mb-6 tracking-tight leading-tight">
-              <span className="text-primary">Elektriker</span> Schweiz
-              <span className="block text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-700 mt-2 sm:mt-4">Alle offenen Elektriker Jobs</span>
+          <div className="container mx-auto px-4 sm:px-6 text-left sm:text-center">
+            <h1 className="text-[clamp(2rem,8vw,4rem)] font-black text-slate-900 mb-3 sm:mb-5 tracking-[-0.04em] leading-[1.02] break-words">
+              <span className="text-amber-700">Elektriker Jobs</span>
+              <span className="block text-[0.72em] font-extrabold text-slate-700 mt-1.5 sm:mt-3">in der ganzen Schweiz</span>
             </h1>
-            <p className="animate-hero-subtitle text-base sm:text-lg text-slate-600 mb-8 sm:mb-10 max-w-2xl mx-auto px-1">
-              Stellen für Elektriker, Elektroinstallateure, Montage-Elektriker und Elektroplaner — live in der ganzen Schweiz. Smarte Filter nach Beruf, Ort und Pensum.
+            <p className="text-sm sm:text-lg text-slate-600 mb-6 sm:mb-8 max-w-2xl sm:mx-auto">
+              Reale Stellen für Elektroinstallateure, Montage-Elektriker, Automatiker und Elektroplaner. Schnell filtern nach Beruf, Ort und Pensum.
             </p>
 
             <form
-              className="animate-hero-search max-w-4xl mx-auto relative z-30"
+              className="max-w-4xl mx-auto relative z-30"
               onSubmit={(event) => {
                 event.preventDefault();
                 handleSearch();
               }}
             >
-              <div className="search-container bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-lg border flex flex-col md:flex-row gap-3">
+              <div className="search-container bg-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-md border flex flex-col lg:flex-row gap-3 min-w-0">
                 <SearchDropdown
                   value={query}
                   onChange={setQuery}
@@ -732,7 +582,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                   placeholder="Welchen Job suchst du?"
                   icon={<Search className="h-5 w-5 text-slate-400" />}
                 />
-                <div className="hidden md:block w-px bg-slate-200 my-2"></div>
+                <div className="hidden lg:block w-px bg-slate-200 my-2"></div>
                 <SearchDropdown
                   value={location}
                   onChange={setLocation}
@@ -740,12 +590,12 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                   placeholder="Wo? (Ort, Kanton oder PLZ)"
                   icon={<MapPin className="h-5 w-5 text-slate-400" />}
                 />
-                <div className={`flex w-full flex-col md:w-auto md:flex-row md:items-center transition-[gap] duration-300 ${hasLocationDraft ? "gap-2 sm:gap-3" : "gap-0"}`}>
+                <div className={`flex w-full min-w-0 flex-col lg:w-auto lg:flex-row lg:items-center ${hasLocationDraft ? "gap-2 sm:gap-3" : "gap-0"}`}>
                   <div
                     aria-hidden={!hasLocationDraft}
-                    className={`relative overflow-hidden transition-all duration-500 ease-out ${hasLocationDraft
-                      ? "max-h-12 opacity-100 translate-y-0 md:max-w-[220px] md:translate-x-0 md:border-l md:border-slate-200 md:pl-3"
-                      : "max-h-0 opacity-0 -translate-y-2 pointer-events-none md:max-w-0 md:translate-x-3 md:pl-0 md:border-l-0"
+                    className={`relative overflow-hidden transition-[max-height,opacity] duration-150 ${hasLocationDraft
+                      ? "max-h-12 opacity-100 lg:max-w-[220px] lg:border-l lg:border-slate-200 lg:pl-3"
+                      : "max-h-0 opacity-0 pointer-events-none lg:max-w-0 lg:pl-0 lg:border-l-0"
                       }`}
                   >
                     <label htmlFor="radius-km" className="sr-only">
@@ -754,7 +604,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                     <LocateFixed className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <select
                       id="radius-km"
-                      className="h-12 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 md:min-w-[200px] md:w-auto md:border-none md:bg-transparent md:shadow-none md:focus:ring-0"
+                      className="h-12 w-full rounded-md border border-slate-200 bg-white pl-9 pr-3 text-sm font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 lg:min-w-[190px] lg:w-auto lg:border-none lg:bg-transparent lg:shadow-none lg:focus:ring-0"
                       value={radiusKm}
                       onChange={(event) => { trigger("selection"); setRadiusKm(event.target.value); }}
                       disabled={!hasLocationDraft}
@@ -769,10 +619,10 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                   <Button
                     type="submit"
                     size="lg"
-                    disabled={isLoading}
-                    className="h-12 px-6 sm:px-8 text-base font-semibold rounded-xl btn-interactive shadow-md shadow-primary/25 w-full md:w-auto transition-all duration-300"
+                    disabled={isLoading || isRefreshing}
+                    className="h-12 px-6 sm:px-8 text-base font-semibold rounded-xl btn-interactive shadow-md shadow-primary/25 w-full lg:w-auto"
                   >
-                    {isLoading ? (
+                    {isLoading || isRefreshing ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Lädt...
@@ -793,23 +643,23 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
             }`}
         >
           <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
-            <AnimateOnScroll className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-                  {hasSearched ? "Suchergebnisse" : "Aktuelle Elektrojobs (Vollzeit/Teilzeit Pensum)"}
+                  {hasSearched ? "Suchergebnisse" : "Aktuelle Elektrojobs"}
                 </h2>
                 {hasActiveLocation && (
                   <p className="text-xs text-slate-500 mt-1">
                     Suchradius: {radiusKm === "all" ? "Beliebig" : `${radiusKm} km`}
                   </p>
                 )}
-                {scrapedAt && !fallbackUsed && (
+                {scrapedAt && (
                   <p className="text-xs text-slate-500 mt-1">
                     Datenstand: {new Date(scrapedAt).toLocaleString("de-CH")}
                   </p>
                 )}
               </div>
-              {!isLoading && (
+              {totalJobs > 0 && (
                 <span className="text-sm text-slate-500">
                   <span key={searchKey} className="count-animate">
                     {visibleJobs} von {totalJobs}
@@ -817,9 +667,9 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                   Stellen
                 </span>
               )}
-            </AnimateOnScroll>
+            </div>
 
-            <AnimateOnScroll className="hidden md:grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+            <div className="hidden md:grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
               <div>
                 <label htmlFor="filter-type" className="sr-only">Vertragsart</label>
                 <select
@@ -896,33 +746,30 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                   <option value="oldest">Älteste zuerst</option>
                 </select>
               </div>
-            </AnimateOnScroll>
+            </div>
 
-            {fallbackUsed && (
-              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                <p className="font-semibold flex items-center gap-2">
-                  <WifiOff className="h-4 w-4" />
-                  Live-Daten nicht verfügbar
-                </p>
-                <p className="mt-1">Aktuell zeigen wir hochwertige Demo-Stellen, bis neue Scraping-Daten bereit sind.</p>
+            {!isLoading && staleData && (
+              <div className="mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+                <p className="font-semibold">Datenstand: {scrapedAt ? new Date(scrapedAt).toLocaleString("de-CH") : "unbekannt"}</p>
+                <p className="mt-1">Die Stellen werden gerade aktualisiert. Bis dahin bleiben die zuletzt geprüften realen Inserate sichtbar.</p>
               </div>
             )}
 
-            {!isLoading && !fallbackUsed && staleData && (
-              <div className="mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
-                <p className="font-semibold">Datenstand: {scrapedAt ? new Date(scrapedAt).toLocaleString("de-CH") : "unbekannt"}</p>
-                <p className="mt-1">Die Live-Stellen wurden länger nicht aktualisiert. Wir empfehlen eine neue Suche in einigen Stunden.</p>
+            {isRefreshing && (
+              <div className="mb-3 flex items-center gap-2 text-sm text-slate-500" role="status" aria-live="polite">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Ergebnisse werden aktualisiert
               </div>
             )}
 
             {errorMessage && (
-              <Card className="mb-4 border-red-200">
+              <Card className="mb-4 border-red-200 py-0 gap-0">
                 <CardContent className="p-4 flex items-start justify-between gap-4">
                   <div>
                     <p className="font-semibold text-red-700">Jobs konnten nicht geladen werden</p>
                     <p className="text-sm text-slate-600 mt-1">{errorMessage}</p>
                   </div>
-                  <Button variant="outline" onClick={() => void runSearch(false)}>
+                  <Button variant="outline" onClick={() => setSearchRevision((revision) => revision + 1)}>
                     <RefreshCw className="h-4 w-4 mr-1" />
                     Erneut laden
                   </Button>
@@ -942,7 +789,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
             )}
 
             {!isLoading && !errorMessage && jobs.length === 0 && (
-              <Card>
+              <Card className="py-0 gap-0">
                 <CardContent className="p-6 text-center">
                   <p className="font-semibold text-slate-900">Keine passenden Jobs gefunden</p>
                   <p className="text-sm text-slate-500 mt-1">Passe deine Suchbegriffe oder Filter an.</p>
@@ -954,24 +801,13 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
               </Card>
             )}
 
-            {!isLoading && !errorMessage && jobs.length > 0 && (
+            {jobs.length > 0 && (
               <>
-                <StaggeredList className="space-y-3 sm:space-y-4" baseDelayMs={0} staggerMs={30} triggerKey={searchKey}>
-                  {jobs.map((job, index) => {
-                    const href = isGeneratedJob(job)
-                      ? {
-                        pathname: `/jobs/${job.id}`,
-                        query: {
-                          q: job.searchContext?.query ?? activeQuery,
-                          loc: job.searchContext?.location ?? activeLocation,
-                        },
-                      }
-                      : `/jobs/${job.id}`;
-
-                    return (
+                <div className="space-y-3 sm:space-y-4">
+                  {jobs.map((job, index) => (
                       <Link
-                        key={`${job.source}-${job.id}-${index}`}
-                        href={href}
+                        key={job.id}
+                        href={`/jobs/${job.id}`}
                         className="block group"
                         onClick={() => {
                           trigger("light");
@@ -982,25 +818,18 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                           });
                         }}
                       >
-                        <Card className="job-card hover:border-primary/50 active:border-primary/40">
-                          <CardContent className="p-4 sm:p-6">
+                        <Card className="job-card py-0 gap-0 hover:border-primary/50 active:border-primary/40">
+                          <CardContent className="p-4 sm:p-5">
                             {/* Title row */}
-                            <div className="flex flex-wrap items-center gap-2 mb-3">
-                              <h3 className="text-base sm:text-xl font-bold text-slate-900 group-hover:text-primary transition-colors duration-200 break-words">
+                            <div className="flex min-w-0 flex-wrap items-center gap-2 mb-3">
+                              <h3 className="basis-full min-w-0 text-base sm:text-xl font-bold text-slate-900 group-hover:text-primary transition-colors duration-200 [overflow-wrap:anywhere]">
                                 {job.title}
                               </h3>
-                              <Badge
-                                variant="outline"
-                                className={isScrapedJob(job) ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}
-                              >
-                                <Building2 className="h-3 w-3" />
-                                {isScrapedJob(job) ? "Live" : "Demo"}
-                              </Badge>
                               {job.isNew && (
-                                <Badge className="bg-accent text-slate-900 hover:bg-accent/90 badge-pulse-new">Neu</Badge>
+                                <Badge className="bg-accent text-slate-900 hover:bg-accent/90">Neu</Badge>
                               )}
                               {job.isUrgent && (
-                                <Badge variant="destructive" className="badge-pulse-urgent">Dringend</Badge>
+                                <Badge variant="destructive">Dringend</Badge>
                               )}
                               {job.isRemote === true && (
                                 <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-700">
@@ -1016,28 +845,28 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                                       <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
                                       {job.location}
                                     </span>
-                                    <span className="text-[11px] text-slate-400 uppercase tracking-wide">Ort</span>
+                                    <span className="text-[11px] text-slate-600 uppercase tracking-wide">Ort</span>
                                   </div>
                                   <div className="bg-white px-3 py-2.5 flex flex-col gap-0.5">
-                                    <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 truncate">
+                                    <span className="flex items-center gap-1.5 text-[13px] sm:text-sm font-semibold tabular-nums text-slate-900 truncate">
                                       <Wallet className="h-3.5 w-3.5 text-primary shrink-0" />
                                       {salaryMap.get(`${job.source}-${job.id}`) ?? "–"}
                                     </span>
-                                    <span className="text-[11px] text-slate-400 uppercase tracking-wide">Lohn, CHF/Jahr</span>
+                                    <span className="text-[11px] text-slate-600 uppercase tracking-wide">Lohn, CHF/Jahr</span>
                                   </div>
                                   <div className="bg-white px-3 py-2.5 flex flex-col gap-0.5">
                                     <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 truncate">
                                       <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
                                       {job.workload}
                                     </span>
-                                    <span className="text-[11px] text-slate-400 uppercase tracking-wide">Pensum</span>
+                                    <span className="text-[11px] text-slate-600 uppercase tracking-wide">Pensum</span>
                                   </div>
                                   <div className="bg-white px-3 py-2.5 flex flex-col gap-0.5">
                                     <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 truncate">
                                       <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
                                       {job.type}
                                     </span>
-                                    <span className="text-[11px] text-slate-400 uppercase tracking-wide">Anstellungsart</span>
+                                    <span className="text-[11px] text-slate-600 uppercase tracking-wide">Anstellungsart</span>
                                   </div>
                                 </div>
 
@@ -1047,12 +876,12 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                               <div className="flex items-center gap-3 shrink-0">
                                 <Badge
                                   variant="secondary"
-                                  className="bg-primary/10 text-primary hover:bg-primary/20 font-bold transition-colors duration-200"
+                                  className="bg-primary/10 text-amber-800 hover:bg-primary/20 font-bold transition-colors duration-200"
                                 >
                                   <Zap className="h-3 w-3 mr-1 fill-current" />
                                   Bewerben
                                 </Badge>
-                                <span className="text-xs text-slate-400 flex items-center gap-1 whitespace-nowrap">
+                                <span className="text-xs text-slate-600 flex items-center gap-1 whitespace-nowrap">
                                   <CalendarDays className="h-3 w-3" />
                                   {new Date(job.datePosted).toLocaleDateString("de-CH")}
                                 </span>
@@ -1061,9 +890,8 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                           </CardContent>
                         </Card>
                       </Link>
-                    );
-                  })}
-                </StaggeredList>
+                  ))}
+                </div>
 
                 {canLoadMore && isMobile && (
                   <div className="mt-6 flex flex-col items-center gap-2">
@@ -1082,7 +910,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                 )}
 
                 {canLoadMore && (
-                  <AnimateOnScroll className="mt-10 text-center hidden md:block" delay={120}>
+                  <div className="mt-10 text-center hidden md:block">
                     <Button
                       onClick={handleLoadMore}
                       variant="outline"
@@ -1099,7 +927,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                         "Weitere Jobs laden"
                       )}
                     </Button>
-                  </AnimateOnScroll>
+                  </div>
                 )}
               </>
             )}

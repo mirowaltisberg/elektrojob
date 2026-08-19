@@ -51,7 +51,7 @@ export function HeaderDropdownMenu({
         className="text-sm px-2 sm:px-4 btn-interactive"
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        aria-controls={menuId}
+        aria-controls={isOpen ? menuId : undefined}
         onClick={() => setIsOpen((prev) => !prev)}
         onKeyDown={(event) => {
           if (event.key === "Escape") {

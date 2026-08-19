@@ -1,8 +1,9 @@
 import fs from "fs";
 import path from "path";
-import { supabase } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase";
 
 const TRADE = "elektro";
+const RUNTIME_MAX_AGE_DAYS = 45;
 
 export interface ScrapedJob {
   id: string;
@@ -42,19 +43,34 @@ interface DbRow {
   type: string;
   workload: string;
   description: string;
-  full_description: string;
-  responsibilities: string[];
-  requirements: string[];
-  benefits: string[];
+  full_description?: string;
+  responsibilities?: string[];
+  requirements?: string[];
+  benefits?: string[];
   date_posted: string | null;
   is_new: boolean;
   is_urgent: boolean;
   salary: string;
-  job_url: string;
-  source: string;
+  job_url?: string;
+  source?: string;
   is_remote: boolean;
-  company_url: string;
+  company_url?: string;
 }
+
+const PUBLICATION_SELECT = [
+  "id",
+  "title",
+  "company",
+  "location",
+  "type",
+  "workload",
+  "description",
+  "date_posted",
+  "is_new",
+  "is_urgent",
+  "salary",
+  "is_remote",
+].join(",");
 
 function mapRowToScrapedJob(row: DbRow): ScrapedJob {
   return {
@@ -65,7 +81,7 @@ function mapRowToScrapedJob(row: DbRow): ScrapedJob {
     type: row.type,
     workload: row.workload,
     description: row.description,
-    fullDescription: row.full_description,
+    fullDescription: row.full_description ?? "",
     responsibilities: row.responsibilities ?? [],
     requirements: row.requirements ?? [],
     benefits: row.benefits ?? [],
@@ -73,11 +89,22 @@ function mapRowToScrapedJob(row: DbRow): ScrapedJob {
     isNew: row.is_new,
     isUrgent: row.is_urgent,
     salary: row.salary,
-    jobUrl: row.job_url,
-    source: row.source,
+    jobUrl: row.job_url ?? "",
+    source: row.source ?? "",
     isRemote: row.is_remote,
-    companyUrl: row.company_url,
+    companyUrl: row.company_url ?? "",
   };
+}
+
+function runtimeCutoffDate(): string {
+  return new Date(Date.now() - RUNTIME_MAX_AGE_DAYS * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+}
+
+function isRuntimeFresh(job: ScrapedJob): boolean {
+  const postedAt = Date.parse(job.datePosted);
+  return Number.isFinite(postedAt) && postedAt >= Date.parse(runtimeCutoffDate());
 }
 
 // --- JSON fallback (resilience if Supabase is unreachable) ---
@@ -86,7 +113,7 @@ function loadFromJson(): ScrapedJob[] {
     const filePath = path.join(process.cwd(), "src", "data", "scraped-jobs.json");
     const raw = fs.readFileSync(filePath, "utf-8");
     const data = JSON.parse(raw) as { jobs: ScrapedJob[] };
-    return data.jobs ?? [];
+    return (data.jobs ?? []).filter(isRuntimeFresh);
   } catch {
     return [];
   }
@@ -105,14 +132,16 @@ export async function loadScrapedJobs(): Promise<ScrapedJob[]> {
   }
 
   try {
+    const supabase = createAdminClient();
     const allRows: DbRow[] = [];
     let from = 0;
 
     while (true) {
       const { data, error } = await supabase
         .from("jobs")
-        .select("*")
+        .select(PUBLICATION_SELECT)
         .eq("trade", TRADE)
+        .gte("date_posted", runtimeCutoffDate())
         .order("date_posted", { ascending: false })
         .range(from, from + SUPABASE_PAGE_SIZE - 1);
 
@@ -120,7 +149,7 @@ export async function loadScrapedJobs(): Promise<ScrapedJob[]> {
         break;
       }
 
-      allRows.push(...(data as DbRow[]));
+      allRows.push(...(data as unknown as DbRow[]));
 
       if (data.length < SUPABASE_PAGE_SIZE) {
         break;
@@ -155,15 +184,17 @@ export async function getScrapedJobById(id: string): Promise<ScrapedJob | null> 
   }
 
   try {
+    const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("jobs")
-      .select("*")
+      .select(PUBLICATION_SELECT)
       .eq("id", id)
       .eq("trade", TRADE)
+      .gte("date_posted", runtimeCutoffDate())
       .single();
 
     if (!error && data) {
-      return mapRowToScrapedJob(data as DbRow);
+      return mapRowToScrapedJob(data as unknown as DbRow);
     }
   } catch {
     // fall through to JSON fallback
@@ -182,9 +213,10 @@ export async function getScrapedMeta(): Promise<{ scrapedAt: string; totalJobs: 
   if (cachedMeta && Date.now() - cachedMetaAt < META_CACHE_TTL_MS) return cachedMeta;
 
   try {
+    const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("scrape_metadata")
-      .select("*")
+      .select("scraped_at,total_jobs")
       .eq("id", 1)
       .single();
 

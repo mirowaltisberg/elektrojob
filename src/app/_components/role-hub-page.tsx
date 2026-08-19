@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Wallet } from "lucide-react";
 import type { RoleHubConfig } from "@/lib/role-hubs";
 import { searchJobListings } from "@/lib/job-catalog";
-import { buildJobPostingSchema } from "@/lib/job-schema";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
 
@@ -81,9 +80,6 @@ export async function RoleHubPage({ config }: Props) {
       <JsonLd data={breadcrumbSchema} />
       <JsonLd data={itemListSchema} />
       <JsonLd data={faqSchema} />
-      {result.jobs.slice(0, 10).map((job) => (
-        <JsonLd key={`schema-${job.source}-${job.id}`} data={buildJobPostingSchema(job)} />
-      ))}
 
       <main className="bg-white">
         <section className="bg-primary/5 border-b">
@@ -130,19 +126,12 @@ export async function RoleHubPage({ config }: Props) {
                   <CardContent className="p-4">
                     <h3 className="font-semibold text-slate-900 mb-1 line-clamp-2">
                       <Link
-                        href={
-                          job.source === "generated"
-                            ? `/jobs/${job.id}?q=${encodeURIComponent(config.searchQuery)}`
-                            : `/jobs/${job.id}`
-                        }
+                        href={`/jobs/${job.id}`}
                         className="hover:text-primary"
                       >
                         {job.title}
                       </Link>
                     </h3>
-                    <p className="text-sm text-slate-600 mb-2 line-clamp-1">
-                      {job.company || "Schweizer Elektrobetrieb"}
-                    </p>
                     <div className="flex flex-wrap gap-2 text-xs text-slate-500">
                       <span className="inline-flex items-center gap-1">
                         <MapPin className="h-3 w-3" />

@@ -5,15 +5,9 @@ interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   const { id } = await context.params;
-  const { searchParams } = new URL(request.url);
-
-  const job = await getJobListingById({
-    id,
-    query: searchParams.get("q") ?? "",
-    location: searchParams.get("loc") ?? "",
-  });
+  const job = await getJobListingById({ id });
 
   if (!job) {
     return NextResponse.json({ error: "Job not found" }, { status: 404 });

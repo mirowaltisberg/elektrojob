@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
-  Building2,
   CalendarDays,
   CheckCircle2,
   Clock,
@@ -23,133 +22,16 @@ import { estimateSalary, formatSalaryRange } from "@/lib/salary-estimates";
 
 interface JobDetailsPageProps {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}
-
-function readParam(value: string | string[] | undefined): string {
-  if (Array.isArray(value)) {
-    return value[0] ?? "";
-  }
-
-  return value ?? "";
 }
 
 function getDisplayJobId(job: JobListing): string {
-  if (job.source === "generated") {
-    return job.id.toUpperCase();
-  }
-  if (job.source === "scraped") {
-    const hash = job.id.replace(/^scraped-/, "");
-    return `ELK-${hash.slice(0, 8).toUpperCase()}`;
-  }
-  return `ELK-${job.id.padStart(4, "0")}`;
+  const hash = job.id.replace(/^scraped-(?:elektro-)?/, "");
+  return "ELK-" + hash.slice(0, 8).toUpperCase();
 }
 
 export const revalidate = 3600;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
-
-// SEO-DECISION: Map Swiss-German job type labels to schema.org employmentType values
-function mapEmploymentType(type: string): string | string[] {
-  const lower = type.toLowerCase();
-  if (lower.includes("vollzeit") || lower === "full-time") return "FULL_TIME";
-  if (lower.includes("teilzeit") || lower === "part-time") return "PART_TIME";
-  if (lower.includes("temporär") || lower.includes("temp")) return "TEMPORARY";
-  if (lower.includes("praktikum") || lower.includes("intern")) return "INTERN";
-  if (lower.includes("freelance") || lower.includes("freiberuf")) return "CONTRACTOR";
-  // "Festanstellung", "Unbefristet" → FULL_TIME as default
-  return "FULL_TIME";
-}
-
-// SEO-DECISION: Parse location string "City, Canton" into structured address parts
-function parseSwissLocation(location: string): { locality: string; region: string } {
-  const parts = location.split(",").map((p) => p.trim());
-  return {
-    locality: parts[0] || location,
-    region: parts[1] || "",
-  };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildJobPostingSchema(job: JobListing): Record<string, any> {
-  const { locality, region } = parseSwissLocation(job.location);
-
-  const postedDate = new Date(job.datePosted);
-  const validThrough = new Date(postedDate);
-  validThrough.setDate(validThrough.getDate() + 60);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const schema: Record<string, any> = {
-    "@context": "https://schema.org",
-    "@type": "JobPosting",
-    title: job.title,
-    description: job.fullDescription || job.description,
-    identifier: {
-      "@type": "PropertyValue",
-      name: "elektrojob.ch",
-      value: job.id,
-    },
-    datePosted: job.datePosted,
-    validThrough: validThrough.toISOString().split("T")[0],
-    employmentType: mapEmploymentType(job.type),
-    hiringOrganization: {
-      "@type": "Organization",
-      name: "Arbeitgeber via elektrojob.ch",
-      logo: `${SITE_URL}/logo.png`,
-    },
-    jobLocation: {
-      "@type": "Place",
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: locality,
-        ...(region ? { addressRegion: region } : {}),
-        addressCountry: "CH",
-      },
-    },
-    directApply: false,
-    industry: "Elektroinstallation & Gebäudetechnik",
-    url: `${SITE_URL}/jobs/${job.id}`,
-  };
-
-  if (job.salary) {
-    const numbers = job.salary.match(/[\d']+/g);
-    if (numbers && numbers.length >= 2) {
-      const min = parseInt(numbers[0].replace(/'/g, ""), 10);
-      const max = parseInt(numbers[1].replace(/'/g, ""), 10);
-      if (min > 0 && max > 0) {
-        schema.baseSalary = {
-          "@type": "MonetaryAmount",
-          currency: "CHF",
-          value: { "@type": "QuantitativeValue", minValue: min, maxValue: max, unitText: "YEAR" },
-        };
-      }
-    }
-  } else {
-    const salaryEstimate = estimateSalary(job.title);
-    if (salaryEstimate) {
-      const median = Math.round((salaryEstimate.min + salaryEstimate.max) / 2);
-      schema.estimatedSalary = {
-        "@type": "MonetaryAmountDistribution",
-        name: "base",
-        currency: "CHF",
-        duration: "P1Y",
-        percentile10: salaryEstimate.min,
-        median,
-        percentile90: salaryEstimate.max,
-      };
-    }
-  }
-
-  if (job.isRemote === true) {
-    schema.jobLocationType = "TELECOMMUTE";
-  }
-
-  if (job.workload) {
-    schema.workHours = job.workload;
-  }
-
-  return schema;
-}
 
 function buildJobBreadcrumbSchema(job: JobListing) {
   return {
@@ -178,52 +60,22 @@ function buildJobBreadcrumbSchema(job: JobListing) {
   };
 }
 
-function buildJobHref(job: JobListing, fallbackQuery: string, fallbackLocation: string): string {
-  if (job.source !== "generated") {
-    return `/jobs/${job.id}`;
-  }
-
-  const query = job.searchContext?.query ?? fallbackQuery;
-  const location = job.searchContext?.location ?? fallbackLocation;
-  const params = new URLSearchParams();
-
-  if (query) {
-    params.set("q", query);
-  }
-  if (location) {
-    params.set("loc", location);
-  }
-
-  const queryString = params.toString();
-  return queryString ? `/jobs/${job.id}?${queryString}` : `/jobs/${job.id}`;
-}
-
-const getJobPageData = cache(async ({ params, searchParams }: JobDetailsPageProps): Promise<{
-  job: JobListing | null;
-  query: string;
-  location: string;
-}> => {
+const getJobPageData = cache(async ({ params }: JobDetailsPageProps): Promise<JobListing | null> => {
   const { id } = await params;
-  const resolvedSearchParams = searchParams ? await searchParams : {};
-  const query = readParam(resolvedSearchParams.q);
-  const location = readParam(resolvedSearchParams.loc);
-
-  const job = await getJobListingById({
-    id,
-    query,
-    location,
-  });
-
-  return { job, query, location };
+  return getJobListingById({ id });
 });
 
 export async function generateMetadata(props: JobDetailsPageProps): Promise<Metadata> {
-  const { job } = await getJobPageData(props);
+  const job = await getJobPageData(props);
 
   if (!job) {
     return {
       title: "Stelle nicht gefunden | elektrojob.ch",
       description: "Die gewünschte Stelle konnte nicht gefunden werden.",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
@@ -253,15 +105,7 @@ export async function generateMetadata(props: JobDetailsPageProps): Promise<Meta
 }
 
 /** Async server component — streams in after main content */
-async function SimilarJobsSection({
-  job,
-  query,
-  location,
-}: {
-  job: JobListing;
-  query: string;
-  location: string;
-}) {
+async function SimilarJobsSection({ job }: { job: JobListing }) {
   const similarJobs = await getSimilarJobListings(job, 4);
 
   if (similarJobs.length === 0) {
@@ -275,7 +119,7 @@ async function SimilarJobsSection({
         {similarJobs.map((item) => (
           <Link
             key={`${item.source}-${item.id}`}
-            href={buildJobHref(item, query, location)}
+            href={`/jobs/${item.id}`}
             className="block rounded-lg border border-slate-200 px-3 py-2 hover:border-primary/40 hover:bg-primary/5 transition-colors"
           >
             <p className="text-sm font-semibold text-slate-900 line-clamp-1">{item.title}</p>
@@ -304,19 +148,18 @@ function SimilarJobsSkeleton() {
 }
 
 export default async function JobDetailsPage(props: JobDetailsPageProps) {
-  const { job, query, location } = await getJobPageData(props);
+  const job = await getJobPageData(props);
 
   if (!job) {
     notFound();
   }
 
-  const currentHref = buildJobHref(job, query, location);
+  const currentHref = `/jobs/${job.id}`;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
-      <JsonLd data={buildJobPostingSchema(job)} />
       <JsonLd data={buildJobBreadcrumbSchema(job)} />
-      <header className="border-b sticky top-0 z-30 header-blur animate-header">
+      <header className="border-b sticky top-0 z-30 header-blur">
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center shrink-0">
             <Image src="/logo.svg" alt="elektrojob.ch — Elektrojobs in der Schweiz" width={142} height={29} className="h-7 sm:h-8 w-auto" priority />
@@ -346,20 +189,13 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
               <div className="flex flex-col gap-4 mb-6">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <Badge
-                      variant="outline"
-                      className={job.source === "scraped" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-50 text-slate-600"}
-                    >
-                      <Building2 className="h-3 w-3" />
-                      {job.source === "scraped" ? "Live-Stelle" : "Demo-Stelle"}
-                    </Badge>
                     {job.isRemote === true && (
                       <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-700">
                         Remote
                       </Badge>
                     )}
                   </div>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 mb-3 sm:mb-4 break-words">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 mb-3 sm:mb-4 [overflow-wrap:anywhere]">
                     {job.title}
                   </h1>
                   {/* Structured info grid */}
@@ -369,7 +205,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
                         <MapPin className="h-4 w-4 text-primary shrink-0" />
                         {job.location}
                       </span>
-                      <span className="text-[11px] text-slate-400 uppercase tracking-wide">Ort</span>
+                      <span className="text-[11px] text-slate-600 uppercase tracking-wide">Ort</span>
                     </div>
                     <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
                       <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
@@ -379,26 +215,26 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
                           return est ? `~${formatSalaryRange(est)}` : "–";
                         })()}
                       </span>
-                      <span className="text-[11px] text-slate-400 uppercase tracking-wide">Lohn, CHF/Jahr</span>
+                      <span className="text-[11px] text-slate-600 uppercase tracking-wide">Lohn, CHF/Jahr</span>
                     </div>
                     <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
                       <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
                         <Clock className="h-4 w-4 text-primary shrink-0" />
                         {job.workload}
                       </span>
-                      <span className="text-[11px] text-slate-400 uppercase tracking-wide">Pensum</span>
+                      <span className="text-[11px] text-slate-600 uppercase tracking-wide">Pensum</span>
                     </div>
                     <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
                       <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
                         <CalendarDays className="h-4 w-4 text-primary shrink-0" />
                         {job.type}
                       </span>
-                      <span className="text-[11px] text-slate-400 uppercase tracking-wide">Anstellungsart</span>
+                      <span className="text-[11px] text-slate-600 uppercase tracking-wide">Anstellungsart</span>
                     </div>
                   </div>
                 </div>
 
-                <JobShareActions job={job} />
+                <JobShareActions jobId={job.id} jobTitle={job.title} source={job.source} />
               </div>
 
               <div className="prose prose-slate max-w-none">
@@ -408,7 +244,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
 
                 {job.responsibilities.length > 0 && (
                   <>
-                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Deine Aufgaben</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Typische Aufgaben</h2>
                     <ul className="space-y-2.5 sm:space-y-3 mb-8">
                       {job.responsibilities.map((item, i) => (
                         <li key={i} className="flex items-start gap-2.5 sm:gap-3">
@@ -422,7 +258,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
 
                 {job.requirements.length > 0 && (
                   <>
-                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Dein Profil</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Gesuchtes Profil</h2>
                     <ul className="space-y-2.5 sm:space-y-3 mb-8">
                       {job.requirements.map((item, i) => (
                         <li key={i} className="flex items-start gap-2.5 sm:gap-3">
@@ -452,10 +288,16 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
 
             {/* Similar jobs — streamed in via Suspense, does NOT block main content */}
             <Suspense fallback={<SimilarJobsSkeleton />}>
-              <SimilarJobsSection job={job} query={query} location={location} />
+              <SimilarJobsSection job={job} />
             </Suspense>
 
-            <RecentlyViewedJobs currentJob={job} currentHref={currentHref} />
+            <RecentlyViewedJobs
+              jobId={job.id}
+              jobTitle={job.title}
+              location={job.location}
+              source={job.source}
+              currentHref={currentHref}
+            />
 
             <nav aria-label="Beliebte Stellenangebote" className="bg-white border rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm">
               <h2 className="text-base sm:text-lg font-bold text-slate-900 mb-3">Beliebte Suchseiten</h2>
@@ -482,7 +324,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
                 </p>
               </div>
 
-              <JobPrimaryAction job={job} />
+              <JobPrimaryAction jobId={job.id} jobTitle={job.title} source={job.source} />
 
               <div className="mt-6 pt-6 border-t text-sm text-slate-500 space-y-3">
                 {(() => {
@@ -513,8 +355,8 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
         </div>
       </main>
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 px-4 pt-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] bg-white/95 backdrop-blur-sm border-t shadow-[0_-4px_12px_-2px_rgb(0,0,0,0.08)] z-20">
-        <JobPrimaryAction job={job} />
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 px-4 pt-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] bg-white border-t shadow-[0_-4px_12px_-2px_rgb(0,0,0,0.08)] z-20">
+        <JobPrimaryAction jobId={job.id} jobTitle={job.title} source={job.source} />
       </div>
     </div>
   );

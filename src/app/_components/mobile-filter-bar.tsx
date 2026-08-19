@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { SlidersHorizontal, ArrowUpWideNarrow } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useHaptic } from "@/hooks/use-haptic";
 import type { JobFacets, JobSort, RemoteFilter } from "@/lib/job-types";
 
@@ -62,7 +69,7 @@ export default function MobileFilterBar({
   const [isSortSheetOpen, setIsSortSheetOpen] = useState(false);
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-white/95 backdrop-blur-sm border-t shadow-[0_-4px_12px_-2px_rgb(0,0,0,0.08)] z-20">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-white border-t shadow-[0_-4px_12px_-2px_rgb(0,0,0,0.08)] z-20">
       <div className="grid grid-cols-2 gap-2">
         <Dialog open={isFilterSheetOpen} onOpenChange={setIsFilterSheetOpen}>
           <DialogTrigger asChild>
@@ -74,10 +81,14 @@ export default function MobileFilterBar({
           <DialogContent className="w-[calc(100%-1rem)] max-w-none max-h-[85dvh] overflow-y-auto rounded-2xl p-4 top-auto bottom-2 translate-y-0">
             <DialogHeader>
               <DialogTitle>Filter</DialogTitle>
+              <DialogDescription className="sr-only">
+                Schränke die Stellen nach Vertragsart, Pensum, Arbeitsort und Zeitraum ein.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
               {hasLocationInput && (
                 <select
+                  aria-label="Maximaler Umkreis"
                   className={filterSelectClass}
                   value={radiusKm}
                   onChange={(event) => { trigger("selection"); setRadiusKm(event.target.value); }}
@@ -90,6 +101,7 @@ export default function MobileFilterBar({
                 </select>
               )}
               <select
+                aria-label="Vertragsart"
                 className={filterSelectClass}
                 value={typeFilter}
                 onChange={(event) => { trigger("selection"); setTypeFilter(event.target.value); }}
@@ -102,6 +114,7 @@ export default function MobileFilterBar({
                 ))}
               </select>
               <select
+                aria-label="Pensum"
                 className={filterSelectClass}
                 value={workloadFilter}
                 onChange={(event) => { trigger("selection"); setWorkloadFilter(event.target.value); }}
@@ -114,6 +127,7 @@ export default function MobileFilterBar({
                 ))}
               </select>
               <select
+                aria-label="Remote-Arbeit"
                 className={filterSelectClass}
                 value={remoteFilter}
                 onChange={(event) => { trigger("selection"); setRemoteFilter(event.target.value as RemoteFilter); }}
@@ -123,6 +137,7 @@ export default function MobileFilterBar({
                 <option value="false">Nur vor Ort</option>
               </select>
               <select
+                aria-label="Zeitraum"
                 className={filterSelectClass}
                 value={postedWithinDays}
                 onChange={(event) => { trigger("selection"); setPostedWithinDays(event.target.value); }}
@@ -152,6 +167,9 @@ export default function MobileFilterBar({
           <DialogContent className="w-[calc(100%-1rem)] max-w-none rounded-2xl p-4 top-auto bottom-2 translate-y-0">
             <DialogHeader>
               <DialogTitle>Sortieren nach</DialogTitle>
+              <DialogDescription className="sr-only">
+                Lege die Reihenfolge der angezeigten Stellen fest.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-2 mt-1">
               {[

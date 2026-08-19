@@ -73,7 +73,7 @@ const FAQS = [
   {
     question: "Wie finde ich Elektriker Jobs in meiner Nähe?",
     answer:
-      "Auf elektrojob.ch gibst du in der Suche deinen Wohnort, deine Postleitzahl oder deinen bevorzugten Arbeitsort ein und wählst einen Umkreis-Radius (5, 10, 25 oder 50 km). Wir zeigen dir alle offenen Elektriker Stellen innerhalb dieses Pendelradius — sortiert nach Aktualität oder Relevanz. Über die Kartenansicht siehst du zusätzlich, wo die Arbeitgeber genau sitzen, was bei der Pendelplanung hilft. Wer flexibel mit dem Auto pendelt, fährt typischerweise einen Radius von 30 bis 50 km — wer ÖV nutzt, wählt eher 10 bis 25 km. Die Stellen aktualisieren sich täglich aus über 26'000 Schweizer Inseraten.",
+      "Auf elektrojob.ch gibst du in der Suche deinen Wohnort, deine Postleitzahl oder deinen bevorzugten Arbeitsort ein und wählst einen Umkreis zwischen 5 und 120 Kilometern. Die Trefferliste zeigt dir passende Elektriker Stellen innerhalb dieses Pendelradius und lässt sich nach Relevanz, Aktualität oder Lohn sortieren. Ort und Region sind direkt bei jedem Inserat sichtbar. Wer flexibel mit dem Auto pendelt, sucht häufig in einem Radius von 30 bis 50 Kilometern; für Wege mit dem öffentlichen Verkehr ist je nach Verbindung ein engerer Radius sinnvoll. Mit zusätzlichen Filtern für Pensum, Anstellungsart, Arbeitsmodell und Veröffentlichungsdatum grenzt du die Ergebnisse weiter ein.",
   },
   {
     question: "Welche Region in der Schweiz hat die meisten Elektriker Stellen?",

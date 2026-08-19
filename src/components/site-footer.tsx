@@ -47,7 +47,8 @@ export function SiteFooter() {
             />
             <p className="text-sm leading-relaxed">
               Die spezialisierte Jobbörse für Elektriker in der Schweiz.
-              Finde offene Stellen für Elektriker, Elektroinstallateure und Montage-Elektriker, vergleiche Arbeitgeber und bewirb dich direkt.
+              Finde offene Stellen für Elektriker, Elektroinstallateure und Montage-Elektriker,
+              vergleiche Stellen nach Ort und Pensum und bewirb dich direkt.
             </p>
           </div>
 

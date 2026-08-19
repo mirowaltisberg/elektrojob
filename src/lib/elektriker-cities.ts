@@ -43,7 +43,7 @@ export const ELEKTRIKER_CITIES: ElektrikerCity[] = [
     population: "ca. 175'000",
     region: "Nordwestschweiz",
     intro:
-      "Basel ist Pharma- und Chemiestandort der Schweiz. Roche, Novartis, Syngenta und ihre Zulieferer beschäftigen Servicetechniker, Betriebselektriker und Automatiker mit überdurchschnittlichen Saläre. Der grenznahe Markt zu Frankreich und Deutschland macht trinationale Karrieren attraktiv. Der Hafenausbau und Wohnbauprojekte am Rheinufer sorgen zusätzlich für Aufträge im Installationsbereich.",
+      "Basel ist ein bedeutender Pharma-, Chemie- und Life-Sciences-Standort. Industriebetriebe und ihre Zulieferer beschäftigen Servicetechniker, Betriebselektriker und Automatiker mit überdurchschnittlichen Salären. Der grenznahe Markt zu Frankreich und Deutschland macht trinationale Karrieren attraktiv. Der Hafenausbau und Wohnbauprojekte am Rheinufer sorgen zusätzlich für Aufträge im Installationsbereich.",
     districts: ["Innenstadt", "Kleinbasel", "Gundeldingen", "Bachletten", "St. Johann"],
     commuterTowns: ["Liestal", "Allschwil", "Münchenstein", "Riehen", "Reinach", "Pratteln"],
     salaryBand: "CHF 80'000 – 100'000",
@@ -56,7 +56,7 @@ export const ELEKTRIKER_CITIES: ElektrikerCity[] = [
     population: "ca. 145'000",
     region: "Mittelland",
     intro:
-      "Bern vereint Bundesverwaltung, Energieversorger BKW und ein breites Spektrum an Gewerbe- und Wohnbauprojekten. Sicherheitsanlagen, Brandmeldetechnik und KNX-Steuerungen sind in den öffentlichen Bauten besonders gefragt. Die Lohnniveaus entsprechen dem Schweizer Mittel — gepaart mit hohem Lebensstandard und ausgewogenen Pendelwegen.",
+      "Bern vereint Bundesverwaltung, regionale Energieversorger und ein breites Spektrum an Gewerbe- und Wohnbauprojekten. Sicherheitsanlagen, Brandmeldetechnik und KNX-Steuerungen sind in den öffentlichen Bauten besonders gefragt. Die Lohnniveaus entsprechen dem Schweizer Mittel — gepaart mit hohem Lebensstandard und ausgewogenen Pendelwegen.",
     districts: ["Innenstadt", "Länggasse", "Breitenrain", "Wankdorf", "Bümpliz"],
     commuterTowns: ["Biel", "Thun", "Köniz", "Münsingen", "Burgdorf", "Lyss"],
     salaryBand: "CHF 75'000 – 95'000",
@@ -69,7 +69,7 @@ export const ELEKTRIKER_CITIES: ElektrikerCity[] = [
     population: "ca. 83'000",
     region: "Zentralschweiz",
     intro:
-      "Luzern wächst dynamisch — Tourismus-Infrastruktur (Hotels, Bergbahnen, KKL), Gewerbe in Emmen/Kriens und Wohnbau-Boom in der Seeregion treiben die Nachfrage. Smart-Home und Photovoltaik sind in den Neubauten Standard. Die Nähe zu Zug eröffnet zusätzlich Pendelchancen mit Top-Saläre.",
+      "Luzern wächst dynamisch — Tourismus-Infrastruktur mit Hotels, Bergbahnen und Veranstaltungsbauten, Gewerbe in Emmen/Kriens und der Wohnungsbau in der Seeregion treiben die Nachfrage. Smart-Home und Photovoltaik sind in den Neubauten häufig gefragt. Die Nähe zu Zug eröffnet zusätzliche Pendelchancen mit attraktiven Salären.",
     districts: ["Innenstadt", "Tribschen", "Sentimatt", "Würzenbach", "Maihof"],
     commuterTowns: ["Emmen", "Kriens", "Sursee", "Hochdorf", "Stans", "Zug"],
     salaryBand: "CHF 75'000 – 95'000",
@@ -82,7 +82,7 @@ export const ELEKTRIKER_CITIES: ElektrikerCity[] = [
     population: "ca. 80'000",
     region: "Ostschweiz",
     intro:
-      "St. Gallen ist Industriestandort und Tor zur Ostschweiz. Maschinenindustrie, Lebensmittelverarbeitung (Bühler-Cluster) und ein wachsender Bildungssektor (HSG, Spitäler) beschäftigen Elektriker in stabilen Festanstellungen. Saläre liegen leicht unter dem Schweizer Mittel, dafür sind Mietpreise und Lebenshaltungskosten spürbar tiefer als in Zürich oder Zug.",
+      "St. Gallen ist Industriestandort und Tor zur Ostschweiz. Maschinenindustrie, Lebensmittelverarbeitung sowie ein wachsender Bildungs- und Spitalsektor beschäftigen Elektriker in stabilen Festanstellungen. Saläre liegen leicht unter dem Schweizer Mittel, dafür sind Mietpreise und Lebenshaltungskosten spürbar tiefer als in Zürich oder Zug.",
     districts: ["Innenstadt", "St. Fiden", "Bruggen", "Riethüsli", "Heiligkreuz"],
     commuterTowns: ["Wil", "Rorschach", "Gossau", "Herisau", "Rapperswil", "Buchs SG"],
     salaryBand: "CHF 72'000 – 90'000",

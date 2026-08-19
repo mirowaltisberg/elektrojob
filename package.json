@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "check:public-jobs": "tsx scripts/check-public-jobs.ts",
     "scrape": "scripts/.venv/bin/python scripts/scrape-jobs.py",
     "scrape:quick": "scripts/.venv/bin/python scripts/scrape-jobs.py --quick"
   },
@@ -19,7 +20,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.575.0",
-    "motion": "^12.38.0",
     "next": "16.1.6",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",

@@ -25,11 +25,10 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 interface ApplyModalProps {
   jobId: string;
   jobTitle: string;
-  company: string;
   onOpen?: () => void;
 }
 
-export function ApplyModal({ jobId, jobTitle, company, onOpen }: ApplyModalProps) {
+export function ApplyModal({ jobId, jobTitle, onOpen }: ApplyModalProps) {
   const { trigger } = useHaptic();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -118,7 +117,6 @@ export function ApplyModal({ jobId, jobTitle, company, onOpen }: ApplyModalProps
     try {
       const formData = new FormData();
       formData.append("jobId", jobId);
-      formData.append("jobTitle", jobTitle);
       formData.append("name", name);
       formData.append("email", email);
       formData.append("phone", phone);

@@ -15,15 +15,17 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+const FB_PIXEL_ID = process.env.NEXT_PUBLIC_FB_PIXEL_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "1042 Elektro Jobs Schweiz 2026 | Offene Stellen finden",
+    default: "Elektro Jobs Schweiz 2026 | Stellenangebote & Lohn",
     template: "%s | elektrojob.ch",
   },
   description:
-    "Finde aktuelle Elektro Jobs in der Schweiz. Stellen für Elektroinstallateur EFZ, Montage-Elektriker, Servicetechniker & mehr. Jetzt Lebenslauf einreichen.",
+    "Finde Elektro Jobs und Stellenangebote in der Schweiz: Elektroinstallateur EFZ, Montage-Elektriker, Servicetechniker, Temporär, Festanstellung und Lohninfos.",
   keywords: [
     "Elektrojobs",
     "Elektrojobs Schweiz",
@@ -40,11 +42,18 @@ export const metadata: Metadata = {
     "Bauleiter Elektro",
     "Betriebselektriker",
     "Stellen Elektrobranche Schweiz",
+    "Elektro Job Schweiz",
+    "Elektro Stellen Schweiz",
+    "Elektriker Jobs Schweiz",
+    "Elektroinstallateur Stellenangebote",
+    "Elektroinstallateur Temporär",
+    "Elektroinstallateur Festanstellung",
+    "Elektro Lohn Schweiz",
   ],
   openGraph: {
-    title: "1042 Elektro Jobs Schweiz 2026 | Offene Stellen finden",
+    title: "Elektro Jobs Schweiz 2026 | Stellenangebote & Lohn",
     description:
-      "Finde aktuelle Elektro Jobs in der Schweiz. Stellen für Elektroinstallateur EFZ, Montage-Elektriker, Servicetechniker & mehr. Jetzt Lebenslauf einreichen.",
+      "Finde Elektro Jobs und Stellenangebote in der Schweiz: Elektroinstallateur EFZ, Montage-Elektriker, Servicetechniker, Temporär, Festanstellung und Lohninfos.",
     type: "website",
     url: "/",
     siteName: "elektrojob.ch",
@@ -52,9 +61,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "1042 Elektro Jobs Schweiz 2026 | Offene Stellen finden",
+    title: "Elektro Jobs Schweiz 2026 | Stellenangebote & Lohn",
     description:
-      "Finde aktuelle Elektro Jobs in der Schweiz. Stellen für Elektroinstallateur EFZ, Montage-Elektriker, Servicetechniker & mehr. Jetzt Lebenslauf einreichen.",
+      "Finde Elektro Jobs und Stellenangebote in der Schweiz: Elektroinstallateur EFZ, Montage-Elektriker, Servicetechniker, Temporär, Festanstellung und Lohninfos.",
   },
   alternates: {
     canonical: "/",
@@ -122,7 +131,12 @@ const websiteSchema = {
   url: SITE_URL,
   description:
     "Die spezialisierte Jobbörse für Elektro-Fachkräfte in der Schweiz.",
-  inLanguage: "de",
+  inLanguage: "de-CH",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${SITE_URL}/?q={search_term_string}`,
+    "query-input": "required name=search_term_string",
+  },
 };
 
 export default function RootLayout({
@@ -133,7 +147,7 @@ export default function RootLayout({
   return (
     <html lang="de">
       <head>
-        <link rel="dns-prefetch" href="https://connect.facebook.net" />
+        {FB_PIXEL_ID && <link rel="dns-prefetch" href="https://connect.facebook.net" />}
       </head>
       <body lang="de" className={`${plusJakarta.variable} antialiased font-sans bg-slate-50`}>
         <JsonLd data={organizationSchema} />
@@ -141,20 +155,25 @@ export default function RootLayout({
         <HapticProvider>{children}</HapticProvider>
         <Analytics />
         <SpeedInsights />
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"}`}
-          strategy="worker"
-        />
-        <Script id="gtag-init" strategy="worker">
-          {`
+        {GA_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="lazyOnload"
+            />
+            <Script id="gtag-init" strategy="lazyOnload">
+              {`
             window.dataLayer=window.dataLayer||[];
             function gtag(){dataLayer.push(arguments);}
             gtag('js',new Date());
-            gtag('config','${process.env.NEXT_PUBLIC_GA_ID || "G-0000000000"}');
+            gtag('config','${GA_ID}');
           `}
-        </Script>
-        <Script id="fb-pixel" strategy="worker">
-          {`
+            </Script>
+          </>
+        )}
+        {FB_PIXEL_ID && (
+          <Script id="fb-pixel" strategy="lazyOnload">
+            {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
             n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -163,19 +182,23 @@ export default function RootLayout({
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${process.env.NEXT_PUBLIC_FB_PIXEL_ID || "0000000000000000"}');
+            fbq('init', '${FB_PIXEL_ID}');
             fbq('track', 'PageView');
           `}
-        </Script>
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{ display: "none" }}
-            src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_FB_PIXEL_ID || "0000000000000000"}&ev=PageView&noscript=1`}
-            alt=""
-          />
-        </noscript>
+          </Script>
+        )}
+        {FB_PIXEL_ID && (
+          <noscript>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              height="1"
+              width="1"
+              style={{ display: "none" }}
+              src={`https://www.facebook.com/tr?id=${FB_PIXEL_ID}&ev=PageView&noscript=1`}
+              alt=""
+            />
+          </noscript>
+        )}
       </body>
     </html>
   );

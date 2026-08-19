@@ -1,0 +1,12 @@
+node_modules
+.next
+.next*
+.vercel
+.playwright-mcp
+.claude
+scripts/.venv
+*.log
+.DS_Store
+# Raw source data is a local development fallback. Production reads a minimal,
+# server-only column set from Supabase and must not bundle employer data.
+src/data/scraped-jobs.json

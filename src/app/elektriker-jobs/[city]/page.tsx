@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ELEKTRIKER_CITIES, findElektrikerCity } from "@/lib/elektriker-cities";
 import { searchJobListings } from "@/lib/job-catalog";
-import { buildJobPostingSchema } from "@/lib/job-schema";
 import { MapPin, Wallet } from "lucide-react";
 
 export const revalidate = 3600;
@@ -108,7 +107,7 @@ export default async function ElektrikerCityPage({ params }: PageProps) {
     },
     {
       question: `Welche Arbeitgeber suchen Elektriker in ${city.name}?`,
-      answer: `${city.intro} Typische Arbeitgeber sind klassische Schweizer Elektroinstallationsbetriebe (KMU mit 5 bis 80 Mitarbeitenden), spezialisierte Servicefirmen für Smart-Building, Gebäudetechnik-Generalisten sowie grössere Industriearbeitgeber für Betriebselektriker und Automatiker. Ergänzt wird das Angebot durch Personaldienstleister, die Temporär- und Vermittlungsstellen für Elektriker in ${city.name} aufschalten. Direktbewerbungen über elektrojob.ch erreichen den Arbeitgeber in der Regel innerhalb von 24 Stunden.`,
+      answer: `${city.intro} Typische Arbeitgeber sind klassische Schweizer Elektroinstallationsbetriebe (KMU mit 5 bis 80 Mitarbeitenden), spezialisierte Servicebetriebe für Smart-Building, Gebäudetechnik-Generalisten sowie grössere Industriearbeitgeber für Betriebselektriker und Automatiker. Ergänzt wird das Angebot durch Personaldienstleister, die Temporär- und Vermittlungsstellen für Elektriker in ${city.name} aufschalten. Über die Detailseite kannst du dein Bewerbungsdossier ohne Konto erfassen.`,
     },
     {
       question: `Wie pendle ich am besten zu einem Elektriker Job in ${city.name}?`,
@@ -131,9 +130,6 @@ export default async function ElektrikerCityPage({ params }: PageProps) {
       <JsonLd data={breadcrumbSchema} />
       <JsonLd data={itemListSchema} />
       <JsonLd data={faqSchema} />
-      {result.jobs.slice(0, 10).map((job) => (
-        <JsonLd key={`schema-${job.source}-${job.id}`} data={buildJobPostingSchema(job)} />
-      ))}
 
       <main className="bg-white">
         <section className="bg-primary/5 border-b">
@@ -182,19 +178,12 @@ export default async function ElektrikerCityPage({ params }: PageProps) {
                   <CardContent className="p-4">
                     <h3 className="font-semibold text-slate-900 mb-1 line-clamp-2">
                       <Link
-                        href={
-                          job.source === "generated"
-                            ? `/jobs/${job.id}?q=Elektriker&loc=${encodeURIComponent(city.name)}`
-                            : `/jobs/${job.id}`
-                        }
+                        href={`/jobs/${job.id}`}
                         className="hover:text-primary"
                       >
                         {job.title}
                       </Link>
                     </h3>
-                    <p className="text-sm text-slate-600 mb-2 line-clamp-1">
-                      {job.company || "Schweizer Elektrobetrieb"}
-                    </p>
                     <div className="flex flex-wrap gap-2 text-xs text-slate-500">
                       <span className="inline-flex items-center gap-1">
                         <MapPin className="h-3 w-3" />

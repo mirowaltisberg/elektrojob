@@ -355,10 +355,16 @@
    ---------------------------------------------------------- */
 
 .header-blur {
-  backdrop-filter: blur(12px) saturate(1.4);
-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
-  background-color: rgb(255 255 255 / 0.85);
+  background-color: rgb(255 255 255 / 0.98);
   transition: box-shadow 0.3s ease;
+}
+
+@media (min-width: 48rem) {
+  .header-blur {
+    backdrop-filter: blur(10px) saturate(1.2);
+    -webkit-backdrop-filter: blur(10px) saturate(1.2);
+    background-color: rgb(255 255 255 / 0.9);
+  }
 }
 
 /* ----------------------------------------------------------

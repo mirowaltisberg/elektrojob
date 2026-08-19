@@ -132,7 +132,7 @@ export function SearchDropdown({
         aria-expanded={showDropdown}
         aria-autocomplete="list"
         aria-haspopup="listbox"
-        aria-controls={listboxId}
+        aria-controls={showDropdown ? listboxId : undefined}
         aria-activedescendant={
           highlightedIndex >= 0
             ? `${listboxId}-suggestion-${highlightedIndex}`
@@ -141,7 +141,7 @@ export function SearchDropdown({
         value={value}
         maxLength={maxLength}
         placeholder={placeholder}
-        className="flex h-12 w-full rounded-md bg-transparent pl-10 pr-3 text-base text-slate-900 placeholder:text-slate-400 focus:outline-none"
+        className="flex h-12 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-3 text-base text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-primary/60 focus:outline-none focus:ring-2 focus:ring-primary/20 lg:rounded-md lg:border-transparent lg:bg-transparent lg:shadow-none lg:focus:border-transparent lg:focus:ring-0"
         onChange={(e) => {
           onChange(e.target.value);
           setIsOpen(true);
@@ -157,9 +157,11 @@ export function SearchDropdown({
         id={listboxId}
         ref={listRef}
         role="listbox"
+        aria-label={`${placeholder} – Vorschläge`}
+        hidden={!showDropdown}
         className={cn(
           "search-dropdown absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-[min(55vh,16rem)] sm:max-h-56 overflow-y-auto overscroll-contain rounded-xl border bg-white shadow-lg",
-          showDropdown ? "search-dropdown-open" : "search-dropdown-closed pointer-events-none"
+          "search-dropdown-open"
         )}
       >
         {filtered.map((item, i) => (

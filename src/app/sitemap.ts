@@ -18,10 +18,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Only include scraped jobs with valid IDs and recent dates (max 90 days old)
   const cutoffMs = now.getTime() - 90 * 24 * 60 * 60 * 1000;
-  const minDescriptionLength = 250;
+  const minDescriptionLength = 160;
   const validJobs = jobs.filter((job) => {
     if (!job.id || !job.title) return false;
-    const descriptionLength = (job.fullDescription?.length || job.description?.length || 0);
+    const descriptionLength = job.description?.length || 0;
     const postedMs = job.datePosted ? Date.parse(job.datePosted) : 0;
     return descriptionLength >= minDescriptionLength && postedMs > cutoffMs;
   });

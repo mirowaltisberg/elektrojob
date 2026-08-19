@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getJobListingById } from "@/lib/job-catalog";
 import { createAdminClient } from "@/lib/supabase";
 
 
@@ -7,7 +8,6 @@ export async function POST(request: Request) {
     const formData = await request.formData();
 
     const jobId = formData.get("jobId") as string | null;
-    const jobTitle = formData.get("jobTitle") as string | null;
     const name = formData.get("name") as string | null;
     const email = formData.get("email") as string | null;
     const phone = formData.get("phone") as string | null;
@@ -17,6 +17,14 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "jobId, name, email, and phone are required" },
         { status: 400 }
+      );
+    }
+
+    const job = await getJobListingById({ id: jobId });
+    if (!job) {
+      return NextResponse.json(
+        { error: "Diese Stelle ist nicht mehr verfügbar." },
+        { status: 404 }
       );
     }
 

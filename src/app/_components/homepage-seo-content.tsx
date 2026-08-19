@@ -6,8 +6,6 @@ import { JsonLd } from "@/components/json-ld";
 // This content is always visible to search engines even though the
 // main job search is client-rendered.
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
-
 // FAQ answers target the AI-citation optimum band of 134-167 words per answer.
 // Shorter answers get truncated by LLMs into low-context excerpts; longer ones
 // get summarized away. The 134-167 range survives both ends intact.
@@ -15,7 +13,7 @@ const HOMEPAGE_FAQS = [
   {
     question: "Welche Elektriker Jobs gibt es auf elektrojob.ch?",
     answer:
-      "Auf elektrojob.ch findest du alle relevanten Elektriker Stellen der Schweizer Elektrobranche. Dazu gehören die EFZ-Lehrabschluss-Berufe Elektroinstallateur, Montage-Elektriker, Elektroniker, Automatiker, Netzelektriker und Telematiker, dazu Service- und Aussendienst-Profile wie Servicetechniker Elektro, Betriebselektriker und Smart-Home-Techniker. Auf der Planungs- und Projektebene listen wir Elektroplaner, Gebäudetechnikplaner, Bauleiter Elektro und Projektleiter Elektro. Spezialisierte Elektriker Profile wie Photovoltaik-Spezialisten, Schaltanlagenbauer, Sicherheitsberater nach NIV sowie Ladeinfrastruktur-Techniker sind ebenfalls regelmässig vertreten. Auf der Führungsebene findest du Niederlassungsleiter, Elektro-Fachvorgesetzte und Geschäftsführende von Elektrobetrieben. Lehrstellen für Elektriker, Trainee-Programme und Wiedereinsteigerangebote sind separat ausgewiesen, damit Berufsanfängerinnen, Quereinsteiger und Wiedereinsteigende die passenden Inserate schnell finden. Über die Kartenansicht lokalisierst du Stellen zusätzlich nach Postleitzahl und Pendelradius. Die Stellen werden täglich aktualisiert und aus über 26'000 öffentlichen Inseraten gefiltert. Sie verteilen sich auf alle 26 Schweizer Kantone, mit besonderer Dichte in Zürich, Bern, Aargau, Basel-Stadt und der Ostschweiz.",
+      "Auf elektrojob.ch findest du Stellen aus der Schweizer Elektrobranche. Dazu gehören die EFZ-Berufe Elektroinstallateur, Montage-Elektriker, Elektroniker, Automatiker, Netzelektriker und Telematiker, dazu Service- und Aussendienst-Profile wie Servicetechniker Elektro, Betriebselektriker und Smart-Home-Techniker. Auf der Planungs- und Projektebene findest du Elektroplaner, Gebäudetechnikplaner, Bauleiter Elektro und Projektleiter Elektro. Spezialisierte Profile wie Photovoltaik-Spezialisten, Schaltanlagenbauer, Sicherheitsberater nach NIV sowie Ladeinfrastruktur-Techniker sind ebenfalls vertreten. Mit der Suche nach Beruf, Ort oder Postleitzahl und dem Umkreis-Filter grenzt du die Treffer nach deinem bevorzugten Pendelradius ein. Zusätzliche Filter für Pensum, Anstellungsart, Arbeitsmodell und Veröffentlichungsdatum helfen bei der Auswahl. Die Inserate verteilen sich auf alle 26 Schweizer Kantone, mit besonderer Dichte in Zürich, Bern, Aargau, Basel-Stadt und der Ostschweiz.",
   },
   {
     question: "Was verdient ein Elektroinstallateur in der Schweiz?",
@@ -25,7 +23,7 @@ const HOMEPAGE_FAQS = [
   {
     question: "Wie finde ich einen Elektriker Job in der Schweiz?",
     answer:
-      "Auf elektrojob.ch suchst du gezielt mit drei Filtern nach passenden Stellen: Beruf (12 EFZ- und Spezialisten-Profile), Standort (alle 26 Schweizer Kantone plus Ortssuche mit Umkreis-Radius in Kilometern) und Pensum (Vollzeit, 80–100%, 60–80%, Teilzeit). Du kannst zusätzlich nach Anstellungsart (Festanstellung, Temporär, Praktikum, Lehre) filtern und Stellen mit konkretem Lohnband gezielt aufrufen. Der Bewerbungsprozess läuft direkt über die Plattform: Lebenslauf als PDF hochladen, Anschreiben in das Formular tippen oder ebenfalls als PDF beifügen, Sprache und Verfügbarkeit angeben, abschicken. Wir leiten dein Dossier anonymisiert an den Arbeitgeber weiter. Du kannst Suchprofile speichern und erhältst dann eine Benachrichtigung, sobald neue passende Stellen aufgeschaltet werden. Für regional konzentrierte Suchen empfehlen wir die Karte mit Umkreis-Filter — so findest du Stellen innerhalb deines bevorzugten Pendelradius. Berufsmessen wie die ineltec, das EnergyDay-Forum oder regionale Berufsbildungsmessen bieten zusätzliche Direktkontakte zu Arbeitgebern; viele Betriebe haben offene Stellen, die sie noch nicht öffentlich ausgeschrieben haben.",
+      "Auf elektrojob.ch startest du mit einem Beruf, Stichwort oder Fachgebiet und ergänzt bei Bedarf einen Ort oder eine Postleitzahl. Über den Umkreis-Filter legst du fest, wie weit die Stelle von deinem gewünschten Arbeitsort entfernt sein darf. Anschliessend kannst du die Ergebnisse nach Anstellungsart, Pensum, Arbeitsmodell und Veröffentlichungsdatum eingrenzen und nach Relevanz, Aktualität oder Lohn sortieren. Jede Trefferkarte zeigt die wichtigsten Angaben zur Stelle kompakt an. Auf der Detailseite findest du Aufgaben, Anforderungen und weitere Angaben zum Inserat. Wenn die Stelle passt, kannst du dein Bewerbungsdossier direkt über das Formular erfassen und einen Lebenslauf als PDF-, DOC- oder DOCX-Datei hochladen. Für eine breitere Suche lohnt es sich, verwandte Berufsbezeichnungen und benachbarte Kantone einzubeziehen.",
   },
   {
     question: "In welchen Kantonen gibt es die meisten Elektriker Jobs?",

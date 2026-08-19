@@ -46,7 +46,7 @@ export const ROLE_HUBS: RoleHubConfig[] = [
     hero:
       "Stellen für Elektroinstallateure EFZ in der ganzen Schweiz — von Wohnbau über Industrie bis Smart-Building.",
     longIntro:
-      "Der Elektroinstallateur EFZ ist der breitestgesuchte Elektriker-Beruf der Schweiz. Nach der 4-jährigen Lehre planst, montierst und prüfst du Stark- und Schwachstrominstallationen in Wohn-, Gewerbe- und Industriebauten. Die Nachfrage übersteigt das Angebot: Schweizer Elektrobetriebe suchen aktuell mehr als 4'000 Elektroinstallateure gleichzeitig — mit Festanstellungen, Temporärstellen und Wiedereinsteigerprogrammen.",
+      "Der Elektroinstallateur EFZ gehört zu den meistgesuchten Elektriker-Berufen der Schweiz. Nach der 4-jährigen Lehre planst, montierst und prüfst du Stark- und Schwachstrominstallationen in Wohn-, Gewerbe- und Industriebauten. Die aktuellen, anonymisierten Stellen oberhalb dieses Ratgebers zeigen dir direkt, wie viele passende Inserate momentan verfügbar sind.",
     salary:
       "Das Lohnband für Elektroinstallateure EFZ liegt zwischen CHF 75'000 (Berufseinsteiger) und CHF 100'000 (Senior, Sicherheitsberater nach NIV). In Zürich, Zug und Basel zahlen Arbeitgeber 5 bis 10 Prozent über dem Schweizer Mittel.",
     education:
@@ -71,7 +71,7 @@ export const ROLE_HUBS: RoleHubConfig[] = [
       {
         question: "Wie viele Elektroinstallateur Jobs sind aktuell ausgeschrieben?",
         answer:
-          "Auf elektrojob.ch und in den verlinkten Stelleninseraten sind regelmässig 1'500 bis 2'500 Elektroinstallateur-Stellen offen. Die Zahlen schwanken mit Bautätigkeit und Saison — im Frühling (Beginn der Bausaison) und im Herbst sind die Spitzenmonate. Festanstellungen machen rund 80 Prozent aus, Temporärstellen 15 Prozent, Lehrstellen und Wiedereinsteigerprogramme rund 5 Prozent.",
+          "Die aktuelle Zahl steht direkt oberhalb der Trefferliste auf dieser Seite. Sie wird aus den tatsächlich verfügbaren, geprüften Inseraten berechnet und kann sich mit neuen Ausschreibungen oder abgelaufenen Stellen ändern. Mit den Filtern grenzt du das Ergebnis nach Ort, Pensum, Vertragsart und Veröffentlichungszeitraum ein.",
       },
       {
         question: "Was unterscheidet Elektroinstallateur Jobs von Montage-Elektriker Stellen?",
@@ -126,7 +126,7 @@ export const ROLE_HUBS: RoleHubConfig[] = [
       {
         question: "Wo arbeiten Elektroniker in der Schweiz?",
         answer:
-          "Typische Arbeitgeber sind Maschinenbau (Bühler, Bobst, Sulzer), Medizintechnik (Sonova, Ypsomed), Halbleiter und Sensorik (STMicroelectronics, Sensirion), Bahn-Industrie (Stadler) und unzählige KMU im Raum Zürich, Basel, Bern und in der Ostschweiz. Hochschulen und Forschungsinstitute (ETH, EPFL, Empa, CSEM) beschäftigen Elektroniker in Entwicklung und Prüftechnik.",
+          "Typische Arbeitgeber kommen aus Maschinenbau, Medizintechnik, Halbleiter- und Sensorik, Bahnindustrie sowie aus zahlreichen spezialisierten KMU im Raum Zürich, Basel, Bern und in der Ostschweiz. Auch Hochschulen und Forschungsinstitute beschäftigen Elektroniker in Entwicklung, Laborbetrieb und Prüftechnik.",
       },
       {
         question: "Verdient ein Elektroniker mehr als ein Elektroinstallateur?",
@@ -195,13 +195,13 @@ export const ROLE_HUBS: RoleHubConfig[] = [
     displayName: "Elektroplaner Jobs",
     title: "Elektroplaner Jobs Schweiz 2026 | Stellen für Elektroplaner & Gebäudetechnikplaner",
     description:
-      "Elektroplaner Jobs in der Schweiz: Planungsbüros, Generalplaner, Bauherrenberatung. CAD/Revit, KNX, Smart-Building. Lohn CHF 80'000 – 120'000.",
+      "Elektroplaner Jobs in der Schweiz: Planungsbüros, Generalplaner, Bauherrenberatung. CAD/BIM, KNX, Smart-Building. Lohn CHF 80'000 – 120'000.",
     searchQuery: "Elektroplaner",
     cantonRoleSlug: "elektroplaner",
     hero:
       "Stellen für Elektroplaner — von Wohnbau über Spitäler bis Industrie- und Verwaltungsbauten.",
     longIntro:
-      "Elektroplaner planen elektrische Anlagen, Stark-/Schwachstrominstallationen, Smart-Building-Steuerungen und Sicherheitssysteme — meist in Planungsbüros, bei Generalplanern oder direkt bei Bauherren. Sie arbeiten mit CAD-Werkzeugen wie Revit, AutoCAD und Plancal, kennen Schweizer Normen (NIN, NIV) und betreuen Projekte von der Vorplanung bis zur Inbetriebnahme. Die Nachfrage steigt mit Smart-Building, Energieeffizienz und Photovoltaik.",
+      "Elektroplaner planen elektrische Anlagen, Stark-/Schwachstrominstallationen, Smart-Building-Steuerungen und Sicherheitssysteme — meist in Planungsbüros, bei Generalplanern oder direkt bei Bauherren. Sie arbeiten mit modernen CAD- und BIM-Werkzeugen, kennen Schweizer Normen (NIN, NIV) und betreuen Projekte von der Vorplanung bis zur Inbetriebnahme. Die Nachfrage steigt mit Smart-Building, Energieeffizienz und Photovoltaik.",
     salary:
       "Das Lohnband für Elektroplaner liegt zwischen CHF 80'000 (Berufseinsteiger nach Technikerausbildung) und CHF 120'000 (Senior-Planer mit Bauherrenberatung). Projektleiter Elektro mit Planungsverantwortung verdienen bis CHF 130'000.",
     education:
@@ -209,7 +209,7 @@ export const ROLE_HUBS: RoleHubConfig[] = [
     career:
       "Aufstieg zum Senior Elektroplaner, Projektleiter Elektro, Bauleiter Elektro oder Bereichsleiter eines Planungsbüros. Mit eigener Firma sind Spezialisierungen auf Smart-Building, Krankenhaus- oder Industrieplanung lukrative Nischen.",
     tasks: [
-      "Elektroplanung in Revit / AutoCAD / Plancal-elektro",
+      "Elektroplanung mit CAD- und BIM-Werkzeugen",
       "Lastberechnungen, Schemata und Stromlaufpläne erstellen",
       "Ausschreibungen und Submissionen vorbereiten",
       "Bauherren- und Architektenberatung zu Smart-Building, KNX/DALI",
@@ -217,7 +217,7 @@ export const ROLE_HUBS: RoleHubConfig[] = [
     ],
     requirements: [
       "Gebäudetechnikplaner Elektro EFZ oder dipl. Techniker HF Elektrotechnik",
-      "Sicherer Umgang mit CAD (Revit, AutoCAD, Plancal-elektro)",
+      "Sicherer Umgang mit CAD- und BIM-Werkzeugen",
       "Kenntnisse NIN/NIV, SIA-Norm 118",
       "Verhandlungsgeschick mit Bauherren und Architekten",
       "Strukturiertes Projektdenken",
@@ -231,7 +231,7 @@ export const ROLE_HUBS: RoleHubConfig[] = [
       {
         question: "Welche Software nutzen Elektroplaner?",
         answer:
-          "Die häufigsten Tools in Schweizer Planungsbüros sind Plancal-elektro (klassischer Schweizer Standard), Revit (BIM, immer wichtiger), AutoCAD (2D-Schemata) und ElCAD/Eplan (Industrie). Für Lichtberechnungen kommen DIALux und Relux zum Einsatz, für Smart-Building ETS5/ETS6 (KNX) und herstellerspezifische Tools wie KNX, Loxone, Tridium. Wer mehrere Tools sicher beherrscht, hat einen klaren Lohn- und Karrierevorteil.",
+          "In Schweizer Planungsbüros gehören CAD-, BIM- und Elektroschema-Programme zur Grundausstattung. Für Lichtberechnungen kommen spezialisierte Simulationswerkzeuge zum Einsatz; Smart-Building-Projekte nutzen Engineering-Software für KNX und weitere Bussysteme. Wer mehrere Werkzeugtypen sicher beherrscht und Modelle, Schemata sowie Berechnungen sauber zwischen den Projektbeteiligten austauschen kann, hat einen klaren Lohn- und Karrierevorteil.",
       },
       {
         question: "Verdient ein Elektroplaner mehr als ein Elektroinstallateur?",

@@ -5,19 +5,18 @@ import Link from "next/link";
 import { Copy, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ApplyModal } from "@/components/apply-modal";
-import type { JobListing } from "@/lib/job-types";
+import type { JobSource } from "@/lib/job-types";
 import { trackEvent } from "@/lib/analytics";
 import { useHaptic } from "@/hooks/use-haptic";
 
-const RECENT_KEY = "elektrojob:recent-jobs";
+const RECENT_KEY = "elektrojob:recent-jobs:v2";
 
 interface RecentJobEntry {
   id: string;
   title: string;
-  company: string;
   location: string;
   href: string;
-  source: string;
+  source: JobSource;
   viewedAt: string;
 }
 
@@ -32,29 +31,27 @@ function readRecentJobs(): RecentJobEntry[] {
       return [];
     }
     const parsed = JSON.parse(raw) as RecentJobEntry[];
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed;
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 }
 
 interface JobPrimaryActionProps {
-  job: JobListing;
+  jobId: string;
+  jobTitle: string;
+  source: JobSource;
 }
 
-export function JobPrimaryAction({ job }: JobPrimaryActionProps) {
+export function JobPrimaryAction({ jobId, jobTitle, source }: JobPrimaryActionProps) {
   return (
     <ApplyModal
-      jobId={job.id}
-      jobTitle={job.title}
-      company={job.company}
+      jobId={jobId}
+      jobTitle={jobTitle}
       onOpen={() =>
         trackEvent("apply_click", {
-          job_id: job.id,
-          source: job.source,
+          job_id: jobId,
+          source,
           destination: "modal",
         })
       }
@@ -63,22 +60,26 @@ export function JobPrimaryAction({ job }: JobPrimaryActionProps) {
 }
 
 interface JobShareActionsProps {
-  job: JobListing;
+  jobId: string;
+  jobTitle: string;
+  source: JobSource;
 }
 
-export function JobShareActions({ job }: JobShareActionsProps) {
+export function JobShareActions({ jobId, jobTitle, source }: JobShareActionsProps) {
   const { trigger } = useHaptic();
   const [isCopied, setIsCopied] = useState(false);
-  const pageUrl = typeof window === "undefined" ? "" : window.location.href;
+  const [pageUrl, setPageUrl] = useState("");
+
+  useEffect(() => setPageUrl(window.location.href), []);
 
   const whatsappHref = useMemo(() => {
     if (!pageUrl) {
       return "#";
     }
 
-    const text = `Interessanter Job: ${job.title} - ${pageUrl}`;
+    const text = `Interessanter Job: ${jobTitle} - ${pageUrl}`;
     return `https://wa.me/?text=${encodeURIComponent(text)}`;
-  }, [job.title, pageUrl]);
+  }, [jobTitle, pageUrl]);
 
   const handleCopy = async () => {
     if (!pageUrl) {
@@ -88,29 +89,32 @@ export function JobShareActions({ job }: JobShareActionsProps) {
     await navigator.clipboard.writeText(pageUrl);
     trigger("success");
     setIsCopied(true);
-    trackEvent("share_copy_link", { job_id: job.id, source: job.source });
+    trackEvent("share_copy_link", { job_id: jobId, source });
     window.setTimeout(() => setIsCopied(false), 1400);
   };
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Button
-        asChild
-        variant="outline"
-        size="sm"
-        className="h-9 rounded-lg"
-      >
+      <Button asChild variant="outline" size="sm" className="h-9 rounded-lg">
         <a
           href={whatsappHref}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={() => trackEvent("share_whatsapp", { job_id: job.id, source: job.source })}
+          aria-disabled={!pageUrl}
+          onClick={() => trackEvent("share_whatsapp", { job_id: jobId, source })}
         >
           <MessageCircle className="h-4 w-4 mr-1" />
           WhatsApp
         </a>
       </Button>
-      <Button type="button" variant="outline" size="sm" className="h-9 rounded-lg" onClick={handleCopy}>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-9 rounded-lg"
+        onClick={handleCopy}
+        disabled={!pageUrl}
+      >
         <Copy className="h-4 w-4 mr-1" />
         {isCopied ? "Kopiert" : "Link kopieren"}
       </Button>
@@ -119,33 +123,44 @@ export function JobShareActions({ job }: JobShareActionsProps) {
 }
 
 interface RecentlyViewedJobsProps {
-  currentJob: JobListing;
+  jobId: string;
+  jobTitle: string;
+  location: string;
+  source: JobSource;
   currentHref: string;
 }
 
-export function RecentlyViewedJobs({ currentJob, currentHref }: RecentlyViewedJobsProps) {
+export function RecentlyViewedJobs({
+  jobId,
+  jobTitle,
+  location,
+  source,
+  currentHref,
+}: RecentlyViewedJobsProps) {
   const recentJobs = useMemo(
-    () => readRecentJobs().filter((entry) => entry.id !== currentJob.id).slice(0, 3),
-    [currentJob.id]
+    () => readRecentJobs().filter((entry) => entry.id !== jobId).slice(0, 3),
+    [jobId]
   );
 
   useEffect(() => {
+    window.localStorage.removeItem("elektrojob:recent-jobs");
+
     const currentEntry: RecentJobEntry = {
-      id: currentJob.id,
-      title: currentJob.title,
-      company: currentJob.company,
-      location: currentJob.location,
+      id: jobId,
+      title: jobTitle,
+      location,
       href: currentHref,
-      source: currentJob.source,
+      source,
       viewedAt: new Date().toISOString(),
     };
 
-    const previousEntries = readRecentJobs().filter((entry) => entry.id !== currentJob.id);
-    const nextEntries = [currentEntry, ...previousEntries].slice(0, 6);
-
-    window.localStorage.setItem(RECENT_KEY, JSON.stringify(nextEntries));
-    trackEvent("job_view", { job_id: currentJob.id, source: currentJob.source });
-  }, [currentHref, currentJob.company, currentJob.id, currentJob.location, currentJob.source, currentJob.title]);
+    const previousEntries = readRecentJobs().filter((entry) => entry.id !== jobId);
+    window.localStorage.setItem(
+      RECENT_KEY,
+      JSON.stringify([currentEntry, ...previousEntries].slice(0, 6))
+    );
+    trackEvent("job_view", { job_id: jobId, source });
+  }, [currentHref, jobId, jobTitle, location, source]);
 
   if (recentJobs.length === 0) {
     return null;

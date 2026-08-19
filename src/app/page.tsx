@@ -4,7 +4,6 @@ import { HomepageSeoContent } from "@/app/_components/homepage-seo-content";
 import { SiteFooter } from "@/components/site-footer";
 import { searchJobListings } from "@/lib/job-catalog";
 import { JsonLd } from "@/components/json-ld";
-import { buildJobPostingSchema } from "@/lib/job-schema";
 
 export const metadata: Metadata = {
   title: "Elektriker Jobs Schweiz 2026 | Stellen & Lohn für Elektriker",
@@ -38,27 +37,13 @@ export default async function HomePage() {
     loc: "",
     limit: 12,
     offset: 0,
-    sort: "relevance",
+    sort: "newest",
   });
-
-  // Strip heavy arrays not needed by the client-side search component
-  const liteData = {
-    ...initialData,
-    jobs: initialData.jobs.map(({ responsibilities, requirements, benefits, fullDescription, ...rest }) => ({
-      ...rest,
-      responsibilities: [] as string[],
-      requirements: [] as string[],
-      benefits: [] as string[],
-    })),
-  };
 
   return (
     <>
       <JsonLd data={homepageBreadcrumbSchema} />
-      {initialData.jobs.map((job) => (
-        <JsonLd key={`schema-${job.source}-${job.id}`} data={buildJobPostingSchema(job)} />
-      ))}
-      <HomepageSearch initialData={liteData} />
+      <HomepageSearch initialData={initialData} />
       <HomepageSeoContent />
       <SiteFooter />
     </>
