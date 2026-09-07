@@ -83,7 +83,7 @@ export async function generateMetadata(props: JobDetailsPageProps): Promise<Meta
   const description = descParts.length > 155 ? descParts.slice(0, 152) + "..." : descParts;
 
   return {
-    title: `${job.title} in ${job.location} · ${job.id.slice(-8).toUpperCase()}`,
+    title: `${job.title} in ${job.location} · ${getDisplayJobId(job)}`,
     description,
     alternates: {
       canonical: `/jobs/${job.id}`,

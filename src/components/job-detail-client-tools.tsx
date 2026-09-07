@@ -142,7 +142,7 @@ export function RecentlyViewedJobs({
   );
 
   useEffect(() => {
-    window.localStorage.removeItem("elektrojob:recent-jobs");
+    try { window.localStorage.removeItem("elektrojob:recent-jobs"); } catch { /* Recent jobs are optional. */ }
 
     const currentEntry: RecentJobEntry = {
       id: jobId,
@@ -154,10 +154,9 @@ export function RecentlyViewedJobs({
     };
 
     const previousEntries = readRecentJobs().filter((entry) => entry.id !== jobId);
-    window.localStorage.setItem(
-      RECENT_KEY,
-      JSON.stringify([currentEntry, ...previousEntries].slice(0, 6))
-    );
+    try {
+      window.localStorage.setItem(RECENT_KEY, JSON.stringify([currentEntry, ...previousEntries].slice(0, 6)));
+    } catch { /* Saving a recent job must never interrupt applying. */ }
     trackEvent("job_view", { job_id: jobId });
   }, [currentHref, jobId, jobTitle, location, source]);
 

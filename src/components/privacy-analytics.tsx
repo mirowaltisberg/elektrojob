@@ -1,6 +1,6 @@
 "use client";
 
-import { isSyntheticVisit } from "@/lib/application-client";
+import { getTestRunId, getTestRunToken, isSyntheticVisit } from "@/lib/application-client";
 
 import { AdsConsent } from "@/components/ads-consent";
 
@@ -108,6 +108,8 @@ export function PrivacyAnalytics() {
       if (readConsentChoice() !== "accepted") return;
       try {
       const payload = {
+        testRunId: getTestRunId(),
+        testToken: getTestRunToken(),
         sessionId: getSessionId(),
         sequence: nextSequence(),
         eventName,

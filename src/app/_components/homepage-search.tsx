@@ -815,7 +815,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
             {!isLoading && !errorMessage && jobs.length === 0 && (
               <Card className="py-0 gap-0">
                 <CardContent className="p-6 text-center">
-                  <p className="font-semibold text-slate-900">Keine passenden Jobs gefunden</p>
+                  <p className="font-semibold text-slate-900">Keine passenden offenen Stellen gefunden</p>
                   <p className="text-sm text-slate-500 mt-1">Passe deine Suchbegriffe oder Filter an.</p>
                   <Button onClick={() => window.location.assign("/")} variant="outline" className="mt-4">
                     <FilterX className="h-4 w-4 mr-1" />
