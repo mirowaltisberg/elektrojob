@@ -43,7 +43,7 @@ interface JobPrimaryActionProps {
   source: JobSource;
 }
 
-export function JobPrimaryAction({ jobId, jobTitle, source }: JobPrimaryActionProps) {
+export function JobPrimaryAction({ jobId, jobTitle }: JobPrimaryActionProps) {
   return (
     <ApplyModal
       jobId={jobId}
@@ -51,7 +51,6 @@ export function JobPrimaryAction({ jobId, jobTitle, source }: JobPrimaryActionPr
       onOpen={() =>
         trackEvent("apply_click", {
           job_id: jobId,
-          source,
           destination: "modal",
         })
       }
@@ -65,7 +64,7 @@ interface JobShareActionsProps {
   source: JobSource;
 }
 
-export function JobShareActions({ jobId, jobTitle, source }: JobShareActionsProps) {
+export function JobShareActions({ jobId, jobTitle }: JobShareActionsProps) {
   const { trigger } = useHaptic();
   const [isCopied, setIsCopied] = useState(false);
   const [pageUrl, setPageUrl] = useState("");
@@ -89,7 +88,7 @@ export function JobShareActions({ jobId, jobTitle, source }: JobShareActionsProp
     await navigator.clipboard.writeText(pageUrl);
     trigger("success");
     setIsCopied(true);
-    trackEvent("share_copy_link", { job_id: jobId, source });
+    trackEvent("share_copy_link", { job_id: jobId });
     window.setTimeout(() => setIsCopied(false), 1400);
   };
 
@@ -101,7 +100,7 @@ export function JobShareActions({ jobId, jobTitle, source }: JobShareActionsProp
           target="_blank"
           rel="noopener noreferrer"
           aria-disabled={!pageUrl}
-          onClick={() => trackEvent("share_whatsapp", { job_id: jobId, source })}
+          onClick={() => trackEvent("share_whatsapp", { job_id: jobId })}
         >
           <MessageCircle className="h-4 w-4 mr-1" />
           WhatsApp
@@ -159,7 +158,7 @@ export function RecentlyViewedJobs({
       RECENT_KEY,
       JSON.stringify([currentEntry, ...previousEntries].slice(0, 6))
     );
-    trackEvent("job_view", { job_id: jobId, source });
+    trackEvent("job_view", { job_id: jobId });
   }, [currentHref, jobId, jobTitle, location, source]);
 
   if (recentJobs.length === 0) {
@@ -178,7 +177,6 @@ export function RecentlyViewedJobs({
               onClick={() =>
                 trackEvent("recent_job_open", {
                   job_id: entry.id,
-                  source: entry.source,
                 })
               }
             >

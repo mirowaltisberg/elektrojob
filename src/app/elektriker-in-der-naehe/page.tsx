@@ -23,9 +23,9 @@ const REGIONS: {
   {
     region: "Grossraum Zürich",
     cantons: [
-      { name: "Zürich", slug: "zuerich", cities: ["Zürich", "Winterthur", "Uster", "Dübendorf", "Wetzikon"] },
-      { name: "Schaffhausen", slug: "schaffhausen", cities: ["Schaffhausen", "Neuhausen"] },
-      { name: "Thurgau", slug: "thurgau", cities: ["Frauenfeld", "Kreuzlingen", "Arbon"] },
+      { name: "Zürich", slug: "zh", cities: ["Zürich", "Winterthur", "Uster", "Dübendorf", "Wetzikon"] },
+      { name: "Schaffhausen", slug: "sh", cities: ["Schaffhausen", "Neuhausen"] },
+      { name: "Thurgau", slug: "tg", cities: ["Frauenfeld", "Kreuzlingen", "Arbon"] },
     ],
     intro:
       "Die Region Zürich ist der grösste Schweizer Arbeitsmarkt für Elektriker. Hohe Lohnniveaus, dichte Bautätigkeit und zahlreiche Smart-Building-Projekte sorgen für konstante Nachfrage nach Elektroinstallateuren, Servicetechnikern und Elektroplanern.",
@@ -33,9 +33,9 @@ const REGIONS: {
   {
     region: "Nordwestschweiz",
     cantons: [
-      { name: "Basel", slug: "basel", cities: ["Basel", "Liestal", "Allschwil"] },
-      { name: "Aargau", slug: "aargau", cities: ["Aarau", "Baden", "Wettingen", "Brugg"] },
-      { name: "Solothurn", slug: "solothurn", cities: ["Solothurn", "Olten", "Grenchen"] },
+      { name: "Basel", slug: "bs", cities: ["Basel", "Liestal", "Allschwil"] },
+      { name: "Aargau", slug: "ag", cities: ["Aarau", "Baden", "Wettingen", "Brugg"] },
+      { name: "Solothurn", slug: "so", cities: ["Solothurn", "Olten", "Grenchen"] },
     ],
     intro:
       "Pharma, Chemie und Maschinenindustrie prägen den Nordwesten. Servicetechniker, Betriebselektriker und Automatiker sind besonders gesucht — oft mit überdurchschnittlichen Saläre dank Industriearbeitgebern.",
@@ -43,7 +43,7 @@ const REGIONS: {
   {
     region: "Bern & Mittelland",
     cantons: [
-      { name: "Bern", slug: "bern", cities: ["Bern", "Biel", "Thun", "Burgdorf"] },
+      { name: "Bern", slug: "be", cities: ["Bern", "Biel", "Thun", "Burgdorf"] },
       { name: "Fribourg", slug: "fribourg", cities: ["Fribourg", "Bulle", "Murten"] },
     ],
     intro:
@@ -52,8 +52,8 @@ const REGIONS: {
   {
     region: "Zentralschweiz",
     cantons: [
-      { name: "Luzern", slug: "luzern", cities: ["Luzern", "Emmen", "Kriens", "Sursee"] },
-      { name: "Zug", slug: "zug", cities: ["Zug", "Baar", "Cham"] },
+      { name: "Luzern", slug: "lu", cities: ["Luzern", "Emmen", "Kriens", "Sursee"] },
+      { name: "Zug", slug: "zg", cities: ["Zug", "Baar", "Cham"] },
     ],
     intro:
       "Tourismus-Infrastruktur, Hightech-Hub und Wohnungsbau treiben die Nachfrage. Zug zahlt regelmässig die höchsten Schweizer Saläre für Elektriker im Industrie- und Gebäudetechnik-Bereich.",
@@ -61,8 +61,8 @@ const REGIONS: {
   {
     region: "Ostschweiz",
     cantons: [
-      { name: "St. Gallen", slug: "st-gallen", cities: ["St. Gallen", "Wil", "Rapperswil", "Buchs"] },
-      { name: "Graubünden", slug: "graubuenden", cities: ["Chur", "Davos", "St. Moritz"] },
+      { name: "St. Gallen", slug: "sg", cities: ["St. Gallen", "Wil", "Rapperswil", "Buchs"] },
+      { name: "Graubünden", slug: "gr", cities: ["Chur", "Davos", "St. Moritz"] },
     ],
     intro:
       "Industrie, Tourismus und Bergbahn-Infrastruktur sorgen für vielseitige Aufgaben. Saisonarbeit ist in den Tourismusorten verbreitet, in St. Gallen dominieren langfristige Festanstellungen.",

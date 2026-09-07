@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     const cantonAliases: Array<[string, string]> = [
+      ["thurgau", "tg"],
       ["zug", "zg"],
       ["luzern", "lu"],
       ["schaffhausen", "sh"],

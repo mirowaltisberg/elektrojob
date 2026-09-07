@@ -1,5 +1,6 @@
 "use client";
 
+import { isSyntheticVisit } from "@/lib/application-client";
 import Script from "next/script";
 import { useState, useSyncExternalStore } from "react";
 import {
@@ -24,12 +25,12 @@ function ConsentDialog({ analyticsChoice, onAnalyticsChoice, adsChoice, onClose 
       setError(true);
       return;
     }
-    onAnalyticsChoice?.(allowAnalytics ? "accepted" : "declined");
+    try { onAnalyticsChoice?.(allowAnalytics ? "accepted" : "declined"); } catch { setError(true); return; }
     onClose();
   };
 
   return (
-    <aside className="fixed inset-x-3 bottom-3 z-[100] mx-auto max-h-[80dvh] max-w-3xl overflow-y-auto rounded-xl border border-slate-300 bg-white p-4 text-slate-900 shadow-2xl sm:p-5"
+    <div className="fixed inset-x-3 bottom-3 z-40 mx-auto max-h-[80dvh] max-w-3xl overflow-y-auto rounded-xl border border-slate-300 bg-white p-4 text-slate-900 shadow-2xl sm:p-5"
       role="dialog" aria-modal="false" aria-labelledby="tracking-consent-title">
       <h2 id="tracking-consent-title" className="text-base font-bold">Deine Tracking-Auswahl</h2>
       <p className="mt-2 text-sm">Du kannst die Website und das Bewerbungsformular auch ohne optionales Tracking nutzen.</p>
@@ -50,23 +51,25 @@ function ConsentDialog({ analyticsChoice, onAnalyticsChoice, adsChoice, onClose 
         <button type="button" className="min-h-11 rounded border border-slate-400 px-4 font-semibold" onClick={() => save(analytics, ads)}>Auswahl speichern</button>
         <button type="button" className="min-h-11 rounded border border-slate-400 px-4 font-semibold" onClick={() => save(true, true)}>Alle erlauben</button>
       </div>
+      <button type="button" className="mt-2 min-h-11 px-2 text-sm underline" onClick={onClose}>Später entscheiden</button>
       <p className="mt-3 text-xs">Jederzeit änderbar unter «Tracking-Einstellungen». <a href="/werbemessung" className="underline">Details zur Google-Werbemessung</a>{onAnalyticsChoice && <> · <a href="/datenschutz" className="underline">Datenschutz</a></>}</p>
       {error && <p role="alert" className="mt-2 text-sm text-red-700">Dein Browser konnte die Auswahl nicht speichern. Google-Werbemessung bleibt ausgeschaltet.</p>}
-    </aside>
+    </div>
   );
 }
 
 export function AdsConsent(props: Props) {
   const consent = useSyncExternalStore(subscribeAdsConsent, readAdsConsent, () => null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const show = settingsOpen || consent === null || (props.onAnalyticsChoice && props.analyticsChoice === null);
+  const [deferred, setDeferred] = useState(false);
+  const show = settingsOpen || (!deferred && (consent === null || (props.onAnalyticsChoice && props.analyticsChoice === null)));
   return <>
-    {consent === "accepted" && isProductionAdsHost() && (
+    {consent === "accepted" && isProductionAdsHost() && !isSyntheticVisit() && (
       <Script id="jobsite-google-ads" src={`https://www.googletagmanager.com/gtag/js?id=${ADS_TAG_ID}&l=jobsiteAdsLayer`}
         strategy="afterInteractive" onReady={activateGoogleAds} />
     )}
     {show ? (
-      <ConsentDialog key={`${consent}-${props.analyticsChoice}`} {...props} adsChoice={consent} onClose={() => setSettingsOpen(false)} />
+      <ConsentDialog key={`${consent}-${props.analyticsChoice}`} {...props} adsChoice={consent} onClose={() => { setSettingsOpen(false); setDeferred(true); }} />
     ) : (
       <button type="button" className="fixed bottom-2 left-2 z-40 rounded border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 shadow-sm" onClick={() => setSettingsOpen(true)}>Tracking-Einstellungen</button>
     )}

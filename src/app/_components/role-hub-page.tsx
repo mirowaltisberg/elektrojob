@@ -10,17 +10,17 @@ import { searchJobListings } from "@/lib/job-catalog";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
 
 const TOP_CANTONS = [
-  { name: "Zürich", slug: "zuerich" },
-  { name: "Bern", slug: "bern" },
-  { name: "Basel", slug: "basel" },
-  { name: "Aargau", slug: "aargau" },
-  { name: "Luzern", slug: "luzern" },
-  { name: "St. Gallen", slug: "st-gallen" },
-  { name: "Solothurn", slug: "solothurn" },
-  { name: "Zug", slug: "zug" },
-  { name: "Thurgau", slug: "thurgau" },
-  { name: "Graubünden", slug: "graubuenden" },
-  { name: "Schaffhausen", slug: "schaffhausen" },
+  { name: "Zürich", slug: "zh" },
+  { name: "Bern", slug: "be" },
+  { name: "Basel", slug: "bs" },
+  { name: "Aargau", slug: "ag" },
+  { name: "Luzern", slug: "lu" },
+  { name: "St. Gallen", slug: "sg" },
+  { name: "Solothurn", slug: "so" },
+  { name: "Zug", slug: "zg" },
+  { name: "Thurgau", slug: "tg" },
+  { name: "Graubünden", slug: "gr" },
+  { name: "Schaffhausen", slug: "sh" },
   { name: "Fribourg", slug: "fribourg" },
 ];
 

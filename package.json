@@ -9,7 +9,8 @@
     "lint": "eslint",
     "check:public-jobs": "tsx scripts/check-public-jobs.ts",
     "scrape": "scripts/.venv/bin/python scripts/scrape-jobs.py",
-    "scrape:quick": "scripts/.venv/bin/python scripts/scrape-jobs.py --quick"
+    "scrape:quick": "scripts/.venv/bin/python scripts/scrape-jobs.py --quick",
+    "check:applications": "node --import tsx --test src/lib/application-validation.test.ts src/lib/application-persistence.test.ts"
   },
   "dependencies": {
     "@genwave/svgmaker-mcp": "^0.4.0",

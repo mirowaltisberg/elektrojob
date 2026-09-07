@@ -25,7 +25,6 @@ import { Badge } from "@/components/ui/badge";
 import type { JobFacets, JobListing, JobSort, RemoteFilter } from "@/lib/job-types";
 import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import { trackEvent } from "@/lib/analytics";
-import { estimateSalary, formatSalaryRange } from "@/lib/salary-estimates";
 
 const MobileFilterBar = dynamic(() => import("./mobile-filter-bar"), {
   ssr: false,
@@ -454,8 +453,8 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
 
     const scopedLocation = normalizeLocationFilter(activeLocation);
     trackEvent("filter_usage", {
-      type: typeFilter,
-      workload: workloadFilter,
+      has_type_filter: Boolean(typeFilter),
+      has_workload_filter: Boolean(workloadFilter),
       remote: remoteFilter,
       posted_within_days: postedWithinDays,
       radius_km: scopedLocation ? radiusKm : "all",
@@ -472,8 +471,10 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
     setActiveLocation(normalizedLocation);
     setSearchRevision((revision) => revision + 1);
     trackEvent("search_submit", {
-      query: normalizedQuery,
-      location: normalizedLocation,
+      has_query: Boolean(normalizedQuery),
+      query_length_bucket: normalizedQuery.length < 10 ? "short" : "long",
+      has_location: Boolean(normalizedLocation),
+      location_kind: /^\d{4}$/.test(normalizedLocation) ? "postal_code" : normalizedLocation ? "place" : "none",
       radius_km: normalizedLocation ? radiusKm : "all",
     });
     window.setTimeout(scrollToResults, 80);
@@ -489,10 +490,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
   const salaryMap = useMemo(() => {
     const map = new Map<string, string | null>();
     for (const job of jobs) {
-      const display = job.salary || (() => {
-        const est = estimateSalary(job.title);
-        return est ? `~${formatSalaryRange(est)}` : null;
-      })();
+      const display = job.salary;
       map.set(`${job.source}-${job.id}`, display || null);
     }
     return map;
@@ -819,9 +817,9 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                 <CardContent className="p-6 text-center">
                   <p className="font-semibold text-slate-900">Keine passenden Jobs gefunden</p>
                   <p className="text-sm text-slate-500 mt-1">Passe deine Suchbegriffe oder Filter an.</p>
-                  <Button onClick={resetFilters} variant="outline" className="mt-4">
+                  <Button onClick={() => window.location.assign("/")} variant="outline" className="mt-4">
                     <FilterX className="h-4 w-4 mr-1" />
-                    Filter zurücksetzen
+                    Alle aktuellen Stellen anzeigen
                   </Button>
                 </CardContent>
               </Card>
@@ -839,7 +837,6 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                           trigger("light");
                           trackEvent("job_open", {
                             job_id: job.id,
-                            source: job.source,
                             position: index + 1,
                           });
                         }}
@@ -878,7 +875,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                                       <Wallet className="h-3.5 w-3.5 text-primary shrink-0" />
                                       {salaryMap.get(`${job.source}-${job.id}`) ?? "–"}
                                     </span>
-                                    <span className="text-[11px] text-slate-600 uppercase tracking-wide">Lohn, CHF/Jahr</span>
+                                    <span className="text-[11px] text-slate-600 uppercase tracking-wide">Lohnangabe</span>
                                   </div>
                                   <div className="bg-white px-3 py-2.5 flex flex-col gap-0.5">
                                     <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 truncate">
