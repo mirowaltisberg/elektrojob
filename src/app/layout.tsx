@@ -1,3 +1,4 @@
+import { AdsConsent } from "@/components/ads-consent";
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
@@ -153,6 +154,7 @@ export default function RootLayout({
         <JsonLd data={organizationSchema} />
         <JsonLd data={websiteSchema} />
         <HapticProvider>{children}</HapticProvider>
+        <AdsConsent />
         <Analytics />
         <SpeedInsights />
         {GA_ID && (
