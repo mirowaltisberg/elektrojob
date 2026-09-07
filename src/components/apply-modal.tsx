@@ -1,6 +1,6 @@
 "use client";
 
-import { trackSavedApplication } from "@/lib/google-ads";
+import { reportSavedApplication } from "@/lib/google-ads";
 
 import { useCallback, useRef, useState } from "react";
 import { UploadCloud, CheckCircle2, Loader2, Zap, X, FileText, AlertCircle } from "lucide-react";
@@ -142,9 +142,7 @@ export function ApplyModal({ jobId, jobTitle, onOpen }: ApplyModalProps) {
           );
         }
 
-        const saved = await res.json();
-        if (saved.success !== true) throw new Error("Die Speicherung wurde nicht bestätigt.");
-        trackSavedApplication(saved.conversionId);
+        await reportSavedApplication(res);
 
         setIsSubmitting(false);
         setIsSuccess(true);

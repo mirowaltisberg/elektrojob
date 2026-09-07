@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   ADS_CONSENT_KEY, ADS_CONVERSION, activateGoogleAds, readAdsConsent,
-  saveAdsConsent, trackSavedApplication,
+  saveAdsConsent, trackSavedApplication, reportSavedApplication,
 } from "./google-ads";
 
-test("Ads measures one confirmed application only with separate consent on production", () => {
+test("Ads measures one confirmed application only with separate consent on production", async () => {
   const storage = new Map<string, string>();
   const target = new EventTarget();
   const browser = Object.assign(target, {
@@ -17,8 +17,13 @@ test("Ads measures one confirmed application only with separate consent on produ
     jobsiteAdsLayer: [] as unknown[],
   });
   Object.defineProperty(globalThis, "window", { value: browser, configurable: true });
+  const cookieWrites: string[] = [];
   Object.defineProperty(globalThis, "document", {
-    value: { referrer: "https://example.com/private?email=secret", cookie: "_gcl_aw=old; necessary=yes" },
+    value: {
+      referrer: "https://example.com/private?email=secret",
+      get cookie() { return "_gcl_aw=old; necessary=yes"; },
+      set cookie(value: string) { cookieWrites.push(value); },
+    },
     configurable: true,
   });
   const commands = () => browser.jobsiteAdsLayer.map(item => Array.from(item as ArrayLike<unknown>));
@@ -56,7 +61,11 @@ test("Ads measures one confirmed application only with separate consent on produ
   trackSavedApplication({ name: "private", email: "private@example.com" });
   trackSavedApplication("application-open");
   assert.equal(conversions().length, 0);
-  trackSavedApplication(first);
+  await reportSavedApplication(new Response("truncated", { status: 200 }));
+  await reportSavedApplication(new Response("{}", { status: 200 }));
+  await reportSavedApplication(new Response(JSON.stringify({success: true, conversionId: first}), {status: 400}));
+  assert.equal(conversions().length, 0);
+  await reportSavedApplication(new Response(JSON.stringify({success: true, conversionId: first}), {status: 200}));
   trackSavedApplication(first);
   assert.equal(conversions().length, 1);
   assert.deepEqual(conversions()[0], ["event", "conversion", {
@@ -72,6 +81,8 @@ test("Ads measures one confirmed application only with separate consent on produ
   trackSavedApplication(second);
   assert.equal(conversions().length, 1);
   assert.equal((commands().at(-1)?.[2] as Record<string, string>).ad_storage, "denied");
+  assert.ok(cookieWrites.some(entry => /^_gcl_aw=; Max-Age=0/.test(entry)));
+  assert.ok(cookieWrites.every(entry => !/^necessary=/.test(entry)));
 
   // Preview/local tests cannot contaminate production conversion reports.
   saveAdsConsent("accepted");

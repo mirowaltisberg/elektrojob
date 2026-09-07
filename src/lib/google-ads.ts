@@ -165,3 +165,17 @@ export function subscribeAdsConsent(onChange: () => void): () => void {
     window.removeEventListener(ADS_CONSENT_EVENT, update);
   };
 }
+
+/** A tracking response problem must not change an already successful save. */
+export async function reportSavedApplication(response: Response): Promise<void> {
+  if (!response.ok) return;
+  try {
+    const saved: unknown = await response.json();
+    if (saved && typeof saved === "object" && "success" in saved &&
+        saved.success === true && "conversionId" in saved) {
+      trackSavedApplication(saved.conversionId);
+    }
+  } catch {
+    // A truncated/malformed tracking payload leaves the application successful.
+  }
+}
