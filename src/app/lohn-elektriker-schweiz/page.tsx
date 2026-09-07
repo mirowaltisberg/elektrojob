@@ -46,17 +46,17 @@ const ROLE_SALARIES: { role: string; entry: string; mid: string; senior: string;
 ];
 
 const CANTON_FACTORS: { canton: string; factor: string; note: string; slug: string }[] = [
-  { canton: "Zürich", factor: "+5 bis +10 %", note: "Höchste Lohnniveaus, dichter Markt, viele Grossprojekte.", slug: "zuerich" },
-  { canton: "Zug", factor: "+8 bis +12 %", note: "Steuergünstig, aber Top-Löhne dank Industrie- und Hightech-Sektor.", slug: "zug" },
-  { canton: "Basel", factor: "+5 bis +8 %", note: "Pharma/Industrie zahlen überdurchschnittlich, v.a. für Servicetechniker.", slug: "basel" },
-  { canton: "Bern", factor: "0 bis +3 %", note: "Solide Mittelwerte, breite Mischung Bund/Bau/Industrie.", slug: "bern" },
-  { canton: "Aargau", factor: "0 bis +2 %", note: "Industrie- und Energieversorger ziehen den Lohn leicht hoch.", slug: "aargau" },
-  { canton: "Luzern", factor: "−2 bis +2 %", note: "Mittelfeld, Tourismus- und Wohnbau treiben Nachfrage.", slug: "luzern" },
-  { canton: "St. Gallen", factor: "−2 bis +1 %", note: "Industriestandort mit konkurrenzfähigen Saläre.", slug: "st-gallen" },
-  { canton: "Solothurn", factor: "−3 bis 0 %", note: "Etwas unter dem Schweizer Mittel, dafür tiefere Lebenskosten.", slug: "solothurn" },
-  { canton: "Thurgau", factor: "−4 bis −1 %", note: "Ländlicher, aber spannende Industrieprojekte.", slug: "thurgau" },
-  { canton: "Graubünden", factor: "−5 bis −1 %", note: "Tourismus & Bergbahnen — Saisonarbeit häufig.", slug: "graubuenden" },
-  { canton: "Schaffhausen", factor: "−3 bis 0 %", note: "Maschinenindustrie sorgt für stabile Nachfrage.", slug: "schaffhausen" },
+  { canton: "Zürich", factor: "+5 bis +10 %", note: "Höchste Lohnniveaus, dichter Markt, viele Grossprojekte.", slug: "zh" },
+  { canton: "Zug", factor: "+8 bis +12 %", note: "Steuergünstig, aber Top-Löhne dank Industrie- und Hightech-Sektor.", slug: "zg" },
+  { canton: "Basel", factor: "+5 bis +8 %", note: "Pharma/Industrie zahlen überdurchschnittlich, v.a. für Servicetechniker.", slug: "bs" },
+  { canton: "Bern", factor: "0 bis +3 %", note: "Solide Mittelwerte, breite Mischung Bund/Bau/Industrie.", slug: "be" },
+  { canton: "Aargau", factor: "0 bis +2 %", note: "Industrie- und Energieversorger ziehen den Lohn leicht hoch.", slug: "ag" },
+  { canton: "Luzern", factor: "−2 bis +2 %", note: "Mittelfeld, Tourismus- und Wohnbau treiben Nachfrage.", slug: "lu" },
+  { canton: "St. Gallen", factor: "−2 bis +1 %", note: "Industriestandort mit konkurrenzfähigen Saläre.", slug: "sg" },
+  { canton: "Solothurn", factor: "−3 bis 0 %", note: "Etwas unter dem Schweizer Mittel, dafür tiefere Lebenskosten.", slug: "so" },
+  { canton: "Thurgau", factor: "−4 bis −1 %", note: "Ländlicher, aber spannende Industrieprojekte.", slug: "tg" },
+  { canton: "Graubünden", factor: "−5 bis −1 %", note: "Tourismus & Bergbahnen — Saisonarbeit häufig.", slug: "gr" },
+  { canton: "Schaffhausen", factor: "−3 bis 0 %", note: "Maschinenindustrie sorgt für stabile Nachfrage.", slug: "sh" },
   { canton: "Fribourg", factor: "−5 bis −2 %", note: "Zweisprachiger Markt, dynamisches Wachstum.", slug: "fribourg" },
 ];
 

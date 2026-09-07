@@ -1,5 +1,7 @@
 "use client";
 
+import { isSyntheticVisit } from "@/lib/application-client";
+
 export const ADS_TAG_ID = "AW-18434284216";
 export const ADS_CONVERSION = `${ADS_TAG_ID}/jv6KCMGvs_AcELi1k9ZE`;
 export const ADS_CONSENT_KEY = "jobsite-google-ads-consent-v1";
@@ -36,6 +38,7 @@ export function isProductionAdsHost(): boolean {
 }
 
 function canMeasure(): boolean {
+  if (isSyntheticVisit()) return false;
   return isProductionAdsHost() && readAdsConsent() === "accepted";
 }
 

@@ -12,13 +12,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { buildJobPostingSchema } from "@/lib/job-schema";
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getJobListingById, getSimilarJobListings } from "@/lib/job-catalog";
 import type { JobListing } from "@/lib/job-types";
 import { JobPrimaryAction, JobShareActions, RecentlyViewedJobs } from "@/components/job-detail-client-tools";
 import { TOP_LANDING_PAGES, getLandingPath } from "@/lib/landing-pages";
-import { estimateSalary, formatSalaryRange } from "@/lib/salary-estimates";
 
 interface JobDetailsPageProps {
   params: Promise<{ id: string }>;
@@ -83,22 +83,24 @@ export async function generateMetadata(props: JobDetailsPageProps): Promise<Meta
   const description = descParts.length > 155 ? descParts.slice(0, 152) + "..." : descParts;
 
   return {
-    title: job.title,
+    title: `${job.title} in ${job.location} · ${getDisplayJobId(job)}`,
     description,
     alternates: {
       canonical: `/jobs/${job.id}`,
     },
     openGraph: {
-      title: `${job.title} | elektrojob.ch`,
+      title: `${job.title} in ${job.location} | elektrojob.ch`,
       description,
       type: "article",
+      images: [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630, alt: `${job.title} in ${job.location}` }],
       url: `/jobs/${job.id}`,
       siteName: "elektrojob.ch",
       locale: "de_CH",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${job.title} | elektrojob.ch`,
+      images: [`${SITE_URL}/opengraph-image`],
+      title: `${job.title} in ${job.location} | elektrojob.ch`,
       description,
     },
   };
@@ -159,6 +161,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       <JsonLd data={buildJobBreadcrumbSchema(job)} />
+      <JsonLd data={buildJobPostingSchema(job, { siteName: "elektrojob.ch", siteUrl: SITE_URL, directApply: false })} />
       <header className="border-b sticky top-0 z-30 header-blur">
         <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center shrink-0">
@@ -210,12 +213,9 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
                     <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
                       <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
                         <Wallet className="h-4 w-4 text-primary shrink-0" />
-                        {job.salary || (() => {
-                          const est = estimateSalary(job.title);
-                          return est ? `~${formatSalaryRange(est)}` : "–";
-                        })()}
+                        {job.salary || "Nicht angegeben"}
                       </span>
-                      <span className="text-[11px] text-slate-600 uppercase tracking-wide">Lohn, CHF/Jahr</span>
+                      <span className="text-[11px] text-slate-600 uppercase tracking-wide">Lohnangabe</span>
                     </div>
                     <div className="bg-white px-3 sm:px-4 py-3 flex flex-col gap-0.5">
                       <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
@@ -320,7 +320,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
               <div className="mb-6">
                 <h2 className="font-bold text-slate-900 mb-2">Interessiert an dieser Stelle?</h2>
                 <p className="text-sm text-slate-500">
-                  Jetzt in weniger als 2 Minuten bewerben. Kein Konto nötig.
+                  Sende deine Angaben zur internen Prüfung. Kein Konto nötig; ein Lebenslauf ist optional.
                 </p>
               </div>
 
@@ -328,13 +328,10 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
 
               <div className="mt-6 pt-6 border-t text-sm text-slate-500 space-y-3">
                 {(() => {
-                  const salaryDisplay = job.salary || (() => {
-                    const est = estimateSalary(job.title);
-                    return est ? `~${formatSalaryRange(est)}` : null;
-                  })();
+                  const salaryDisplay = job.salary;
                   return salaryDisplay ? (
                     <div className="flex justify-between gap-3">
-                      <span>Lohn/Jahr</span>
+                      <span>Lohnangabe</span>
                       <span className="font-medium text-slate-900 text-right">{salaryDisplay}</span>
                     </div>
                   ) : null;
@@ -355,7 +352,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
         </div>
       </main>
 
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 px-4 pt-3 pb-[max(0.875rem,env(safe-area-inset-bottom))] bg-white border-t shadow-[0_-4px_12px_-2px_rgb(0,0,0,0.08)] z-20">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 px-4 pt-3 pb-[calc(3.25rem+env(safe-area-inset-bottom))] bg-white border-t shadow-[0_-4px_12px_-2px_rgb(0,0,0,0.08)] z-20">
         <JobPrimaryAction jobId={job.id} jobTitle={job.title} source={job.source} />
       </div>
     </div>

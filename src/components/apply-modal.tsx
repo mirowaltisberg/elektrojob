@@ -1,13 +1,23 @@
 "use client";
 
-import { reportSavedApplication } from "@/lib/google-ads";
+import { trackSavedApplication } from "@/lib/google-ads";
+import { getApplicationAnalytics, getTestRunId, getTestRunToken, readSavedApplication } from "@/lib/application-client";
 
-import { useCallback, useRef, useState } from "react";
-import { UploadCloud, CheckCircle2, Loader2, Zap, X, FileText, AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { useRef, useState } from "react";
+import { AlertCircle, CheckCircle2, FileText, Loader2, UploadCloud, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useHaptic } from "@/hooks/use-haptic";
+import {
+  MAX_APPLICATION_PDF_BYTES,
+  hasPdfMagic,
+  hasDisallowedPdfFeatures,
+  isAcceptedPdfMimeType,
+  isValidPdfFilename,
+} from "@/lib/application-validation";
+import { trackEvent } from "@/lib/analytics";
 import {
   Dialog,
   DialogContent,
@@ -17,147 +27,209 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const ACCEPTED_TYPES = [
-  "application/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-];
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-
 interface ApplyModalProps {
   jobId: string;
   jobTitle: string;
   onOpen?: () => void;
+  controllerName?: string;
 }
 
-export function ApplyModal({ jobId, jobTitle, onOpen }: ApplyModalProps) {
+export function ApplyModal({ jobId, jobTitle, onOpen, controllerName }: ApplyModalProps) {
   const { trigger } = useHaptic();
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [website, setWebsite] = useState("");
+  const [consent, setConsent] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-
+  const submissionIdRef = useRef<string | null>(null);
+  const fileSelectionRef = useRef(0);
+  const [isValidatingFile, setIsValidatingFile] = useState(false);
+  const formStartedAtRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const submissionInFlight = useRef(false);
 
   const resetForm = () => {
+    submissionIdRef.current = null;
     setName("");
-    setEmail("");
-    setPhone("");
+    setWebsite("");
+    setConsent(false);
     setCvFile(null);
     setError(null);
     setIsSuccess(false);
     setIsSubmitting(false);
+    formStartedAtRef.current = 0;
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleOpenChange = (open: boolean) => {
+    if (submissionInFlight.current || isValidatingFile) return;
     setIsOpen(open);
-    if (!open) {
-      setTimeout(resetForm, 300);
+    if (open) {
+      if (isSuccess) resetForm();
+      if (!formStartedAtRef.current) formStartedAtRef.current = Date.now();
+      submissionIdRef.current ??= crypto.randomUUID();
+      trackEvent("application_open", { job_id: jobId });
+      onOpen?.();
     }
   };
 
-  const validateFile = (file: File): string | null => {
-    if (!ACCEPTED_TYPES.includes(file.type)) {
-      return "Bitte lade eine PDF- oder DOCX-Datei hoch.";
+  const validateFile = async (file: File): Promise<string | null> => {
+    const filename = file.name.normalize("NFKC").trim();
+    if (
+      !isAcceptedPdfMimeType(file.type) ||
+      !isValidPdfFilename(filename)
+    ) {
+      return "Bitte lade ausschliesslich eine PDF-Datei mit einem gültigen Dateinamen hoch.";
     }
-    if (file.size > MAX_FILE_SIZE) {
-      return "Die Datei darf maximal 10 MB gross sein.";
+    if (file.size < 10 || file.size > MAX_APPLICATION_PDF_BYTES) {
+      return "Die PDF-Datei darf maximal 4 MB gross sein.";
+    }
+
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      if (hasDisallowedPdfFeatures(bytes)) return "Bitte exportiere den Lebenslauf als PDF ohne Passwortschutz oder ausführbare Inhalte.";
+      if (!hasPdfMagic(bytes)) {
+        return "Die ausgewählte Datei ist keine gültige PDF-Datei.";
+      }
+    } catch {
+      return "Die PDF-Datei konnte nicht gelesen werden.";
     }
     return null;
   };
 
-  const handleFileSelect = (file: File) => {
-    const fileError = validateFile(file);
+  const handleFileSelect = async (file: File) => {
+    const selection = ++fileSelectionRef.current;
+    setIsValidatingFile(true);
+    const fileError = await validateFile(file);
+    if (selection !== fileSelectionRef.current) return;
+    setIsValidatingFile(false);
     if (fileError) {
+      trackEvent("application_error", {
+        job_id: jobId,
+        error_kind: "file_validation",
+      });
       trigger("error");
       setError(fileError);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
     trigger("selection");
     setError(null);
     setCvFile(file);
+    trackEvent("application_file_selected", {
+      job_id: jobId,
+      file_size_bucket:
+        file.size < 1_000_000
+          ? "under_1mb"
+          : file.size < 3_000_000
+            ? "1_to_3mb"
+            : "3_to_4mb",
+    });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
-    }
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) void handleFileSelect(file);
   };
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      handleFileSelect(file);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const file = event.dataTransfer.files[0];
+    if (file) void handleFileSelect(file);
+  };
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
     setIsDragging(true);
-  }, []);
+  };
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.preventDefault();
     setIsDragging(false);
-  }, []);
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (submissionInFlight.current) return;
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (submissionInFlight.current || isValidatingFile || isSuccess) return;
     submissionInFlight.current = true;
     try {
       setError(null);
-      setIsSubmitting(true);
 
+      if (!cvFile || !consent) {
+        trackEvent("application_error", {
+          job_id: jobId,
+          error_kind: "missing_file_or_consent",
+        });
+        setError("Bitte füge einen PDF-Lebenslauf hinzu und bestätige die Einwilligung.");
+        trigger("error");
+        return;
+      }
+
+      setIsSubmitting(true);
+      const fileError = await validateFile(cvFile);
+      if (fileError) {
+        trackEvent("application_error", {
+          job_id: jobId,
+          error_kind: "file_validation",
+        });
+        setError(fileError);
+        trigger("error");
+        return;
+      }
+
+      setIsSubmitting(true);
+      trackEvent("application_submit", { job_id: jobId });
       try {
         const formData = new FormData();
         formData.append("jobId", jobId);
-        formData.append("name", name);
-        formData.append("email", email);
-        formData.append("phone", phone);
-        if (cvFile) {
-          formData.append("cv", cvFile);
-        }
+        formData.append("name", name.trim());
+        formData.append("website", website);
+        formData.append("formStartedAt", String(formStartedAtRef.current));
+        formData.append("consent", "yes");
+        formData.append("cv", cvFile);
+        submissionIdRef.current ??= crypto.randomUUID();
+        formData.append("submissionId", submissionIdRef.current);
+        formData.append("analytics", getApplicationAnalytics());
+        formData.append("testRunId", getTestRunId() ?? "");
+        formData.append("testToken", getTestRunToken() ?? "");
 
-        const res = await fetch("/api/applications", {
+        const response = await fetch("/api/applications", {
           method: "POST",
           body: formData,
+          credentials: "same-origin",
+          signal: AbortSignal.timeout(45_000),
+          headers: { Accept: "application/json" },
         });
 
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(
-            (data as { error?: string }).error || "Bewerbung konnte nicht gesendet werden."
-          );
-        }
-
-        await reportSavedApplication(res);
+        const saved = await readSavedApplication(response);
+        if (!saved.synthetic) trackSavedApplication(saved.conversionId);
 
         setIsSubmitting(false);
         setIsSuccess(true);
         trigger("success");
-
-        setTimeout(() => {
-          setIsOpen(false);
-          setTimeout(resetForm, 300);
-        }, 2500);
-      } catch (err) {
+      } catch (submissionError) {
+        formStartedAtRef.current = Date.now() - 3_000;
+        trackEvent("application_error", {
+          job_id: jobId,
+          error_kind: "submission",
+        });
         setIsSubmitting(false);
         trigger("error");
-        setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten.");
+        setError(
+          submissionError instanceof TypeError || (submissionError instanceof DOMException && ["AbortError", "TimeoutError"].includes(submissionError.name))
+            ? "Die Verbindung wurde unterbrochen. Deine Angaben bleiben erhalten. Bitte versuche es erneut."
+            : submissionError instanceof Error
+            ? submissionError.message
+            : "Online-Bewerbungen sind derzeit nicht verfügbar."
+        );
       }
     } finally {
+      setIsSubmitting(false);
       submissionInFlight.current = false;
     }
   };
@@ -171,116 +243,101 @@ export function ApplyModal({ jobId, jobTitle, onOpen }: ApplyModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button
-          className="w-full h-12 text-base sm:text-lg font-bold shadow-lg shadow-primary/20 rounded-xl btn-interactive"
-          onClick={onOpen}
-        >
-          Jetzt bewerben
+        <Button className="w-full h-12 text-base sm:text-lg font-bold shadow-lg shadow-primary/20 rounded-xl btn-interactive">
+          Bewerbung starten
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-[calc(100%-1rem)] sm:w-full max-w-none sm:max-w-[min(425px,calc(100vw-2rem))] max-h-[92dvh] sm:max-h-[85dvh] overflow-y-auto rounded-2xl p-4 sm:p-6 animate-modal-in top-auto bottom-2 sm:top-[50%] sm:bottom-auto translate-y-0 sm:translate-y-[-50%]">
+      <DialogContent className="w-[calc(100%-1rem)] sm:w-full max-w-none sm:max-w-[min(480px,calc(100vw-2rem))] max-h-[92dvh] sm:max-h-[85dvh] overflow-y-auto rounded-2xl p-4 sm:p-6 animate-modal-in top-auto bottom-2 sm:top-[50%] sm:bottom-auto translate-y-0 sm:translate-y-[-50%]">
         {!isSuccess ? (
           <>
             <DialogHeader>
               <DialogTitle className="text-xl sm:text-2xl font-bold text-slate-900 break-words pr-8">
-                Bewerben für {jobTitle}
+                Bewerbung für {jobTitle}
               </DialogTitle>
-              <DialogDescription className="text-slate-500">
-                Schnell und unkompliziert in unter 2 Minuten
+              <DialogDescription className="text-slate-600">
+                Nur dein Name und dein CV. {controllerName ?? "Das Team dieser Plattform"} prüft dein Dossier; es wird nicht automatisch weitergeleitet.
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6 mt-4">
-              <div className="space-y-3 sm:space-y-4">
+            <form onSubmit={handleSubmit} aria-busy={isSubmitting} className="space-y-4 mt-2">
+              <fieldset disabled={isSubmitting} className="space-y-4 min-w-0">
+              <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+                <Label htmlFor="apply-website">Website</Label>
+                <Input
+                  id="apply-website"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={website}
+                  onChange={(event) => setWebsite(event.target.value)}
+                />
+              </div>
+
+              <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="apply-name">Vollständiger Name</Label>
                   <Input
                     id="apply-name"
+                    autoComplete="name"
+                    maxLength={100}
                     required
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(event) => setName(event.target.value)}
                     placeholder="Max Muster"
-                    className="h-11 rounded-lg transition-shadow duration-200 focus-visible:shadow-[0_0_0_3px_oklch(0.795_0.155_75_/_20%)]"
+                    className="h-11 rounded-lg text-base"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="apply-email">E-Mail-Adresse</Label>
-                  <Input
-                    id="apply-email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="max@beispiel.ch"
-                    className="h-11 rounded-lg transition-shadow duration-200 focus-visible:shadow-[0_0_0_3px_oklch(0.795_0.155_75_/_20%)]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="apply-phone">Telefonnummer</Label>
-                  <Input
-                    id="apply-phone"
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+41 79 123 45 67"
-                    className="h-11 rounded-lg transition-shadow duration-200 focus-visible:shadow-[0_0_0_3px_oklch(0.795_0.155_75_/_20%)]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="apply-cv">Lebenslauf / CV</Label>
+                  <Label htmlFor="apply-cv">Lebenslauf / CV als PDF</Label>
                   <input
                     id="apply-cv"
                     ref={fileInputRef}
                     type="file"
-                    accept=".pdf,.doc,.docx"
+                    accept="application/pdf,.pdf"
+                    aria-describedby="apply-cv-help"
+                    tabIndex={-1}
                     className="sr-only"
                     onChange={handleFileChange}
                   />
 
+                  <p id="apply-cv-help" className="text-sm text-slate-600">PDF bis 4 MB. Bitte verwende einen CV mit Telefonnummer oder E-Mail-Adresse.</p>
+                  {isValidatingFile && <p role="status" className="text-sm">PDF wird geprüft...</p>}
+
                   {!cvFile ? (
-                    <div
-                      role="button"
-                      tabIndex={0}
+                    <button
+                      type="button"
+                      aria-label="PDF-Lebenslauf auswählen"
                       onClick={() => fileInputRef.current?.click()}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click();
-                      }}
                       onDrop={handleDrop}
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
-                      className={`border-2 border-dashed rounded-xl p-5 sm:p-6 flex flex-col items-center justify-center text-center transition-colors duration-200 cursor-pointer group ${
-                        isDragging
-                          ? "border-primary bg-primary/5"
-                          : "border-slate-200 hover:bg-slate-50 hover:border-primary/50"
+                      className={`w-full border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center transition-colors cursor-pointer ${
+                        isDragging ? "border-primary bg-primary/5" : "border-slate-200 hover:bg-slate-50"
                       }`}
                     >
-                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200 ease-out">
-                        <UploadCloud className="h-6 w-6 text-primary" />
-                      </div>
-                      <p className="text-sm font-medium text-slate-900">
-                        Klicken zum Hochladen oder Datei hineinziehen
-                      </p>
-                      <p className="text-xs text-slate-500 mt-1">PDF, DOCX bis 10 MB</p>
-                    </div>
+                      <UploadCloud className="h-7 w-7 text-primary mb-2" />
+                      <span className="text-sm font-semibold text-slate-900">CV auswählen</span>
+                      <span className="text-xs text-slate-500 mt-1">Oder die PDF hier hineinziehen</span>
+                    </button>
                   ) : (
                     <div className="border border-slate-200 rounded-xl p-3 flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <FileText className="h-5 w-5 text-primary" />
-                      </div>
+                      <FileText className="h-5 w-5 text-primary shrink-0" />
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-slate-900 truncate">{cvFile.name}</p>
                         <p className="text-xs text-slate-500">{formatFileSize(cvFile.size)}</p>
+                        <button type="button" onClick={() => fileInputRef.current?.click()} className="min-h-11 text-sm underline">Anderen CV wählen</button>
                       </div>
                       <button
                         type="button"
+                        aria-label="PDF entfernen"
                         onClick={() => {
-                          trigger("selection");
+                          fileSelectionRef.current += 1;
+                          setIsValidatingFile(false);
                           setCvFile(null);
                           if (fileInputRef.current) fileInputRef.current.value = "";
                         }}
-                        className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                        className="flex min-h-11 min-w-11 items-center justify-center rounded-md hover:bg-slate-100 text-slate-500"
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -289,8 +346,30 @@ export function ApplyModal({ jobId, jobTitle, onOpen }: ApplyModalProps) {
                 </div>
               </div>
 
+              <label className="flex items-start gap-3 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  required
+                  checked={consent}
+                  onChange={(event) => setConsent(event.target.checked)}
+                  className="mt-1 h-5 w-5 shrink-0 rounded border-slate-300"
+                />
+                <span>
+                  Ich stimme der Verarbeitung meiner Angaben und meines CV gemäss der{" "}
+                  <Link
+                    href="/datenschutz"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline font-medium"
+                  >
+                    Datenschutzerklärung
+                  </Link>{" "}
+                  zur Prüfung meiner Bewerbung zu.
+                </span>
+              </label>
+
               {error && (
-                <div className="flex items-start gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+                <div className="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3" role="alert">
                   <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
@@ -298,32 +377,30 @@ export function ApplyModal({ jobId, jobTitle, onOpen }: ApplyModalProps) {
 
               <Button
                 type="submit"
-                className="w-full h-12 rounded-xl text-base font-bold btn-interactive"
-                disabled={isSubmitting}
+                className="w-full h-12 rounded-xl text-base font-bold"
+                disabled={isSubmitting || isValidatingFile}
               >
                 {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Bewerbung wird gesendet...
-                  </>
+                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Bewerbung wird gespeichert...</>
                 ) : (
-                  <>
-                    <Zap className="mr-2 h-5 w-5 fill-current" />
-                    Bewerbung absenden
-                  </>
+                  "Bewerbung zur Prüfung senden"
                 )}
               </Button>
+              <Link href="/kontakt" target="_blank" rel="noopener noreferrer" className="inline-block text-sm underline">Kontakt aufnehmen</Link>
+              </fieldset>
             </form>
           </>
         ) : (
-          <div className="py-10 sm:py-12 flex flex-col items-center justify-center text-center space-y-4">
-            <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mb-2 animate-success-pop">
-              <CheckCircle2 className="h-10 w-10 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900">Bewerbung gesendet!</h2>
-            <p className="text-slate-500">
-              Deine Bewerbung wurde erfolgreich übermittelt. Viel Erfolg!
-            </p>
+          <div className="py-10 flex flex-col items-center justify-center text-center space-y-4">
+            <CheckCircle2 className="h-14 w-14 text-green-600" />
+            <DialogTitle className="text-2xl font-bold text-slate-900">Bewerbung gespeichert</DialogTitle>
+            <DialogDescription className="text-slate-600">
+              Dein Name und CV sind zur Prüfung eingegangen. Das Team nutzt die Kontaktdaten in deinem CV für Rückfragen. Dein Dossier wurde nicht automatisch an einen Arbeitgeber weitergeleitet.
+            </DialogDescription>
+            <Link href="/kontakt" className="text-sm underline">Rückfrage zu deiner Bewerbung</Link>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+              Schliessen
+            </Button>
           </div>
         )}
       </DialogContent>

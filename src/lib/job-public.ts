@@ -158,8 +158,8 @@ export function buildPublicJobCopy(input: PublicJobCopyInput): PublicJobCopy {
   // do not exactly match the structured company field.
   const title = canonicalPublicTitle(input.title);
   const location = cleanJobText(input.location) || "Schweiz";
-  const type = cleanJobText(input.type) || "Festanstellung";
-  const workload = cleanJobText(input.workload) || "80-100%";
+  const type = cleanJobText(input.type);
+  const workload = cleanJobText(input.workload);
   const profile = profileForTitle(title);
 
   return {
@@ -169,11 +169,10 @@ export function buildPublicJobCopy(input: PublicJobCopyInput): PublicJobCopy {
       title +
       " in " +
       location +
-      ". Diese veröffentlichte Stelle ist als " +
-      type +
-      " mit einem Pensum von " +
-      workload +
-      " ausgeschrieben. Angaben zum Arbeitgeber bleiben vertraulich und werden im Bewerbungsprozess offengelegt.",
+      ". " +
+      (type ? "Anstellungsart laut Inserat: " + type + ". " : "Anstellungsart nicht angegeben. ") +
+      (workload ? "Pensum laut Inserat: " + workload + ". " : "Pensum nicht angegeben. ") +
+      "Arbeitgeberangaben werden auf der öffentlichen Stellenansicht nicht angezeigt.",
     responsibilities: profile.responsibilities,
     requirements: profile.requirements,
     benefits: [],

@@ -340,8 +340,8 @@ function toPublicSalary(value: string): string | undefined {
 
 function toScrapedListing(job: ScrapedJob, relevanceScore: number): JobListing {
   const location = cleanJobText(job.location) || "Schweiz";
-  const type = cleanJobText(job.type) || "Festanstellung";
-  const workload = cleanJobText(job.workload) || "80-100%";
+  const type = cleanJobText(job.type) || "Nicht angegeben";
+  const workload = cleanJobText(job.workload) || "Nicht angegeben";
   const publicCopy = buildPublicJobCopy({
     title: job.title,
     company: job.company,
