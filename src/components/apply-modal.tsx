@@ -1,5 +1,7 @@
 "use client";
 
+import { trackSavedApplication } from "@/lib/google-ads";
+
 import { useCallback, useRef, useState } from "react";
 import { UploadCloud, CheckCircle2, Loader2, Zap, X, FileText, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,6 +44,7 @@ export function ApplyModal({ jobId, jobTitle, onOpen }: ApplyModalProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const submissionInFlight = useRef(false);
 
   const resetForm = () => {
     setName("");
@@ -111,43 +114,53 @@ export function ApplyModal({ jobId, jobTitle, onOpen }: ApplyModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
-
+    if (submissionInFlight.current) return;
+    submissionInFlight.current = true;
     try {
-      const formData = new FormData();
-      formData.append("jobId", jobId);
-      formData.append("name", name);
-      formData.append("email", email);
-      formData.append("phone", phone);
-      if (cvFile) {
-        formData.append("cv", cvFile);
+      setError(null);
+      setIsSubmitting(true);
+
+      try {
+        const formData = new FormData();
+        formData.append("jobId", jobId);
+        formData.append("name", name);
+        formData.append("email", email);
+        formData.append("phone", phone);
+        if (cvFile) {
+          formData.append("cv", cvFile);
+        }
+
+        const res = await fetch("/api/applications", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(
+            (data as { error?: string }).error || "Bewerbung konnte nicht gesendet werden."
+          );
+        }
+
+        const saved = await res.json();
+        if (saved.success !== true) throw new Error("Die Speicherung wurde nicht bestätigt.");
+        trackSavedApplication(saved.conversionId);
+
+        setIsSubmitting(false);
+        setIsSuccess(true);
+        trigger("success");
+
+        setTimeout(() => {
+          setIsOpen(false);
+          setTimeout(resetForm, 300);
+        }, 2500);
+      } catch (err) {
+        setIsSubmitting(false);
+        trigger("error");
+        setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten.");
       }
-
-      const res = await fetch("/api/applications", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(
-          (data as { error?: string }).error || "Bewerbung konnte nicht gesendet werden."
-        );
-      }
-
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      trigger("success");
-
-      setTimeout(() => {
-        setIsOpen(false);
-        setTimeout(resetForm, 300);
-      }, 2500);
-    } catch (err) {
-      setIsSubmitting(false);
-      trigger("error");
-      setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten.");
+    } finally {
+      submissionInFlight.current = false;
     }
   };
 

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getJobListingById } from "@/lib/job-catalog";
 import { createAdminClient } from "@/lib/supabase";
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
     }
 
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, conversionId: randomUUID() });
   } catch (error) {
     console.error("Application error:", error);
     return NextResponse.json(
