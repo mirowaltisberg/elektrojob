@@ -53,4 +53,6 @@ export interface JobSearchParams {
   postedWithinDays?: number;
   sort?: JobSort;
   homepageOnly?: boolean;
+  /** User-facing searches may show explicitly labelled alternatives when empty. */
+  allowAlternatives?: boolean;
 }
