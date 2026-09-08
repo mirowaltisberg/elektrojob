@@ -159,6 +159,7 @@ interface JobsApiResponse {
   limit: number;
   facets: JobFacets;
   scrapedAt: string | null;
+  alternativeMessage: string | null;
 }
 
 function normalize(value: string): string {
@@ -202,6 +203,7 @@ interface InitialJobData {
   limit: number;
   facets: JobFacets;
   scrapedAt: string | null;
+  alternativeMessage?: string | null;
 }
 
 interface HomepageSearchProps {
@@ -218,6 +220,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
 
   const [jobs, setJobs] = useState<JobListing[]>(initialData?.jobs ?? []);
   const [totalJobs, setTotalJobs] = useState(initialData?.total ?? 0);
+  const [alternativeMessage, setAlternativeMessage] = useState<string | null>(initialData?.alternativeMessage ?? null);
   const [facets, setFacets] = useState<JobFacets>(initialData?.facets ?? DEFAULT_FACETS);
   const [scrapedAt, setScrapedAt] = useState<string | null>(initialData?.scrapedAt ?? null);
   const [searchKey, setSearchKey] = useState(0);
@@ -228,7 +231,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
   const [remoteFilter, setRemoteFilter] = useState<RemoteFilter>("any");
   const [postedWithinDays, setPostedWithinDays] = useState("30");
   const [radiusKm, setRadiusKm] = useState(DEFAULT_RADIUS_KM);
-  const [sortBy, setSortBy] = useState<JobSort>("newest");
+  const [sortBy, setSortBy] = useState<JobSort>("relevance");
 
   const [isLoading, setIsLoading] = useState(!initialData);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -340,7 +343,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
           offset: String(nextOffset),
           sort: sortBy,
           remote: remoteFilter,
-          homepageOnly: "true",
+          allowAlternatives: "true",
         });
 
         if (typeFilter !== "all") {
@@ -383,6 +386,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
           return nextJobs;
         });
         setTotalJobs(data.total);
+        setAlternativeMessage(data.alternativeMessage ?? null);
         setFacets(data.facets ?? DEFAULT_FACETS);
         setScrapedAt(data.scrapedAt ?? null);
 
@@ -531,7 +535,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
     setRemoteFilter("any");
     setPostedWithinDays("30");
     setRadiusKm(DEFAULT_RADIUS_KM);
-    setSortBy("newest");
+    setSortBy("relevance");
     trackEvent("filter_reset");
   };
 
@@ -546,7 +550,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
     setRemoteFilter("any");
     setPostedWithinDays("30");
     setRadiusKm(DEFAULT_RADIUS_KM);
-    setSortBy("newest");
+    setSortBy("relevance");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
@@ -593,7 +597,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
               <span className="block text-[0.72em] font-extrabold text-slate-700 mt-1.5 sm:mt-3">in der ganzen Schweiz</span>
             </h1>
             <p className="text-sm sm:text-lg text-slate-600 mb-6 sm:mb-8 max-w-2xl sm:mx-auto">
-              Ausgewählte Elektrojobs mit konkreten Angaben zu Ort, Pensum, Aufgaben und Anforderungen. Schnell filtern nach Beruf und Arbeitsort.
+              Aktuelle Elektrojobs in der ganzen Schweiz. Ausführliche Inserate zuerst, alle Stellen durchsuchbar – nach Beruf, Arbeitsort und Pensum.
             </p>
 
             <form
@@ -675,7 +679,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
-                  {hasSearched ? "Suchergebnisse" : "Aktuelle Elektrojobs"}
+                  {alternativeMessage ? "Alternative Stellen" : hasSearched ? "Suchergebnisse" : "Aktuelle Elektrojobs"}
                 </h2>
                 {hasActiveLocation && (
                   <p className="text-xs text-slate-500 mt-1">
@@ -695,7 +699,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                   <span key={searchKey} className="count-animate">
                     {visibleJobs} von {totalJobs}
                   </span>{" "}
-                  Stellen
+                  {alternativeMessage ? "Vorschläge" : "Stellen"}
                 </span>
               )}
             </div>
@@ -816,6 +820,13 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                     className={`skeleton-card h-32 sm:h-36 border border-slate-100 skeleton-stagger-${i}`}
                   />
                 ))}
+              </div>
+            )}
+
+            {!isLoading && !isRefreshing && !errorMessage && alternativeMessage && jobs.length > 0 && (
+              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-slate-700" role="status" aria-live="polite">
+                <p className="font-semibold text-slate-900">Keine exakten Treffer – weitere aktuelle Stellen</p>
+                <p className="mt-1">{alternativeMessage}</p>
               </div>
             )}
 

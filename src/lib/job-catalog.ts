@@ -6,34 +6,17 @@ import {
 } from "@/lib/scraped-jobs";
 import { cleanJobText } from "@/lib/job-text-clean";
 import { buildPublicJobCopy } from "@/lib/job-public";
-import { matchesJobLocation, matchesJobQuery } from "@/lib/job-search-matching";
 import { getPublicJobLocation, getVerifiedJobDetails } from "@/lib/job-source-quality";
-import { getCantonSearchCode } from "@/lib/canton-search";
-import { calculateDistanceKm, resolveLocationCoordinate, type Coordinate } from "@/lib/location-distance";
 import type {
-  JobFacets,
   JobListing,
   JobSearchParams,
-  JobSort,
-  RemoteFilter,
 } from "@/lib/job-types";
 
-const DEFAULT_LIMIT = 30;
-const MAX_LIMIT = 200;
-const MIN_RADIUS_KM = 5;
-const MAX_RADIUS_KM = 300;
+import { searchJobListingsInCatalogue, sortJobs, type JobSearchResult } from "@/lib/job-search";
+export type { JobSearchResult } from "@/lib/job-search";
+
 const SCRAPE_STALE_HOURS = Math.max(1, Number(process.env.SCRAPE_STALE_HOURS ?? 72));
 const MIN_RELEVANCE_SCORE = 2;
-const COUNTRY_WIDE_LOCATIONS = new Set([
-  "schweiz",
-  "ganze schweiz",
-  "schweizweit",
-  "switzerland",
-  "whole switzerland",
-  "ch",
-]);
-const coordinateCache = new Map<string, Coordinate | null>();
-
 const POSITIVE_KEYWORDS = [
   "elektro",
   "elektriker",
@@ -225,30 +208,8 @@ const OTHER_TRADE_KEYWORDS = [
   "gartenbau",
 ];
 
-interface NormalizedParams {
-  q: string;
-  loc: string;
-  radiusKm: number | null;
-  limit: number;
-  offset: number;
-  type: string;
-  workload: string;
-  remote: RemoteFilter;
-  postedWithinDays: number | null;
-  sort: JobSort;
-}
-
 interface SourceBundle {
   scrapedJobs: JobListing[];
-  scrapedAt: string | null;
-}
-
-export interface JobSearchResult {
-  jobs: JobListing[];
-  total: number;
-  offset: number;
-  limit: number;
-  facets: JobFacets;
   scrapedAt: string | null;
 }
 
@@ -322,10 +283,6 @@ function scoreScrapedJob(job: ScrapedJob): number {
   return score;
 }
 
-function normalizeWorkload(value: string): string {
-  return value.replace(/\s+/g, "").trim();
-}
-
 function dedupeSignature(job: Pick<ScrapedJob, "title" | "company" | "location">): string {
   return normalizeText(job.title) + "|" + normalizeText(job.company) + "|" + normalizeText(job.location);
 }
@@ -382,15 +339,15 @@ function toScrapedListing(job: ScrapedJob, relevanceScore: number): JobListing {
 }
 
 let cachedCurated: JobListing[] | null = null;
-let cachedCuratedAt = 0;
-const CURATED_TTL_MS = 120_000;
+let cachedCuratedSource: ScrapedJob[] | null = null;
 
 async function buildCuratedScrapedListings(): Promise<JobListing[]> {
-  if (cachedCurated && Date.now() - cachedCuratedAt < CURATED_TTL_MS) return cachedCurated;
+  const source = await loadScrapedJobs();
+  if (cachedCurated && cachedCuratedSource === source) return cachedCurated;
 
   const deduped = new Map<string, JobListing>();
 
-  for (const job of await loadScrapedJobs()) {
+  for (const job of source) {
     const relevanceScore = scoreScrapedJob(job);
     if (relevanceScore < MIN_RELEVANCE_SCORE) {
       continue;
@@ -419,140 +376,8 @@ async function buildCuratedScrapedListings(): Promise<JobListing[]> {
 
   const result = [...deduped.values()];
   cachedCurated = result;
-  cachedCuratedAt = Date.now();
+  cachedCuratedSource = source;
   return result;
-}
-
-function isValueInFilter(fieldValue: string, selectedValue: string): boolean {
-  const normalizedField = normalizeText(fieldValue);
-  const normalizedSelected = normalizeText(selectedValue);
-
-  if (!normalizedSelected || normalizedSelected === "all") {
-    return true;
-  }
-
-  return normalizedField.includes(normalizedSelected);
-}
-
-function getCachedCoordinate(location: string): Coordinate | null {
-  const normalizedLocation = normalizeText(location);
-  if (!normalizedLocation) {
-    return null;
-  }
-
-  if (coordinateCache.has(normalizedLocation)) {
-    return coordinateCache.get(normalizedLocation) ?? null;
-  }
-
-  const resolved = resolveLocationCoordinate(location);
-  coordinateCache.set(normalizedLocation, resolved);
-  return resolved;
-}
-
-function matchesLocationWithRadius(
-  job: JobListing,
-  location: string,
-  radiusKm: number | null,
-  originCoordinate: Coordinate | null
-): boolean {
-  if (!location) {
-    return true;
-  }
-
-  if (getCantonSearchCode(location) || !radiusKm || !originCoordinate) {
-    return matchesJobLocation(job, location);
-  }
-
-  const jobCoordinate = getCachedCoordinate(job.location);
-  if (!jobCoordinate) {
-    return matchesJobLocation(job, location);
-  }
-
-  return calculateDistanceKm(originCoordinate, jobCoordinate) <= radiusKm;
-}
-
-function matchesRemote(job: JobListing, remote: RemoteFilter): boolean {
-  if (remote === "any") {
-    return true;
-  }
-
-  if (remote === "true") {
-    return job.isRemote === true;
-  }
-
-  return job.isRemote === false;
-}
-
-function matchesPostedWithinDays(job: JobListing, postedWithinDays: number | null): boolean {
-  if (!postedWithinDays) {
-    return true;
-  }
-
-  const dateMs = parseIsoDateMs(job.datePosted);
-  if (!dateMs) {
-    return false;
-  }
-
-  const thresholdMs = Date.now() - postedWithinDays * 24 * 60 * 60 * 1000;
-  return dateMs >= thresholdMs;
-}
-
-function sortJobs(jobs: JobListing[], sort: JobSort): JobListing[] {
-  return [...jobs].sort((a, b) => {
-    if (sort === "oldest") {
-      return parseIsoDateMs(a.datePosted) - parseIsoDateMs(b.datePosted);
-    }
-
-    if (sort === "relevance") {
-      const relevanceDelta = (b.relevanceScore ?? 0) - (a.relevanceScore ?? 0);
-      if (relevanceDelta !== 0) {
-        return relevanceDelta;
-      }
-    }
-
-    return parseIsoDateMs(b.datePosted) - parseIsoDateMs(a.datePosted);
-  });
-}
-
-function buildFacets(jobs: JobListing[]): JobFacets {
-  const typeCounts = new Map<string, number>();
-  const workloadCounts = new Map<string, number>();
-  const remote = {
-    true: 0,
-    false: 0,
-    unknown: 0,
-  };
-
-  for (const job of jobs) {
-    const type = job.type.trim();
-    const workload = normalizeWorkload(job.workload);
-
-    if (type) {
-      typeCounts.set(type, (typeCounts.get(type) ?? 0) + 1);
-    }
-    if (workload) {
-      workloadCounts.set(workload, (workloadCounts.get(workload) ?? 0) + 1);
-    }
-
-    if (job.isRemote === true) {
-      remote.true += 1;
-    } else if (job.isRemote === false) {
-      remote.false += 1;
-    } else {
-      remote.unknown += 1;
-    }
-  }
-
-  const mapToSortedArray = (map: Map<string, number>) =>
-    [...map.entries()]
-      .map(([value, count]) => ({ value, count }))
-      .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "de-CH"));
-
-  return {
-    types: mapToSortedArray(typeCounts),
-    workloads: mapToSortedArray(workloadCounts),
-    remote,
-  };
 }
 
 export function isScrapedDataStale(scrapedAt: string | null): boolean {
@@ -569,56 +394,6 @@ export function isScrapedDataStale(scrapedAt: string | null): boolean {
   return Date.now() - scrapedAtMs > maxAgeMs;
 }
 
-function normalizeLocationFilter(location: string): string {
-  const trimmed = location.trim();
-  if (!trimmed) {
-    return "";
-  }
-
-  if (COUNTRY_WIDE_LOCATIONS.has(normalizeText(trimmed))) {
-    return "";
-  }
-
-  return trimmed;
-}
-
-function normalizeSearchParams(params: JobSearchParams): NormalizedParams {
-  const limit = Math.min(
-    Math.max(Number.isFinite(params.limit) ? Number(params.limit) : DEFAULT_LIMIT, 1),
-    MAX_LIMIT
-  );
-  const offset = Math.max(Number.isFinite(params.offset) ? Number(params.offset) : 0, 0);
-  const radiusRaw = Number(params.radiusKm);
-  const radiusKm =
-    Number.isFinite(radiusRaw) && radiusRaw > 0
-      ? Math.min(Math.max(Math.round(radiusRaw), MIN_RADIUS_KM), MAX_RADIUS_KM)
-      : null;
-  const postedWithinDaysRaw = Number(params.postedWithinDays);
-  const postedWithinDays =
-    Number.isFinite(postedWithinDaysRaw) && postedWithinDaysRaw > 0 ? postedWithinDaysRaw : null;
-
-  const sort: JobSort = ["newest", "oldest", "relevance"].includes(params.sort ?? "")
-    ? (params.sort as JobSort)
-    : "newest";
-
-  const remote: RemoteFilter = ["any", "true", "false"].includes(params.remote ?? "")
-    ? (params.remote as RemoteFilter)
-    : "any";
-
-  return {
-    q: (params.q ?? "").trim(),
-    loc: normalizeLocationFilter(params.loc ?? ""),
-    radiusKm,
-    limit,
-    offset,
-    type: (params.type ?? "").trim(),
-    workload: (params.workload ?? "").trim(),
-    remote,
-    postedWithinDays,
-    sort,
-  };
-}
-
 async function getSourceJobs(): Promise<SourceBundle> {
   const [meta, curatedScraped] = await Promise.all([
     getScrapedMeta(),
@@ -631,45 +406,9 @@ async function getSourceJobs(): Promise<SourceBundle> {
   };
 }
 
-function applySecondaryFilters(
-  jobs: JobListing[],
-  normalized: NormalizedParams
-): JobListing[] {
-  return jobs.filter(
-    (job) =>
-      isValueInFilter(job.type, normalized.type) &&
-      isValueInFilter(normalizeWorkload(job.workload), normalizeWorkload(normalized.workload)) &&
-      matchesRemote(job, normalized.remote) &&
-      matchesPostedWithinDays(job, normalized.postedWithinDays)
-  );
-}
-
 export async function searchJobListings(params: JobSearchParams): Promise<JobSearchResult> {
-  const normalized = normalizeSearchParams(params);
   const sourceBundle = await getSourceJobs();
-  const originCoordinate =
-    normalized.loc && normalized.radiusKm ? getCachedCoordinate(normalized.loc) : null;
-
-  const scopedJobs = sourceBundle.scrapedJobs.filter(
-    (job) =>
-      (!params.homepageOnly || job.hasVerifiedDetails === true) &&
-      matchesJobQuery(job, normalized.q) &&
-      matchesLocationWithRadius(job, normalized.loc, normalized.radiusKm, originCoordinate)
-  );
-  const filteredJobs = applySecondaryFilters(scopedJobs, normalized);
-  const facets = buildFacets(scopedJobs);
-  const sortedJobs = sortJobs(filteredJobs, normalized.sort);
-  const total = sortedJobs.length;
-  const paged = sortedJobs.slice(normalized.offset, normalized.offset + normalized.limit);
-
-  return {
-    jobs: paged,
-    total,
-    offset: normalized.offset,
-    limit: normalized.limit,
-    facets,
-    scrapedAt: sourceBundle.scrapedAt,
-  };
+  return searchJobListingsInCatalogue(sourceBundle.scrapedJobs, params, sourceBundle.scrapedAt);
 }
 
 async function normalizeScrapedById(id: string): Promise<JobListing | null> {
@@ -745,7 +484,7 @@ export async function getSimilarJobListings(current: JobListing, limit = 4): Pro
     .map(({ candidate }) => candidate);
 }
 
-export async function getIndexableJobListings(limit = 400): Promise<JobListing[]> {
+export async function getIndexableJobListings(): Promise<JobListing[]> {
   const curatedScraped = await buildCuratedScrapedListings();
-  return sortJobs(curatedScraped, "newest").slice(0, limit);
+  return sortJobs(curatedScraped, "newest");
 }

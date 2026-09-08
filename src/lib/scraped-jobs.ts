@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { createAdminClient } from "@/lib/supabase";
+import { createJobSnapshotLoader } from "@/lib/job-snapshot";
 
 const TRADE = "elektro";
 const RUNTIME_MAX_AGE_DAYS = 45;
@@ -29,11 +30,6 @@ export interface ScrapedJob {
 
 /** Listing-friendly version without fullDescription */
 export type ScrapedJobListing = Omit<ScrapedJob, "fullDescription">;
-
-// --- TTL cache ---
-const CACHE_TTL_MS = 300_000;
-let cachedJobs: ScrapedJob[] | null = null;
-let cachedAt = 0;
 
 interface DbRow {
   id: string;
@@ -122,89 +118,34 @@ function loadFromJson(): ScrapedJob[] {
   }
 }
 
-const SUPABASE_PAGE_SIZE = 1000;
-
-/**
- * Load all scraped jobs from Supabase (with TTL cache).
- * Paginates through all results since Supabase limits to 1000 rows per request.
- * Falls back to local JSON if Supabase is unreachable.
- */
-export async function loadScrapedJobs(): Promise<ScrapedJob[]> {
-  if (cachedJobs && Date.now() - cachedAt < CACHE_TTL_MS) {
-    return cachedJobs;
-  }
-
-  try {
-    const supabase = createAdminClient();
-    const allRows: DbRow[] = [];
-    let from = 0;
-
-    while (true) {
-      const { data, error } = await supabase
-        .from("jobs")
-        .select(PUBLICATION_SELECT)
-        .eq("trade", TRADE)
-        .gte("date_posted", runtimeCutoffDate())
-        .order("date_posted", { ascending: false })
-        .range(from, from + SUPABASE_PAGE_SIZE - 1);
-
-      if (error || !data || data.length === 0) {
-        break;
-      }
-
-      allRows.push(...(data as unknown as DbRow[]));
-
-      if (data.length < SUPABASE_PAGE_SIZE) {
-        break;
-      }
-
-      from += SUPABASE_PAGE_SIZE;
-    }
-
-    if (allRows.length > 0) {
-      cachedJobs = allRows.map(mapRowToScrapedJob);
-      cachedAt = Date.now();
-      return cachedJobs;
-    }
-  } catch {
-    // fall through to JSON fallback
-  }
-
-  return loadFromJson();
-}
-
-/** Get a single job by ID with full description.
- *  Checks the in-memory cache first to avoid a DB round-trip
- *  when loadScrapedJobs has already been called recently.
- */
-export async function getScrapedJobById(id: string): Promise<ScrapedJob | null> {
-  // Fast path: check in-memory cache first (avoids Supabase round-trip)
-  if (cachedJobs && Date.now() - cachedAt < CACHE_TTL_MS) {
-    const cached = cachedJobs.find((j) => j.id === id);
-    if (cached) {
-      return cached;
-    }
-  }
-
-  try {
+/** Lists and detail pages use the same complete, short-lived publication snapshot. */
+const readJobSnapshot = createJobSnapshotLoader<ScrapedJob>({
+  pageSize: 1000,
+  ttlMs: 300_000,
+  fallback: loadFromJson,
+  async readPage(from, to) {
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("jobs")
       .select(PUBLICATION_SELECT)
-      .eq("id", id)
       .eq("trade", TRADE)
       .gte("date_posted", runtimeCutoffDate())
-      .single();
+      .order("date_posted", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to);
 
-    if (!error && data) {
-      return mapRowToScrapedJob(data as unknown as DbRow);
-    }
-  } catch {
-    // fall through to JSON fallback
-  }
+    if (error || data === null) throw error ?? new Error("Stellen konnten nicht geladen werden");
+    return (data as unknown as DbRow[]).map(mapRowToScrapedJob);
+  },
+});
 
-  // Fallback: search local JSON
-  const jobs = loadFromJson();
+export async function loadScrapedJobs(): Promise<ScrapedJob[]> {
+  return readJobSnapshot();
+}
+
+/** Never revive an absent live job from a separate bundled-file lookup. */
+export async function getScrapedJobById(id: string): Promise<ScrapedJob | null> {
+  const jobs = await loadScrapedJobs();
   return jobs.find((j) => j.id === id) ?? null;
 }
 

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
 
@@ -37,9 +37,9 @@ export default async function HomePage() {
     loc: "",
     limit: 12,
     offset: 0,
-    sort: "newest",
+    sort: "relevance",
     postedWithinDays: 30,
-    homepageOnly: true,
+    allowAlternatives: true,
   });
 
   return (

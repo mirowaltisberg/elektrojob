@@ -9,7 +9,7 @@ import { JsonLd } from "@/components/json-ld";
 const HOMEPAGE_FAQS = [
   {
     question: "Welche Elektriker Jobs gibt es auf elektrojob.ch?",
-    answer: "Auf der Startseite findest du ausgewählte Stellen aus der Schweizer Elektrobranche mit konkreten Angaben zu Ort, Pensum, Aufgaben und Anforderungen. Welche Berufe und Regionen aktuell vertreten sind, siehst du in der Trefferliste. Die Auswahl ändert sich mit den verfügbaren Inseraten. Weitere Berufs- und Kantonsseiten können auch Stellen mit noch unvollständigen Angaben enthalten; dort werden fehlende Details kenntlich gemacht.",
+    answer: "Du durchsuchst den gesamten aktuellen Stellenbestand aus der Schweizer Elektrobranche. Bei der Sortierung nach Relevanz stehen ausführlich beschriebene Stellen zuerst. Welche Berufe und Regionen vertreten sind, siehst du in der Trefferliste. Fehlende Angaben werden nicht erfunden. Wenn keine Stelle alle Filter erfüllt, zeigen wir ausdrücklich bezeichnete Alternativen.",
   },
   {
     question: "Warum zeigen manche Stellen keinen Lohn?",
@@ -29,7 +29,7 @@ const HOMEPAGE_FAQS = [
   },
   {
     question: "Wie finde ich Stellen mit reduziertem Pensum?",
-    answer: "Nutze den Pensum-Filter und wähle einen der aktuell verfügbaren Werte. Die Startseite zeigt nur Stellen, deren Arbeitspensum ausdrücklich angegeben ist. Ein Bereich wie 80–100 Prozent beschreibt den Rahmen im Inserat; das konkrete Pensum wird im Bewerbungsprozess vereinbart. Wir ersetzen fehlende Pensumsangaben nicht durch Standardwerte.",
+    answer: "Nutze den Pensum-Filter und wähle einen der aktuell verfügbaren Werte. Exakte Treffer berücksichtigen das im Inserat angegebene Pensum. Gibt es keine exakten Treffer, können die gekennzeichneten Alternativen ein anderes oder noch nicht bekanntes Pensum haben. Ein Bereich wie 80–100 Prozent beschreibt den Rahmen im Inserat; das konkrete Pensum wird im Bewerbungsprozess vereinbart. Wir ersetzen fehlende Pensumsangaben nicht durch Standardwerte.",
   },
 ];
 
@@ -59,16 +59,17 @@ export function HomepageSeoContent() {
       <div className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 max-w-5xl">
         <div className="mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">
-            Ausgewählte Elektriker Jobs in der Schweiz
+            Aktuelle Elektriker Jobs in der Schweiz
           </h2>
           <p className="text-slate-600 text-base sm:text-lg leading-relaxed mb-4">
-            Auf der Startseite zeigen wir Elektrojobs mit konkreten Aufgaben, Anforderungen,
-            einem Arbeitsort und einem angegebenen Pensum. So kannst du die wichtigsten
-            Stellenangaben vergleichen, bevor du deine Bewerbung sendest.
+            Hier findest du den gesamten aktuellen Stellenbestand. Ausführliche Inserate stehen
+            bei der Sortierung nach Relevanz zuerst. Vergleiche die vorhandenen Angaben
+            zu Arbeitsort, Pensum, Aufgaben und Anforderungen vor deiner Bewerbung.
           </p>
           <p className="text-slate-600 text-base leading-relaxed">
             Suche nach Beruf, Ort, Umkreis und Pensum. Die angezeigten Ergebnisse richten
-            sich nach den aktuell verfügbaren Inseraten und deinen Filtern.
+            sich nach den aktuell verfügbaren Inseraten und deinen Filtern. Ohne exakte Treffer
+            findest du klar bezeichnete Alternativen mit Hinweisen zu den Abweichungen.
           </p>
           <p className="text-slate-600 text-base leading-relaxed mt-4">
             Lohn und Anstellungsart zeigen wir bei einer Stelle nur an, wenn entsprechende

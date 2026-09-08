@@ -30,11 +30,12 @@ export async function GET(request: Request) {
     remote: parseRemote(searchParams.get("remote")),
     postedWithinDays: Number(searchParams.get("postedWithinDays") ?? ""),
     homepageOnly: searchParams.get("homepageOnly") === "true",
+    allowAlternatives: searchParams.get("allowAlternatives") === "true",
     sort: parseSort(searchParams.get("sort")),
   };
 
   const result = await searchJobListings(params);
   return NextResponse.json(result, {
-    headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=3600" },
+    headers: { "Cache-Control": "no-store" },
   });
 }

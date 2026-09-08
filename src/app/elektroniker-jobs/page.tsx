@@ -4,7 +4,7 @@ import { findRoleHub } from "@/lib/role-hubs";
 
 const SLUG = "elektroniker-jobs";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export function generateMetadata(): Metadata {
   const config = findRoleHub(SLUG)!;
