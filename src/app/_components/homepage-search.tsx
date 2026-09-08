@@ -667,6 +667,15 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                 </div>
               </div>
             </form>
+            <div className="mx-auto mt-5 flex max-w-4xl flex-col items-start justify-between gap-3 rounded-xl border border-amber-200 bg-white/80 p-4 text-left sm:flex-row sm:items-center">
+              <div>
+                <p className="text-sm font-bold text-slate-900">Noch keine passende Stelle?</p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-600">Sende uns deinen CV und entdecke Jobs per Swipe. Ohne Konto oder Motivationsschreiben.</p>
+              </div>
+              <Button asChild variant="outline" className="h-auto min-h-11 w-full whitespace-normal rounded-lg border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-bold text-amber-900 hover:bg-amber-100 sm:w-auto">
+                <Link href="/job-finder">CV senden & Jobs entdecken</Link>
+              </Button>
+            </div>
           </div>
         </section>
 
