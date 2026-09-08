@@ -12,7 +12,8 @@
     "scrape:quick": "scripts/.venv/bin/python scripts/scrape-jobs.py --quick",
     "check:applications": "node --import tsx --test src/lib/application-validation.test.ts src/lib/application-persistence.test.ts src/lib/application-request.test.ts",
     "check:ads": "node --import tsx --test src/lib/google-ads.test.ts src/lib/google-ads-csp.test.ts",
-    "check:search": "node --import tsx --test src/lib/job-search.test.ts src/lib/job-search-matching.test.ts"
+    "check:search": "node --import tsx --test src/lib/job-search.test.ts src/lib/job-search-matching.test.ts",
+    "check:job-finder": "node --import tsx --test src/lib/job-finder-session.test.ts src/lib/job-finder-summary.test.ts"
   },
   "dependencies": {
     "@genwave/svgmaker-mcp": "^0.4.0",
