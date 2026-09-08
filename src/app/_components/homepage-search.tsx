@@ -825,7 +825,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
 
             {!isLoading && !isRefreshing && !errorMessage && alternativeMessage && jobs.length > 0 && (
               <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-slate-700" role="status" aria-live="polite">
-                <p className="font-semibold text-slate-900">Keine exakten Treffer – hier sind passende Alternativen</p>
+                <p className="font-semibold text-slate-900">Keine exakten Treffer – weitere aktuelle Stellen</p>
                 <p className="mt-1">{alternativeMessage}</p>
               </div>
             )}
