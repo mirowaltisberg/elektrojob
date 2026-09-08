@@ -14,7 +14,7 @@ Swiss job board for electrical trades — live at [elektrojob.ch](https://www.el
 - **Live job listings** — 2000+ scraped Swiss electrical jobs, updated regularly
 - **Search & filter** — by keyword, location (with radius), job type, workload, remote
 - **SEO landing pages** — pre-rendered pages for top role/canton combos
-- **CV upload & apply** — applicants submit name, email, phone + CV (PDF/DOCX), stored in Supabase Storage
+- **Bewerbung mit Name und CV** — vollständiger Name, PDF-Lebenslauf bis 4 MB und Einwilligung zur internen Prüfung; private Speicherung in Supabase Storage
 - **Swiss postal code autocomplete** — location search with PLZ support
 - **Vercel Analytics** — page view tracking
 
@@ -51,7 +51,7 @@ scripts/
 | `jobs` | All scraped job listings |
 | `applications` | Job applications with CV references |
 | `scrape_metadata` | Last scrape timestamp + total count |
-| `cvs` (storage) | Uploaded CV files (PDF/DOCX, max 10 MB) |
+| `cvs` (storage) | Private PDF-Lebensläufe bis 4 MB |
 
 ## Development
 

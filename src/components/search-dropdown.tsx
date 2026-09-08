@@ -100,6 +100,7 @@ export function SearchDropdown({
         }
         break;
       case "Escape":
+      case "Tab":
         setIsOpen(false);
         setHighlightedIndex(-1);
         break;
@@ -129,12 +130,13 @@ export function SearchDropdown({
         ref={inputRef}
         type="text"
         role="combobox"
+        aria-label={placeholder}
         aria-expanded={showDropdown}
         aria-autocomplete="list"
         aria-haspopup="listbox"
         aria-controls={showDropdown ? listboxId : undefined}
         aria-activedescendant={
-          highlightedIndex >= 0
+          showDropdown && highlightedIndex >= 0 && highlightedIndex < filtered.length
             ? `${listboxId}-suggestion-${highlightedIndex}`
             : undefined
         }
@@ -177,7 +179,7 @@ export function SearchDropdown({
               i === filtered.length - 1 && "rounded-b-xl"
             )}
             onMouseEnter={() => setHighlightedIndex(i)}
-            onMouseDown={(e) => {
+            onPointerDown={(e) => {
               e.preventDefault();
               select(item);
             }}

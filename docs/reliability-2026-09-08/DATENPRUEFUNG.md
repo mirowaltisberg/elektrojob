@@ -38,3 +38,21 @@ Diese Zahlen sind **heuristische Vorprüfung**, keine manuelle Bestätigung jede
 ## Empfehlung
 
 Für die Startseite nur Inserate freigeben, deren konkreter Einsatzort, Beruf, Pensum, Aufgaben und Anforderungen aus der Quelle belegt und datenschutzgerecht öffentlich darstellbar sind. Fehlende Angaben nicht mit Standardwerten oder allgemeinen Berufsprofilen ersetzen. Eine leere oder kürzere Auswahl ist ehrlicher als scheinbar vollständige Inserate. Firmen-, Kontakt- und Quellenangaben müssen an der bestehenden privaten Grenze bleiben; vollständige Rohtexte nicht ungeprüft öffentlich ausgeben.
+
+## Prüfung mit der implementierten Freigaberegel
+
+Nach Fertigstellung von `getVerifiedJobDetails` wurde dieselbe Menge von 413 öffentlichen IDs direkt durch den neuen Code geprüft. Ergebnis: **25 Inserate erfüllen die konkrete Freigaberegel**. Anstellungsart und Lohn sind optional und werden ohne Beleg nicht behauptet.
+
+- 163 mit im Titel oder ausdrücklich beschriftet belegtem Pensum.
+- 365 mit kanonisch bestätigter Schweizer Gemeinde.
+- 195 mit mindestens zwei bereinigten, im Quelltext belegten Aufgaben.
+- 216 mit mindestens zwei solchen Anforderungen; 143 erfüllen beide Punkte.
+- 16 mit allgemeinem statt konkretem Berufstitel.
+
+Die erzeugten Kandidaten wurden ausschliesslich mit den vorgesehenen öffentlichen Feldern in einem ignorierten lokalen Prüfartefakt abgelegt und zur manuellen Inhalts-/Datenschutzprüfung übergeben. Die Rohtexte blieben nur im Arbeitsspeicher. Eine zusätzliche Mustersuche fand in den ausgegebenen Aufgaben und Anforderungen keine offensichtlichen Kontakt-, URL- oder Firmensuffix-Muster; dies ersetzt nicht die separate manuelle Prüfung.
+
+### Nachprüfung nach inhaltlichen Schutzregeln
+
+Am 8. September 2026 um 13:57:48 Uhr (Zürich) wurde die Auswahl nach weiteren Korrekturen erneut berechnet: Der Quelltitel muss einen Elektroberuf belegen, Aufgaben müssen tatsächliche Tätigkeiten beschreiben und abgeschnittene Textfragmente werden entfernt. **Damit erfüllen 9 der 413 zuvor öffentlichen Inserate die aktuelle Regel.** Die frühere Zahl 25 beschreibt den Zwischenstand vor diesen zusätzlichen Prüfungen. Die endgültigen neun öffentlichen Textvorschläge wurden erneut zur manuellen Prüfung übergeben.
+
+Zwei mögliche Dublettenpaare wurden ausschliesslich anhand von Vergleichsergebnissen untersucht: Quelltitel, Ort, vollständiger Text und Datum stimmen überein, gespeicherter Arbeitgeber und Quell-URL unterscheiden sich jedoch. Eine identische reale Vakanz ist damit nicht belegt; es wurde deshalb kein Datensatz als Dublette entfernt.

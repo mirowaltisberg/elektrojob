@@ -5,6 +5,8 @@
 1. **Vorschau-Bewerbungen wurden vor dem Speichern mit HTTP 403 abgewiesen.** Die API erlaubte ausschliesslich die beiden Produktionsadressen, obwohl sie bereits eine eigene Einstufung für synthetische Vorschau-Bewerbungen enthält. Unter `VERCEL_ENV=preview` ergänzt sie jetzt ausschliesslich die exakten, serverseitig konfigurierten Adressen `VERCEL_URL` und `VERCEL_BRANCH_URL`. Beliebige Vercel-Adressen, manipulierte Host-Header, HTTP-Adressen und fremde Herkunft bleiben gesperrt. Die Produktionsregeln bleiben unverändert.
 2. **Beschädigte Multipart-Anfragen erschienen als Dienstunterbruch.** Fehler beim Dekodieren der Formulardaten fielen bisher in die allgemeine HTTP-503-Antwort. Sie werden jetzt als Eingabefehler mit HTTP 400 beantwortet. Die Grössenbegrenzung antwortet weiterhin mit HTTP 413.
 
+3. **Bewerbungshinweise widersprachen dem Formular.** Die Detailseite nannte den CV optional; die Startseitenanleitung versprach DOC-/DOCX-Uploads. Beide Hinweise verlangen jetzt korrekt Name, PDF-Lebenslauf bis 4 MB und die erforderliche Einwilligung. Auch die veraltete Funktions- und Speicherbeschreibung im README wurde berichtigt. Die ältere API-Kompatibilität bleibt unverändert.
+
 Die Prüfung von Herkunft und Formulardaten liegt in `src/lib/application-request.ts`; die API verwendet dieselben Funktionen. Die Extraktion ermöglicht Tests mit echten Web-Request-, FormData- und File-Objekten ohne Zugang zu Produktionsdaten.
 
 ## Geprüfter bestehender Ablauf

@@ -19,7 +19,6 @@ import {
 } from "@/lib/landing-pages";
 import { searchJobListings } from "@/lib/job-catalog";
 import type { JobListing } from "@/lib/job-types";
-import { estimateSalary, formatSalaryRange } from "@/lib/salary-estimates";
 import { getEditorialContent } from "@/data/editorial/elektrojob";
 import { EditorialIntro } from "@/app/_components/editorial-intro";
 
@@ -202,7 +201,7 @@ export default async function LandingRolePage({ params }: LandingPageProps) {
             {result.total} {result.total === 1 ? "Stelle" : "Stellen"} gefunden
           </p>
           <Button asChild className="mt-4">
-            <Link href={`/?q=${encodeURIComponent(config.role)}&loc=${encodeURIComponent(config.canton)}`}>
+            <Link href={`/?q=${encodeURIComponent(config.role)}&loc=${encodeURIComponent(config.canton)}&radiusKm=all`}>
               Alle passenden Stellen suchen
             </Link>
           </Button>
@@ -229,14 +228,10 @@ export default async function LandingRolePage({ params }: LandingPageProps) {
                       <div className="bg-white px-2.5 py-2 flex flex-col gap-0.5">
                         <span className="flex items-center gap-1 text-sm font-semibold text-slate-900 truncate">
                           <Wallet className="h-3.5 w-3.5 text-primary shrink-0" />
-                          {job.salary ||
-                            (() => {
-                              const est = estimateSalary(job.title);
-                              return est ? `~${formatSalaryRange(est)}` : "–";
-                            })()}
+                          {job.salary || "Nicht angegeben"}
                         </span>
                         <span className="text-[11px] text-slate-600 uppercase tracking-wide">
-                          Lohn, CHF/Jahr
+                          Lohnangabe
                         </span>
                       </div>
                       <div className="bg-white px-2.5 py-2 flex flex-col gap-0.5">

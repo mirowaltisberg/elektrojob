@@ -242,9 +242,15 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
                   {job.description}
                 </p>
 
+                {!job.hasVerifiedDetails && (
+                  <p className="text-sm text-slate-600 mb-6">
+                    Zu dieser Stelle liegen noch nicht alle Angaben vor. Fehlende Details werden bei deiner Anfrage geklärt.
+                  </p>
+                )}
+
                 {job.responsibilities.length > 0 && (
                   <>
-                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Typische Aufgaben</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Aufgaben laut Inserat</h2>
                     <ul className="space-y-2.5 sm:space-y-3 mb-8">
                       {job.responsibilities.map((item, i) => (
                         <li key={i} className="flex items-start gap-2.5 sm:gap-3">
@@ -258,7 +264,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
 
                 {job.requirements.length > 0 && (
                   <>
-                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Gesuchtes Profil</h2>
+                    <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4">Anforderungen laut Inserat</h2>
                     <ul className="space-y-2.5 sm:space-y-3 mb-8">
                       {job.requirements.map((item, i) => (
                         <li key={i} className="flex items-start gap-2.5 sm:gap-3">
@@ -320,7 +326,7 @@ export default async function JobDetailsPage(props: JobDetailsPageProps) {
               <div className="mb-6">
                 <h2 className="font-bold text-slate-900 mb-2">Interessiert an dieser Stelle?</h2>
                 <p className="text-sm text-slate-500">
-                  Sende deine Angaben zur internen Prüfung. Kein Konto nötig; ein Lebenslauf ist optional.
+                  Sende deinen Namen und deinen Lebenslauf als PDF zur internen Prüfung. Kein Konto nötig.
                 </p>
               </div>
 

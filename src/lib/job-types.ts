@@ -23,6 +23,7 @@ export interface JobListing {
   salary?: string;
   isRemote?: boolean;
   relevanceScore?: number;
+  hasVerifiedDetails?: boolean;
 }
 
 export interface JobFacetCount {
@@ -51,4 +52,5 @@ export interface JobSearchParams {
   remote?: RemoteFilter;
   postedWithinDays?: number;
   sort?: JobSort;
+  homepageOnly?: boolean;
 }

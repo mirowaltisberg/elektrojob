@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/json-ld";
 export const metadata: Metadata = {
   title: "Elektriker Jobs Schweiz 2026",
   description:
-    "Elektriker Jobs in der Schweiz: aktuelle Stellen für Elektroinstallateure, Montage-Elektriker, Elektroniker und Elektroplaner – mit Lohnband und Pensum-Filter.",
+    "Elektriker Jobs in der Schweiz: aktuelle Stellen für Elektroinstallateure, Montage-Elektriker, Elektroniker und Elektroplaner – nach Ort und Pensum filtern.",
   alternates: {
     canonical: "/",
   },
@@ -38,6 +38,8 @@ export default async function HomePage() {
     limit: 12,
     offset: 0,
     sort: "newest",
+    postedWithinDays: 30,
+    homepageOnly: true,
   });
 
   return (
