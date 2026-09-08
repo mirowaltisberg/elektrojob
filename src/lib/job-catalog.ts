@@ -339,15 +339,15 @@ function toScrapedListing(job: ScrapedJob, relevanceScore: number): JobListing {
 }
 
 let cachedCurated: JobListing[] | null = null;
-let cachedCuratedAt = 0;
-const CURATED_TTL_MS = 120_000;
+let cachedCuratedSource: ScrapedJob[] | null = null;
 
 async function buildCuratedScrapedListings(): Promise<JobListing[]> {
-  if (cachedCurated && Date.now() - cachedCuratedAt < CURATED_TTL_MS) return cachedCurated;
+  const source = await loadScrapedJobs();
+  if (cachedCurated && cachedCuratedSource === source) return cachedCurated;
 
   const deduped = new Map<string, JobListing>();
 
-  for (const job of await loadScrapedJobs()) {
+  for (const job of source) {
     const relevanceScore = scoreScrapedJob(job);
     if (relevanceScore < MIN_RELEVANCE_SCORE) {
       continue;
@@ -376,7 +376,7 @@ async function buildCuratedScrapedListings(): Promise<JobListing[]> {
 
   const result = [...deduped.values()];
   cachedCurated = result;
-  cachedCuratedAt = Date.now();
+  cachedCuratedSource = source;
   return result;
 }
 
@@ -484,7 +484,7 @@ export async function getSimilarJobListings(current: JobListing, limit = 4): Pro
     .map(({ candidate }) => candidate);
 }
 
-export async function getIndexableJobListings(limit = 400): Promise<JobListing[]> {
+export async function getIndexableJobListings(): Promise<JobListing[]> {
   const curatedScraped = await buildCuratedScrapedListings();
-  return sortJobs(curatedScraped, "newest").slice(0, limit);
+  return sortJobs(curatedScraped, "newest");
 }

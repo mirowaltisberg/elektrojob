@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { CalendarDays, Clock, MapPin, Wallet } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ import type { JobListing } from "@/lib/job-types";
 import { getEditorialContent } from "@/data/editorial/elektrojob";
 import { EditorialIntro } from "@/app/_components/editorial-intro";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
 
@@ -86,7 +86,11 @@ function buildFaqSchema(config: LandingPageConfig) {
 
 async function resolveLandingConfig(params: LandingPageProps["params"]) {
   const { role, canton } = await params;
-  return findLandingPageBySlug(role, canton);
+  const config = findLandingPageBySlug(role, canton);
+  if (config && `/elektrojobs/${role}/${canton}` !== getLandingPath(config)) {
+    permanentRedirect(getLandingPath(config));
+  }
+  return config;
 }
 
 export async function generateStaticParams() {

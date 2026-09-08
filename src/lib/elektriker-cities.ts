@@ -26,7 +26,7 @@ export const ELEKTRIKER_CITIES: ElektrikerCity[] = [
     slug: "zuerich",
     name: "Zürich",
     cantonAbbr: "ZH",
-    cantonSlug: "zuerich",
+    cantonSlug: "zh",
     population: "ca. 440'000",
     region: "Grossraum Zürich",
     intro:
@@ -39,7 +39,7 @@ export const ELEKTRIKER_CITIES: ElektrikerCity[] = [
     slug: "basel",
     name: "Basel",
     cantonAbbr: "BS",
-    cantonSlug: "basel",
+    cantonSlug: "bs",
     population: "ca. 175'000",
     region: "Nordwestschweiz",
     intro:
@@ -52,7 +52,7 @@ export const ELEKTRIKER_CITIES: ElektrikerCity[] = [
     slug: "bern",
     name: "Bern",
     cantonAbbr: "BE",
-    cantonSlug: "bern",
+    cantonSlug: "be",
     population: "ca. 145'000",
     region: "Mittelland",
     intro:
@@ -65,7 +65,7 @@ export const ELEKTRIKER_CITIES: ElektrikerCity[] = [
     slug: "luzern",
     name: "Luzern",
     cantonAbbr: "LU",
-    cantonSlug: "luzern",
+    cantonSlug: "lu",
     population: "ca. 83'000",
     region: "Zentralschweiz",
     intro:
@@ -78,7 +78,7 @@ export const ELEKTRIKER_CITIES: ElektrikerCity[] = [
     slug: "st-gallen",
     name: "St. Gallen",
     cantonAbbr: "SG",
-    cantonSlug: "st-gallen",
+    cantonSlug: "sg",
     population: "ca. 80'000",
     region: "Ostschweiz",
     intro:

@@ -358,9 +358,10 @@ export function getLandingPath(config: LandingPageConfig): string {
 }
 
 export function findLandingPageBySlug(roleSlug: string, cantonSlug: string): LandingPageConfig | null {
+  const canonicalCanton = toCantonSlug(cantonSlug);
   return (
     TOP_LANDING_PAGES.find(
-      (item) => toRoleSlug(item.role) === roleSlug && toCantonSlug(item.canton) === cantonSlug
+      (item) => toRoleSlug(item.role) === roleSlug && toCantonSlug(item.canton) === canonicalCanton
     ) ?? null
   );
 }

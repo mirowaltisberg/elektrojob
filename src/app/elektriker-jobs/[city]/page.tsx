@@ -9,7 +9,7 @@ import { ELEKTRIKER_CITIES, findElektrikerCity } from "@/lib/elektriker-cities";
 import { searchJobListings } from "@/lib/job-catalog";
 import { MapPin, Wallet } from "lucide-react";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
 

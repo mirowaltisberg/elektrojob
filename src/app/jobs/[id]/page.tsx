@@ -29,7 +29,7 @@ function getDisplayJobId(job: JobListing): string {
   return "ELK-" + hash.slice(0, 8).toUpperCase();
 }
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.elektrojob.ch";
 
