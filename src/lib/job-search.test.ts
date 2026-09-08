@@ -103,3 +103,19 @@ test("strict catalogue queries remain exact and an empty source never invents jo
   assert.deepEqual(empty.jobs, []);
   assert.equal(empty.alternativeMessage, null);
 });
+
+test("alternative sorting respects explicit date order, while relevance prefers nearby jobs", () => {
+  const records = [
+    job("near-old", { location: "Emmen, Luzern", datePosted: "2026-09-01" }),
+    job("far-new", { location: "Zürich, Zürich", datePosted: "2026-09-08" }),
+  ];
+  const query = { q: "Elektroinstallateur", loc: "Luzern, LU", radiusKm: 5, remote: "true" as const, allowAlternatives: true };
+  // Force a profession-wide alternative set by using a place with no exact job.
+  query.loc = "Bern, BE";
+  const newest = searchJobListingsInCatalogue(records, { ...query, sort: "newest" });
+  const oldest = searchJobListingsInCatalogue(records, { ...query, sort: "oldest" });
+  const relevant = searchJobListingsInCatalogue(records, { ...query, sort: "relevance" });
+  assert.deepEqual(newest.jobs.map((j) => j.id), ["far-new", "near-old"]);
+  assert.deepEqual(oldest.jobs.map((j) => j.id), ["near-old", "far-new"]);
+  assert.deepEqual(relevant.jobs.map((j) => j.id), ["near-old", "far-new"]);
+});

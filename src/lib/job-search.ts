@@ -312,9 +312,12 @@ export function searchJobListingsInCatalogue(
       const coordinate = originCoordinate ? getCachedCoordinate(job.location) : null;
       return originCoordinate && coordinate ? calculateDistanceKm(originCoordinate, coordinate) : Infinity;
     };
-    const ranked = sortJobs(alternatives, normalized.sort).map((job) => ({ job, distance: distance(job), score: preferenceScore(job) }));
-    ranked.sort((a, b) => (a.distance === b.distance ? 0 : a.distance < b.distance ? -1 : 1) || b.score - a.score);
-    sortedJobs = ranked.map(({ job }) => job);
+    sortedJobs = sortJobs(alternatives, normalized.sort);
+    if (normalized.sort === "relevance") {
+      const ranked = sortedJobs.map((job) => ({ job, distance: distance(job), score: preferenceScore(job) }));
+      ranked.sort((a, b) => (a.distance === b.distance ? 0 : a.distance < b.distance ? -1 : 1) || b.score - a.score);
+      sortedJobs = ranked.map(({ job }) => job);
+    }
   }
 
   const facets = buildFacets(facetJobs);
@@ -332,4 +335,3 @@ export function searchJobListingsInCatalogue(
     alternativeMessage,
   };
 }
-
