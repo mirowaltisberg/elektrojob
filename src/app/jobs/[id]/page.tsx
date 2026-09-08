@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { buildJobPostingSchema } from "@/lib/job-schema";
+import { buildJobMetaDescription } from "@/lib/job-metadata";
 import { JsonLd } from "@/components/json-ld";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getJobListingById, getSimilarJobListings } from "@/lib/job-catalog";
@@ -79,8 +80,7 @@ export async function generateMetadata(props: JobDetailsPageProps): Promise<Meta
     };
   }
 
-  const descParts = `${job.title} in ${job.location}. ${job.description}`;
-  const description = descParts.length > 155 ? descParts.slice(0, 152) + "..." : descParts;
+  const description = buildJobMetaDescription(job);
 
   return {
     title: `${job.title} in ${job.location} · ${getDisplayJobId(job)}`,
