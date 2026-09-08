@@ -30,8 +30,16 @@ function readRecentJobs(): RecentJobEntry[] {
     if (!raw) {
       return [];
     }
-    const parsed = JSON.parse(raw) as RecentJobEntry[];
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((entry): entry is RecentJobEntry =>
+      Boolean(entry) && typeof entry === "object" &&
+      typeof entry.id === "string" && /^scraped-elektro-[a-f0-9]{12}$/i.test(entry.id) &&
+      entry.href === `/jobs/${entry.id}` &&
+      typeof entry.title === "string" && entry.title.trim().length > 0 &&
+      typeof entry.location === "string" && entry.source === "scraped" &&
+      typeof entry.viewedAt === "string" && Number.isFinite(Date.parse(entry.viewedAt))
+    ).slice(0, 6);
   } catch {
     return [];
   }
@@ -68,6 +76,7 @@ export function JobShareActions({ jobId, jobTitle }: JobShareActionsProps) {
   const { trigger } = useHaptic();
   const [isCopied, setIsCopied] = useState(false);
   const [pageUrl, setPageUrl] = useState("");
+  const [copyError, setCopyError] = useState(false);
 
   useEffect(() => setPageUrl(window.location.href), []);
 
@@ -85,11 +94,16 @@ export function JobShareActions({ jobId, jobTitle }: JobShareActionsProps) {
       return;
     }
 
-    await navigator.clipboard.writeText(pageUrl);
-    trigger("success");
-    setIsCopied(true);
-    trackEvent("share_copy_link", { job_id: jobId });
-    window.setTimeout(() => setIsCopied(false), 1400);
+    setCopyError(false);
+    try {
+      await navigator.clipboard.writeText(pageUrl);
+      trigger("success");
+      setIsCopied(true);
+      trackEvent("share_copy_link", { job_id: jobId });
+      window.setTimeout(() => setIsCopied(false), 1400);
+    } catch {
+      setCopyError(true);
+    }
   };
 
   return (
@@ -106,6 +120,11 @@ export function JobShareActions({ jobId, jobTitle }: JobShareActionsProps) {
           WhatsApp
         </a>
       </Button>
+      {copyError && (
+        <p role="status" className="w-full text-sm text-slate-600">
+          Kopieren ist in diesem Browser nicht möglich. Kopiere den Link aus der Adresszeile.
+        </p>
+      )}
       <Button
         type="button"
         variant="outline"
@@ -136,10 +155,7 @@ export function RecentlyViewedJobs({
   source,
   currentHref,
 }: RecentlyViewedJobsProps) {
-  const recentJobs = useMemo(
-    () => readRecentJobs().filter((entry) => entry.id !== jobId).slice(0, 3),
-    [jobId]
-  );
+  const [recentJobs, setRecentJobs] = useState<RecentJobEntry[]>([]);
 
   useEffect(() => {
     try { window.localStorage.removeItem("elektrojob:recent-jobs"); } catch { /* Recent jobs are optional. */ }
@@ -154,6 +170,9 @@ export function RecentlyViewedJobs({
     };
 
     const previousEntries = readRecentJobs().filter((entry) => entry.id !== jobId);
+    // The server and initial browser render must both be empty. Reading stored
+    // visits during render causes hydration errors for returning visitors.
+    setRecentJobs(previousEntries.slice(0, 3));
     try {
       window.localStorage.setItem(RECENT_KEY, JSON.stringify([currentEntry, ...previousEntries].slice(0, 6)));
     } catch { /* Saving a recent job must never interrupt applying. */ }

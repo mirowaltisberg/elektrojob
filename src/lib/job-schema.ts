@@ -192,10 +192,10 @@ function buildDescription(job: JobListing): string {
   const sections = [`<p>${escapeHtml(job.description)}</p>`];
 
   if (job.responsibilities.length > 0) {
-    sections.push("<p>Typische Aufgaben im Berufsbild:</p>", listHtml(job.responsibilities));
+    sections.push("<p>Aufgaben laut Inserat:</p>", listHtml(job.responsibilities));
   }
   if (job.requirements.length > 0) {
-    sections.push("<p>Typisches Berufsprofil:</p>", listHtml(job.requirements));
+    sections.push("<p>Anforderungen laut Inserat:</p>", listHtml(job.requirements));
   }
   if (job.benefits.length > 0) {
     sections.push("<p>Weitere Hinweise:</p>", listHtml(job.benefits));

@@ -1,5 +1,14 @@
 import { verifyApplicationTestRun } from "@/lib/application-test-run";
 import { createApplicationRequestLimiter } from "@/lib/application-request-limit";
+import {
+  ApplicationRequestTooLarge,
+  InvalidApplicationRequest,
+  getApplicationOrigins,
+  getSingleFile,
+  getSingleString,
+  isSameOrigin,
+  parseBoundedFormData,
+} from "@/lib/application-request";
 import { createHmac, randomUUID } from "node:crypto";
 
 import { applicationIdentity, isSubmissionId, parseApplicationAnalytics, recordApplicationSaved, resolveApplicationInsert } from "@/lib/application-persistence";
@@ -7,13 +16,17 @@ import { applicationIdentity, isSubmissionId, parseApplicationAnalytics, recordA
 import { NextResponse } from "next/server";
 import { getJobListingById } from "@/lib/job-catalog";
 import { createAdminClient } from "@/lib/supabase";
-// Elektrojob keeps its existing optional-CV flow and deployment credentials.
+// Bestehende Kontaktbewerbungen bleiben neben dem Formular mit Name und CV möglich.
 type ApplicationsConfig = ReturnType<typeof getApplicationsConfig> & {};
 function getApplicationsConfig() {
   const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!secret || !process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
   return {
-    allowedOrigins: ["https://www.elektrojob.ch", "https://elektrojob.ch"],
+    allowedOrigins: getApplicationOrigins({
+      VERCEL_ENV: process.env.VERCEL_ENV,
+      VERCEL_URL: process.env.VERCEL_URL,
+      VERCEL_BRANCH_URL: process.env.VERCEL_BRANCH_URL,
+    }),
     ipHashSecret: secret, site: "elektrojob.ch", storageBucket: "cvs",
     rateLimitMax: 3, rateLimitWindowMinutes: 60, retentionDays: 90,
     consentVersion: "application-v1",
@@ -21,7 +34,6 @@ function getApplicationsConfig() {
 }
 import {
   MAX_APPLICATION_PDF_BYTES,
-  MAX_APPLICATION_REQUEST_BYTES,
   hasDisallowedPdfFeatures,
   isAcceptableFormAge,
   isValidEmail,
@@ -34,24 +46,6 @@ import {
 
 export const runtime = "nodejs";
 const requestLimited = createApplicationRequestLimiter();
-
-const ALLOWED_FIELDS = new Set([
-  "jobId",
-  "name",
-  "email",
-  "phone",
-  "cv",
-  "website",
-  "formStartedAt",
-  "consent",
-  "submissionId",
-  "analytics",
-  "testRunId",
-  "testToken",
-]);
-
-class InvalidApplicationRequest extends Error {}
-class ApplicationRequestTooLarge extends Error {}
 
 function jsonError(message: string, status: number) {
   return NextResponse.json(
@@ -74,12 +68,6 @@ function logFailure(event: string, requestId: string) {
   console.error("[applications] request failed", { event, requestId });
 }
 
-function isSameOrigin(request: Request, allowedOrigins: readonly string[]): boolean {
-  const origin = request.headers.get("origin");
-  const fetchSite = request.headers.get("sec-fetch-site");
-  return Boolean(origin && allowedOrigins.includes(origin)) && (!fetchSite || fetchSite === "same-origin");
-}
-
 function getClientAddress(request: Request): string | null {
   const forwarded =
     request.headers.get("x-vercel-forwarded-for") ??
@@ -93,80 +81,6 @@ function getClientAddress(request: Request): string | null {
 
 function hashClientAddress(address: string, secret: string): string {
   return createHmac("sha256", secret).update(address, "utf8").digest("hex");
-}
-
-async function readRequestBody(request: Request): Promise<Buffer> {
-  const contentLength = request.headers.get("content-length");
-  if (contentLength) {
-    if (!/^\d+$/.test(contentLength) || Number(contentLength) > MAX_APPLICATION_REQUEST_BYTES) {
-      throw new ApplicationRequestTooLarge();
-    }
-  }
-
-  if (!request.body) {
-    throw new InvalidApplicationRequest();
-  }
-
-  const reader = request.body.getReader();
-  const chunks: Uint8Array[] = [];
-  let totalBytes = 0;
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    totalBytes += value.byteLength;
-    if (totalBytes > MAX_APPLICATION_REQUEST_BYTES) {
-      await reader.cancel();
-      throw new ApplicationRequestTooLarge();
-    }
-    chunks.push(value);
-  }
-
-  if (totalBytes === 0) {
-    throw new InvalidApplicationRequest();
-  }
-  return Buffer.concat(chunks, totalBytes);
-}
-
-async function parseBoundedFormData(request: Request): Promise<FormData> {
-  const contentType = request.headers.get("content-type") ?? "";
-  if (!/^multipart\/form-data;\s*boundary=/i.test(contentType)) {
-    throw new InvalidApplicationRequest();
-  }
-
-  const body = await readRequestBody(request);
-  const boundedRequest = new Request(request.url, {
-    method: "POST",
-    headers: { "content-type": contentType },
-    body: Uint8Array.from(body).buffer,
-  });
-  const formData = await boundedRequest.formData();
-
-  let entryCount = 0;
-  for (const key of formData.keys()) {
-    entryCount += 1;
-    if (entryCount > ALLOWED_FIELDS.size || !ALLOWED_FIELDS.has(key)) {
-      throw new InvalidApplicationRequest();
-    }
-  }
-  return formData;
-}
-
-function getSingleString(formData: FormData, field: string): string {
-  const values = formData.getAll(field);
-  if (values.length !== 1 || typeof values[0] !== "string") {
-    throw new InvalidApplicationRequest();
-  }
-  return values[0].normalize("NFKC").trim();
-}
-
-function getSingleFile(formData: FormData, field: string): File {
-  const values = formData.getAll(field);
-  if (values.length !== 1 || !(values[0] instanceof File)) {
-    throw new InvalidApplicationRequest();
-  }
-  return values[0];
 }
 
 async function isRateLimited(

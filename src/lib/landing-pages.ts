@@ -346,7 +346,11 @@ export function toRoleSlug(role: string): string {
 }
 
 export function toCantonSlug(canton: string): string {
-  return normalizeSlug(canton);
+  const slug = normalizeSlug(canton);
+  const entry = Object.values(CANTON_CONTENT).find((item) =>
+    normalizeSlug(item.name) === slug || item.abbr.toLowerCase() === slug
+  );
+  return entry?.abbr.toLowerCase() ?? slug;
 }
 
 export function getLandingPath(config: LandingPageConfig): string {

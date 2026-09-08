@@ -21,7 +21,7 @@ const TOP_CANTONS = [
   { name: "Thurgau", slug: "tg" },
   { name: "Graubünden", slug: "gr" },
   { name: "Schaffhausen", slug: "sh" },
-  { name: "Fribourg", slug: "fribourg" },
+  { name: "Fribourg", slug: "fr" },
 ];
 
 interface Props {
@@ -56,8 +56,8 @@ export async function RoleHubPage({ config }: Props) {
     "@type": "ItemList",
     name: config.displayName,
     description: config.description,
-    numberOfItems: result.jobs.length,
-    itemListElement: result.jobs.slice(0, 15).map((job, i) => ({
+    numberOfItems: Math.min(result.jobs.length, 12),
+    itemListElement: result.jobs.slice(0, 12).map((job, i) => ({
       "@type": "ListItem",
       position: i + 1,
       url: `${SITE_URL}/jobs/${job.id}`,
@@ -114,9 +114,10 @@ export async function RoleHubPage({ config }: Props) {
           <h2 className="text-2xl font-bold text-slate-900 mb-4">
             Aktuelle {config.displayName}
           </h2>
+          <p className="text-sm text-slate-600 mb-4">{result.total} {result.total === 1 ? "Stelle" : "Stellen"} gefunden</p>
           {result.jobs.length === 0 ? (
             <p className="text-slate-600">
-              Aktuell laden wir die Inserate. Schau gleich auf der{" "}
+              Aktuell sind keine passenden Stellen verfügbar. Weitere Berufe findest du auf der{" "}
               <Link href="/" className="text-primary underline">Startseite</Link> vorbei.
             </p>
           ) : (

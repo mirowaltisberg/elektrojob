@@ -10,7 +10,8 @@
     "check:public-jobs": "tsx scripts/check-public-jobs.ts",
     "scrape": "scripts/.venv/bin/python scripts/scrape-jobs.py",
     "scrape:quick": "scripts/.venv/bin/python scripts/scrape-jobs.py --quick",
-    "check:applications": "node --import tsx --test src/lib/application-validation.test.ts src/lib/application-persistence.test.ts"
+    "check:applications": "node --import tsx --test src/lib/application-validation.test.ts src/lib/application-persistence.test.ts src/lib/application-request.test.ts",
+    "check:ads": "node --import tsx --test src/lib/google-ads.test.ts src/lib/google-ads-csp.test.ts"
   },
   "dependencies": {
     "@genwave/svgmaker-mcp": "^0.4.0",

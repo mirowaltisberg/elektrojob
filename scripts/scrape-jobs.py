@@ -65,33 +65,25 @@ def parse_location(raw_location: str) -> str:
     return parts[0] if parts[0] else "Schweiz"
 
 
-def extract_workload(description: str) -> str | None:
-    """Try to extract workload percentage from the description text."""
-    patterns = [
-        r'(\d{2,3})\s*%',                    # "100%", "80 %"
-        r'(\d{2,3})\s*-\s*(\d{2,3})\s*%',    # "80-100%"
-        r'Pensum[:\s]*(\d{2,3})\s*%',         # "Pensum: 100%"
-        r'Pensum[:\s]*(\d{2,3})\s*-\s*(\d{2,3})\s*%',  # "Pensum: 80-100%"
-    ]
-
-    # Check first 500 chars for workload info
-    header = description[:500]
-
-    # Range pattern first
-    m = re.search(r'(\d{2,3})\s*-\s*(\d{2,3})\s*%', header)
-    if m:
-        lo, hi = int(m.group(1)), int(m.group(2))
-        if 20 <= lo <= 100 and 20 <= hi <= 100:
-            return f"{lo}-{hi}%"
-
-    # Single percentage (look for "Pensum" context or standalone)
-    m = re.search(r'(?:Pensum|Arbeitspensum|Beschäftigungsgrad)[:\s]*(\d{2,3})\s*%', header, re.IGNORECASE)
-    if m:
-        val = int(m.group(1))
-        if 20 <= val <= 100:
-            return f"{val}%"
-
-    return None
+def extract_workload(description: str, title: str = "") -> str | None:
+    """Read a workload from the title or an explicit source label, never perks."""
+    labelled = re.search(
+        r"(?:Pensum|Arbeitspensum|Beschäftigungsgrad)[:\s]*(?:von\s+|beträgt\s+)?([\d\s%–—-]+)",
+        description[:1500], re.IGNORECASE,
+    )
+    value = title if "%" in title else (labelled.group(1) if labelled else "")
+    number = r"(?:100|[1-9]\d?)"
+    pattern = rf"(?<![\d.])({number})(?:\s*%?\s*[-–—]\s*({number}))?\s*%(?!\d)"
+    match = re.search(pattern, value)
+    if not match:
+        return None
+    low = int(match.group(1))
+    high = int(match.group(2)) if match.group(2) else None
+    if high is not None:
+        return f"{low}-{high}%" if low <= high else None
+    if re.search(r"\d+\s*%?\s*[-–—]\s*\d+\s*%", value):
+        return None
+    return f"{low}%"
 
 
 def extract_sections(description: str) -> dict:
@@ -455,7 +447,7 @@ def normalize_job(raw: dict, idx: int) -> dict | None:
         "internship": "Praktikum",
     }
     # Handle comma-separated types: pick the first recognized one
-    job_type_display = "Vollzeit"
+    job_type_display = ""
     for t in job_type.lower().split(","):
         t = t.strip()
         if t in type_map:
@@ -463,9 +455,7 @@ def normalize_job(raw: dict, idx: int) -> dict | None:
             break
 
     # Try to extract workload from description
-    workload = extract_workload(description)
-    if not workload:
-        workload = "100%" if job_type_display == "Vollzeit" else "60-100%"
+    workload = extract_workload(description, title) or ""
 
     # Extract structured sections from description
     sections = extract_sections(description)

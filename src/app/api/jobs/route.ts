@@ -29,6 +29,7 @@ export async function GET(request: Request) {
     workload: searchParams.get("workload") ?? "",
     remote: parseRemote(searchParams.get("remote")),
     postedWithinDays: Number(searchParams.get("postedWithinDays") ?? ""),
+    homepageOnly: searchParams.get("homepageOnly") === "true",
     sort: parseSort(searchParams.get("sort")),
   };
 

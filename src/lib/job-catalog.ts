@@ -6,6 +6,9 @@ import {
 } from "@/lib/scraped-jobs";
 import { cleanJobText } from "@/lib/job-text-clean";
 import { buildPublicJobCopy } from "@/lib/job-public";
+import { matchesJobLocation, matchesJobQuery } from "@/lib/job-search-matching";
+import { getPublicJobLocation, getVerifiedJobDetails } from "@/lib/job-source-quality";
+import { getCantonSearchCode } from "@/lib/canton-search";
 import { calculateDistanceKm, resolveLocationCoordinate, type Coordinate } from "@/lib/location-distance";
 import type {
   JobFacets,
@@ -339,27 +342,35 @@ function toPublicSalary(value: string): string | undefined {
 }
 
 function toScrapedListing(job: ScrapedJob, relevanceScore: number): JobListing {
-  const location = cleanJobText(job.location) || "Schweiz";
-  const type = cleanJobText(job.type) || "Nicht angegeben";
-  const workload = cleanJobText(job.workload) || "Nicht angegeben";
-  const publicCopy = buildPublicJobCopy({
+  const location = getPublicJobLocation(job.location);
+  const titleCopy = buildPublicJobCopy({
     title: job.title,
     company: job.company,
     location,
-    type,
-    workload,
+    type: "",
+    workload: "",
   });
+  const verified = getVerifiedJobDetails(job, titleCopy.title);
+  const publicCopy = buildPublicJobCopy({
+    title: job.title, company: job.company, location,
+    type: verified.type, workload: verified.workload,
+  });
+  const firstTask = verified.responsibilities[0];
+  const description = verified.hasVerifiedDetails
+    ? `${firstTask}${/[.!?]$/u.test(firstTask) ? "" : "."} Pensum: ${verified.workload}.${verified.type ? ` Anstellungsart: ${verified.type}.` : ""}`
+    : `${publicCopy.description} Weitere Stellenangaben werden bei der Anfrage geklärt.`;
 
   return {
     id: String(job.id),
     title: publicCopy.title,
     location,
-    type,
-    workload,
-    description: publicCopy.description,
-    responsibilities: publicCopy.responsibilities,
-    requirements: publicCopy.requirements,
-    benefits: publicCopy.benefits,
+    type: verified.type || "Nicht angegeben",
+    workload: verified.workload || "Nicht angegeben",
+    description,
+    responsibilities: verified.responsibilities,
+    requirements: verified.requirements,
+    benefits: [],
+    hasVerifiedDetails: verified.hasVerifiedDetails,
     datePosted: job.datePosted,
     isNew: Boolean(job.isNew),
     isUrgent: Boolean(job.isUrgent),
@@ -423,45 +434,6 @@ function isValueInFilter(fieldValue: string, selectedValue: string): boolean {
   return normalizedField.includes(normalizedSelected);
 }
 
-function matchesQuery(job: JobListing, query: string): boolean {
-  if (!query) {
-    return true;
-  }
-
-  const tokenize = (value: string) =>
-    value
-      .toLocaleLowerCase("de-CH")
-      .replace(/[^\p{L}\p{N}]+/gu, " ")
-      .split(" ")
-      .filter((token) => token.length >= 2);
-  const ignoredQueryTokens = new Set(["efz", "job", "jobs", "stelle", "stellen", "spezialist"]);
-  const queryTokens = tokenize(query).filter((token) => !ignoredQueryTokens.has(token));
-  const publicTokens = tokenize(`${job.title} ${job.description}`);
-
-  const hasPublicMatch = (queryToken: string) => {
-    if (queryToken === "elektriker") {
-      return true;
-    }
-
-    return publicTokens.some(
-      (publicToken) =>
-        publicToken === queryToken ||
-        (queryToken.length >= 5 &&
-          (publicToken.startsWith(queryToken) || queryToken.startsWith(publicToken)))
-    );
-  };
-
-  return queryTokens.length > 0 && queryTokens.every(hasPublicMatch);
-}
-
-function matchesLocation(job: JobListing, location: string): boolean {
-  if (!location) {
-    return true;
-  }
-
-  return normalizeText(job.location).includes(normalizeText(location));
-}
-
 function getCachedCoordinate(location: string): Coordinate | null {
   const normalizedLocation = normalizeText(location);
   if (!normalizedLocation) {
@@ -487,13 +459,13 @@ function matchesLocationWithRadius(
     return true;
   }
 
-  if (!radiusKm || !originCoordinate) {
-    return matchesLocation(job, location);
+  if (getCantonSearchCode(location) || !radiusKm || !originCoordinate) {
+    return matchesJobLocation(job, location);
   }
 
   const jobCoordinate = getCachedCoordinate(job.location);
   if (!jobCoordinate) {
-    return matchesLocation(job, location);
+    return matchesJobLocation(job, location);
   }
 
   return calculateDistanceKm(originCoordinate, jobCoordinate) <= radiusKm;
@@ -680,7 +652,8 @@ export async function searchJobListings(params: JobSearchParams): Promise<JobSea
 
   const scopedJobs = sourceBundle.scrapedJobs.filter(
     (job) =>
-      matchesQuery(job, normalized.q) &&
+      (!params.homepageOnly || job.hasVerifiedDetails === true) &&
+      matchesJobQuery(job, normalized.q) &&
       matchesLocationWithRadius(job, normalized.loc, normalized.radiusKm, originCoordinate)
   );
   const filteredJobs = applySecondaryFilters(scopedJobs, normalized);

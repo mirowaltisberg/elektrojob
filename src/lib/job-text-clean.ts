@@ -37,12 +37,12 @@ function stripInlineMarkdown(input: string): string {
     .replace(/\[([^\]]+)]\([^)]+\)/g, "$1")
     .replace(/^\s{0,3}#{1,6}\s+/g, "")
     .replace(/[*_`~]/g, "")
-    .replace(/\\([\\\-_*[\]()#+.!])/g, "$1");
+    .replace(/\\([\\\-_*[\]()#+.!&])/g, "$1");
 }
 
 function sanitizeLine(line: string): string {
   return stripInlineMarkdown(line)
-    .replace(/^\s*(?:[-*•►▸◦‣]|\d+[.)])\s+/, "")
+    .replace(/^\s*(?:[-–—*•►▸◦‣]|\d+[.)])\s+/, "")
     .replace(/\s+/g, " ")
     .trim();
 }

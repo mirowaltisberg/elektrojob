@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import type { JobFacets, JobListing, JobSort, RemoteFilter } from "@/lib/job-types";
 import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import { trackEvent } from "@/lib/analytics";
+import { getCantonSearchCode } from "@/lib/canton-search";
 
 const MobileFilterBar = dynamic(() => import("./mobile-filter-bar"), {
   ssr: false,
@@ -241,6 +242,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
   const searchAbortRef = useRef<AbortController | null>(null);
   const searchRequestRef = useRef(0);
   const loadMoreInFlightRef = useRef(false);
+  const searchInFlightRef = useRef(false);
   const [isMobile, setIsMobile] = useState(false);
 
   const [plzSuggestions, setPlzSuggestions] = useState<string[]>([]);
@@ -307,7 +309,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
 
   const runSearch = useCallback(
     async (append: boolean, offsetOverride = 0) => {
-      if (append && loadMoreInFlightRef.current) {
+      if (append && (loadMoreInFlightRef.current || searchInFlightRef.current)) {
         return;
       }
 
@@ -318,6 +320,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
       searchAbortRef.current?.abort();
       const controller = new AbortController();
       searchAbortRef.current = controller;
+      searchInFlightRef.current = true;
 
       setErrorMessage(null);
       if (append) {
@@ -337,6 +340,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
           offset: String(nextOffset),
           sort: sortBy,
           remote: remoteFilter,
+          homepageOnly: "true",
         });
 
         if (typeFilter !== "all") {
@@ -348,7 +352,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
         if (postedWithinDays !== "all") {
           params.set("postedWithinDays", postedWithinDays);
         }
-        if (scopedLocation && radiusKm !== "all") {
+        if (scopedLocation && !getCantonSearchCode(scopedLocation) && radiusKm !== "all") {
           params.set("radiusKm", radiusKm);
         }
 
@@ -391,6 +395,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
         }
       } finally {
         if (requestId === searchRequestRef.current) {
+          searchInFlightRef.current = false;
           setIsLoading(false);
           setIsRefreshing(false);
           setIsLoadingMore(false);
@@ -499,12 +504,12 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
   const staleData = isScrapedStale(scrapedAt);
   const normalizedLocationDraft = normalizeLocationFilter(location);
   const normalizedActiveLocation = normalizeLocationFilter(activeLocation);
-  const hasLocationDraft = Boolean(normalizedLocationDraft);
+  const hasLocationDraft = Boolean(normalizedLocationDraft && !getCantonSearchCode(normalizedLocationDraft));
   const hasLocationInput = hasLocationDraft;
   const hasActiveLocation = Boolean(normalizedActiveLocation);
 
   useEffect(() => {
-    if (!isMobile || !canLoadMore || isLoadingMore) return;
+    if (!isMobile || !canLoadMore || isLoading || isRefreshing || isLoadingMore || errorMessage) return;
     const sentinel = loadMoreSentinelRef.current;
     if (!sentinel) return;
 
@@ -518,7 +523,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [isMobile, canLoadMore, isLoadingMore, handleLoadMore]);
+  }, [isMobile, canLoadMore, isLoading, isRefreshing, isLoadingMore, errorMessage, handleLoadMore]);
 
   const resetFilters = () => {
     setTypeFilter("all");
@@ -588,7 +593,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
               <span className="block text-[0.72em] font-extrabold text-slate-700 mt-1.5 sm:mt-3">in der ganzen Schweiz</span>
             </h1>
             <p className="text-sm sm:text-lg text-slate-600 mb-6 sm:mb-8 max-w-2xl sm:mx-auto">
-              Reale Stellen für Elektroinstallateure, Montage-Elektriker, Automatiker und Elektroplaner. Schnell filtern nach Beruf, Ort und Pensum.
+              Ausgewählte Elektrojobs mit konkreten Angaben zu Ort, Pensum, Aufgaben und Anforderungen. Schnell filtern nach Beruf und Arbeitsort.
             </p>
 
             <form
@@ -674,7 +679,9 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                 </h2>
                 {hasActiveLocation && (
                   <p className="text-xs text-slate-500 mt-1">
-                    Suchradius: {radiusKm === "all" ? "Beliebig" : `${radiusKm} km`}
+                    {getCantonSearchCode(normalizedActiveLocation)
+                      ? `Ganzer Kanton ${getCantonSearchCode(normalizedActiveLocation)}`
+                      : `Suchradius: ${radiusKm === "all" ? "Beliebig" : `${radiusKm} km`}`}
                   </p>
                 )}
                 {scrapedAt && (
@@ -775,7 +782,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
             {!isLoading && staleData && (
               <div className="mb-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
                 <p className="font-semibold">Datenstand: {scrapedAt ? formatSwissDateTime(scrapedAt) : "unbekannt"}</p>
-                <p className="mt-1">Die Stellen werden gerade aktualisiert. Bis dahin bleiben die zuletzt geprüften realen Inserate sichtbar.</p>
+                <p className="mt-1">Der letzte Datenabgleich liegt länger zurück. Prüfe die Verfügbarkeit einer Stelle bei deiner Anfrage.</p>
               </div>
             )}
 
@@ -862,7 +869,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                             </div>
 
                             {/* Structured info grid */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-slate-100 rounded-lg border border-slate-200 overflow-hidden mb-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-[repeat(auto-fit,minmax(135px,1fr))] gap-px bg-slate-100 rounded-lg border border-slate-200 overflow-hidden mb-3">
                                   <div className="bg-white px-3 py-2.5 flex flex-col gap-0.5">
                                     <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 truncate">
                                       <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -870,6 +877,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                                     </span>
                                     <span className="text-[11px] text-slate-600 uppercase tracking-wide">Ort</span>
                                   </div>
+                                  {salaryMap.get(`${job.source}-${job.id}`) && (
                                   <div className="bg-white px-3 py-2.5 flex flex-col gap-0.5">
                                     <span className="flex items-center gap-1.5 text-[13px] sm:text-sm font-semibold tabular-nums text-slate-900 truncate">
                                       <Wallet className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -877,6 +885,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                                     </span>
                                     <span className="text-[11px] text-slate-600 uppercase tracking-wide">Lohnangabe</span>
                                   </div>
+                                  )}
                                   <div className="bg-white px-3 py-2.5 flex flex-col gap-0.5">
                                     <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 truncate">
                                       <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -884,6 +893,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                                     </span>
                                     <span className="text-[11px] text-slate-600 uppercase tracking-wide">Pensum</span>
                                   </div>
+                                  {job.type !== "Nicht angegeben" && (
                                   <div className="bg-white px-3 py-2.5 flex flex-col gap-0.5">
                                     <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 truncate">
                                       <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -891,6 +901,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                                     </span>
                                     <span className="text-[11px] text-slate-600 uppercase tracking-wide">Anstellungsart</span>
                                   </div>
+                                  )}
                                 </div>
 
                             {/* Description + actions */}
@@ -933,13 +944,13 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                 )}
 
                 {canLoadMore && (
-                  <div className="mt-10 text-center hidden md:block">
+                  <div className="mt-6 md:mt-10 text-center">
                     <Button
                       onClick={handleLoadMore}
                       variant="outline"
                       size="lg"
                       className="rounded-xl btn-interactive"
-                      disabled={isLoadingMore}
+                      disabled={isLoading || isRefreshing || isLoadingMore}
                     >
                       {isLoadingMore ? (
                         <>

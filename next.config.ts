@@ -51,12 +51,15 @@ const nextConfig: NextConfig = {
         key: "Content-Security-Policy",
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://va.vercel-scripts.com",
+          // Google Ads nutzt neben Bildpixeln auch Scripts, fetch/Beacon und
+          // einen Google-Tag-Frame. Die Einwilligung steuert weiterhin AdsConsent.
+          // https://developers.google.com/tag-platform/security/guides/csp#google_ads
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.googleadservices.com https://www.google.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.google-analytics.com https://connect.facebook.net https://va.vercel-scripts.com",
           "style-src 'self' 'unsafe-inline'",
           "img-src 'self' data: https: blob:",
           "font-src 'self' https://fonts.gstatic.com",
-          "connect-src 'self' https://www.google-analytics.com https://www.facebook.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://*.supabase.co",
-          "frame-src 'none'",
+          "connect-src 'self' https://www.googletagmanager.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://ad.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://google.com https://www.google.ch https://www.google-analytics.com https://www.facebook.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://*.supabase.co",
+          "frame-src https://www.googletagmanager.com",
           "object-src 'none'",
           "base-uri 'self'",
         ].join("; "),
