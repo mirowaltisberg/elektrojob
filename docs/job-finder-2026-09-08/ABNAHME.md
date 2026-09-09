@@ -19,7 +19,23 @@ Der CV bleibt im privaten Speicher. Die bestehende Benachrichtigung enthält ein
 - Zusätzliche Prüfung verhindert, dass ein älterer Browser-Tab Interessen einem neu gestarteten Profil zuordnet.
 - Der Versanddienst wurde separat mit 6261 Prüfungen, Typprüfung, Produktions-Build und einer Kontrolle auf Zugangsdaten im Browsercode geprüft.
 
-Die abschliessende Prüfung auf der veröffentlichten Website und der tatsächliche Empfang der beiden Test-E-Mails werden nach der Bereitstellung ergänzt. Synthetische Prüfungen zählen nicht als Google-Ads-Conversion und gehen ausschliesslich an das bereits verbundene Absenderpostfach.
+Synthetische Prüfungen zählen nicht als Google-Ads-Conversion und gehen ausschliesslich an das bereits verbundene Absenderpostfach.
+
+## Prüfung auf der veröffentlichten Website am 9. September 2026
+
+- Der Einstieg «CV senden & Jobs entdecken» ist auf der Startseite sichtbar und öffnet den Job-Finder.
+- Ein gültiger Test-CV wurde über Chrome auf der veröffentlichten Website hochgeladen. Genau ein allgemeines Profil wurde im bestehenden Bewerbungseingang gespeichert. Die privat gespeicherte Datei stimmt Byte für Byte mit der hochgeladenen PDF überein.
+- Die CV-Nachricht kam um 09:09 Uhr im Outlook-Posteingang an, bevor die erste Stelle ausgewählt wurde. Ihr geschützter Link öffnet die richtige PDF ohne Administratorzugang.
+- Auf einem Bildschirm mit 390 Pixeln Breite wurden ein Swipe nach rechts, die linke Pfeiltaste und die sichtbare Interessiert-Taste geprüft. Ergebnis: drei beurteilte Stellen, zwei interessant, eine übersprungen.
+- Ein Neuladen sowie der erneute Einstieg über die Startseite stellen die gespeicherte Auswahl wieder her. Eine Datei, die nur auf «.pdf» endet, wird mit verständlicher Meldung abgewiesen.
+- Die gespeicherte Zusammenfassung nennt Automatiker/in in Oensingen und Elektromonteur/in in Widnau, jeweils 100 Prozent. Es wurden keine zusätzlichen Einzelbewerbungen angelegt.
+- Anfragen ohne Sitzung erhalten keine persönlichen Angaben. Anfragen von einer fremden Website und Schreibversuche mit der Sitzungsnummer eines anderen Tabs werden abgewiesen.
+
+- Die Interessen-Nachricht wurde um 09:44 Uhr im Outlook-Postfach empfangen. Der Nachrichtentext stimmt mit der gespeicherten Auswahl überein; die Anlage «Job-Finder-Interessen.md» ist vorhanden. Die Transportdetails bestätigen die Zustellung um 09:44:15 Uhr. Bei der Kontrolle lag die Nachricht in «Gelöschte Elemente»; die CV-Nachricht lag im Posteingang.
+- Die Website aktualisiert beide Versandstände zu «an unser Team gesendet». Ein weiterer Aufruf des Versanddiensts verarbeitete null Aufträge und verschickte keine zweite Nachricht. Der CV hat einen Versandversuch; die Zusammenfassung einen vor dem Versand übersprungenen und einen erfolgreichen Versuch.
+- Anschliessend wurden ausschliesslich das eigene synthetische Profil, seine private Test-PDF, Auswahl und Versanddatensätze entfernt. Die als TEST gekennzeichneten E-Mails bleiben als Nachweis im Postfach; ihr Test-PDF-Link ist nach der Bereinigung nicht mehr verfügbar.
+
+Der erste synthetische Zusammenfassungsversuch wurde vor dem Versand zurückgehalten, weil mehrere vorhandene Outlook-Verbindungen zur gleichen Adresse gehören. Die veröffentlichte Korrektur bindet den Test an seine ursprüngliche Verbindung; die Empfängerauswahl für echte CVs bleibt unverändert. Die Produktionsprüfung erfolgte mit Website-Stand `1c5fa8a` und Versanddienst-Stand `e9916dd`; beide wurden über den normalen PR- und Freigabeweg veröffentlicht.
 
 ## Betrieb
 
