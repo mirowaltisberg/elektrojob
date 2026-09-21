@@ -36,6 +36,41 @@ class PipelineError(RuntimeError):
     """A safe, user-displayable pipeline failure without job data."""
 
 
+def source_identity(job: dict[str, Any]) -> str:
+    # Same Unicode letters/numbers, lowercase and town boundary as the CRM.
+    def key(value):
+        return "".join(c for c in text(value).lower() if unicodedata.category(c)[0] in "LN")
+    return "|".join(key(value) for value in
+                    (job.get("company"), job.get("title"), text(job.get("location")).split(",")[0]))
+
+
+def observation_time(paths: list[Path]) -> str:
+    observed = []
+    chunks = set()
+    now = datetime.now(timezone.utc)
+    for path in paths:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            stamp = datetime.fromisoformat(payload["scrapedAt"].replace("Z", "+00:00"))
+            expected = payload.get("expectedQueries")
+            chunk = payload.get("chunk")
+            if (payload.get("complete") is not True or type(expected) is not int or expected < 1
+                    or payload.get("fullSearch") is not True or payload.get("trade") != TRADE
+                    or payload.get("totalChunks") != len(paths) or type(chunk) is not int
+                    or chunk < 0 or chunk >= len(paths) or chunk in chunks
+                    or payload.get("completedQueries") != expected or stamp.tzinfo is None
+                    or stamp > now or stamp < now - timedelta(days=1)):
+                raise ValueError("incomplete or stale artifact")
+            observed.append(stamp)
+            chunks.add(chunk)
+        except (OSError, ValueError, KeyError, TypeError, AttributeError) as exc:
+            raise PipelineError("all scrape chunks must be complete, successful and less than a day old") from exc
+    if not observed:
+        raise PipelineError("no completed scrape chunks")
+    # Retrying the same artifacts cannot count as another missed scrape.
+    return min(observed).isoformat()
+
+
 def text(value: Any) -> str:
     return value.strip() if isinstance(value, str) else ""
 
@@ -306,6 +341,7 @@ def publish(
     max_age_days: int,
     minimum_jobs: int,
     minimum_retention_ratio: float,
+    observed_at: str,
 ) -> tuple[int, int]:
     today = datetime.now(timezone.utc).date()
     cutoff = today - timedelta(days=max_age_days)
@@ -351,6 +387,13 @@ def publish(
         raise PipelineError("scrape metadata row 1 was not updated")
 
     verify_publish(client, len(rows))
+    # Only verified complete snapshots count. A failed publish never advances
+    # absence counters. Tracking is private; it contains hashes, not employers.
+    keys = sorted({hashlib.sha256(source_identity(job).encode("utf-8")).hexdigest()
+                   for job in jobs if text(job.get("company"))})
+    client.rpc("record_job_ad_snapshot", {
+        "p_trade": TRADE, "p_observed_at": observed_at, "p_seen_keys": keys,
+    }).execute()
     return len(rows), len(stale_ids)
 
 
@@ -382,6 +425,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     try:
+        observed_at = observation_time([Path(path) for path in args.input])
         jobs, rejected = merge_artifacts(
             [Path(path) for path in args.input],
             args.expected_files,
@@ -404,6 +448,7 @@ def main() -> int:
             args.max_age_days,
             args.min_jobs,
             args.min_retention_ratio,
+            observed_at,
         )
         print(f"Published {published} jobs and pruned {pruned} stale elektro rows.")
         return 0

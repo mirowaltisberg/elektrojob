@@ -418,7 +418,7 @@ def scrape_swiss_jobs(
 
     except Exception as e:
         print(f"    Scraper request failed: {type(e).__name__}")
-        return []
+        raise RuntimeError("Scrape incomplete; no snapshot may be published") from e
 
 
 def normalize_job(raw: dict, idx: int) -> dict | None:
@@ -658,6 +658,14 @@ def main():
 
     print(f"\nDone! Total unique raw jobs: {len(all_raw)}")
     save_results(all_raw, args.output, "(final)")
+    # Intermediate artifacts intentionally lack this completion evidence.
+    with open(args.output, encoding="utf-8") as handle:
+        completed = json.load(handle)
+    completed.update(complete=True, completedQueries=combo_count, expectedQueries=total_combos)
+    completed.update(trade="elektro", chunk=args.chunk, totalChunks=args.total_chunks,
+                     fullSearch=not (args.query or args.location or args.quick))
+    with open(args.output, "w", encoding="utf-8") as handle:
+        json.dump(completed, handle, ensure_ascii=False, indent=2)
     print_quality_summary(all_raw)
 
 
