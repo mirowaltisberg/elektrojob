@@ -16,7 +16,7 @@ sql(`DROP SCHEMA public CASCADE; CREATE SCHEMA public;
   DO $$BEGIN CREATE ROLE service_role BYPASSRLS; EXCEPTION WHEN duplicate_object THEN NULL; END$$;
   ALTER ROLE service_role BYPASSRLS;
   GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;`);
-sql(readFileSync(new URL('../supabase/migrations/20260921142130_job_ad_lifecycle.sql', import.meta.url), 'utf8'));
+sql(readFileSync(new URL('../supabase/migrations/20260921164334_job_ad_lifecycle.sql', import.meta.url), 'utf8'));
 const a = 'a'.repeat(64), b = 'b'.repeat(64);
 const stamp = hours => new Date(Date.now() - hours * 3600000).toISOString();
 const run = (at, keys, trade = 'elektro') => `SELECT record_job_ad_snapshot('${trade}', '${at}', ARRAY[${keys.map(k => `'${k}'`).join(',')}]::text[])`;

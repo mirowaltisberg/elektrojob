@@ -27,11 +27,11 @@ Entscheidung ausdrücklich beim Berater.
 ## Freigabe
 
 Vor Merge/erstem neuen Publisher-Lauf die Migration
-`20260921142130_job_ad_lifecycle.sql` im **Rolejobs-Projekt mwnhzniryagcchotspwm**
+`20260921164334_job_ad_lifecycle.sql` im **Rolejobs-Projekt mwnhzniryagcchotspwm**
 anwenden. Nicht auf der CRM-Datenbank ausführen. Ohne Migration schlägt der neue
 Publisher beim Schreiben der Nachweise sichtbar fehl. Alte Nachweise werden
 nicht aus `updated_at` erzeugt. Die CRM-Erweiterung wartet auf den ersten neuen
-erfolgreichen Lauf. Migration und Release sind noch nicht produktiv ausgeführt.
+erfolgreichen Lauf. Die Migration wurde am 21.09.2026 nach ausdrücklicher Freigabe angewendet; beide Tabellen sind RLS-geschützt und weder anonym noch für angemeldete Browser lesbar. Der erste neue vollständige Quelllauf bleibt vor der CRM-Ankündigung erforderlich.
 
 ## Prüfung
 
