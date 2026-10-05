@@ -236,7 +236,8 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
   const [isLoading, setIsLoading] = useState(!initialData);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [searchError, setSearchError] = useState<{ message: string; append: boolean } | null>(null);
+  const errorMessage = searchError?.message;
 
   const resultsRef = useRef<HTMLDivElement>(null);
   const hasTrackedFilterChange = useRef(false);
@@ -325,7 +326,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
       searchAbortRef.current = controller;
       searchInFlightRef.current = true;
 
-      setErrorMessage(null);
+      setSearchError(null);
       if (append) {
         loadMoreInFlightRef.current = true;
         setIsLoadingMore(true);
@@ -394,8 +395,11 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
           setSearchKey((previous) => previous + 1);
         }
       } catch (error) {
-        if (!(error instanceof DOMException && error.name === "AbortError")) {
-          setErrorMessage(error instanceof Error ? error.message : "Unbekannter Fehler");
+        if (requestId === searchRequestRef.current && !(error instanceof DOMException && error.name === "AbortError")) {
+          setSearchError({
+            message: error instanceof Error ? error.message : "Unbekannter Fehler",
+            append,
+          });
         }
       } finally {
         if (requestId === searchRequestRef.current) {
@@ -806,10 +810,10 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
               </div>
             )}
 
-            {errorMessage && (
+            {searchError && !searchError.append && (
               <Card className="mb-4 border-red-200 py-0 gap-0">
                 <CardContent className="p-4 flex items-start justify-between gap-4">
-                  <div>
+                  <div role="alert">
                     <p className="font-semibold text-red-700">Jobs konnten nicht geladen werden</p>
                     <p className="text-sm text-slate-600 mt-1">{errorMessage}</p>
                   </div>
@@ -965,6 +969,12 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
 
                 {canLoadMore && (
                   <div className="mt-6 md:mt-10 text-center">
+                    {searchError?.append && (
+                      <div role="alert" className="mb-3 rounded-xl border border-red-200 bg-white p-4 text-sm">
+                        <p className="font-semibold text-red-700">Weitere Jobs konnten nicht geladen werden</p>
+                        <p className="mt-1 text-slate-600">Deine bisher geladenen Stellen bleiben erhalten. Versuche es erneut.</p>
+                      </div>
+                    )}
                     <Button
                       onClick={handleLoadMore}
                       variant="outline"
@@ -978,7 +988,7 @@ export function HomepageSearch({ initialData }: HomepageSearchProps) {
                           Lädt...
                         </>
                       ) : (
-                        "Weitere Jobs laden"
+                        searchError?.append ? "Weitere Jobs erneut laden" : "Weitere Jobs laden"
                       )}
                     </Button>
                   </div>

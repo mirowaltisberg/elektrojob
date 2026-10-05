@@ -43,9 +43,9 @@ export function SearchDropdown({
     (item: string) => {
       trigger("selection");
       onChange(item);
+      inputRef.current?.focus({ preventScroll: true });
       setIsOpen(false);
       setHighlightedIndex(-1);
-      inputRef.current?.blur();
     },
     [onChange, trigger]
   );
@@ -150,6 +150,10 @@ export function SearchDropdown({
           setHighlightedIndex(-1);
         }}
         onFocus={() => setIsOpen(true)}
+        onBlur={() => {
+          setIsOpen(false);
+          setHighlightedIndex(-1);
+        }}
         onKeyDown={handleKeyDown}
         autoComplete="off"
       />
@@ -179,10 +183,12 @@ export function SearchDropdown({
               i === filtered.length - 1 && "rounded-b-xl"
             )}
             onMouseEnter={() => setHighlightedIndex(i)}
-            onPointerDown={(e) => {
+            onMouseDown={(e) => {
+              // Keep the combobox focused until click commits the selection.
+              // A touch gesture must be able to scroll without selecting.
               e.preventDefault();
-              select(item);
             }}
+            onClick={() => select(item)}
           >
             {renderHighlight(item)}
           </li>
