@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "check:applicant:browser": "playwright test --config playwright.applicant.config.ts",
     "check:public-jobs": "tsx scripts/check-public-jobs.ts",
     "scrape": "scripts/.venv/bin/python scripts/scrape-jobs.py",
     "scrape:quick": "scripts/.venv/bin/python scripts/scrape-jobs.py --quick",

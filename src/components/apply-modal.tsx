@@ -50,6 +50,7 @@ export function ApplyModal({ jobId, jobTitle, onOpen, controllerName }: ApplyMod
   const [isValidatingFile, setIsValidatingFile] = useState(false);
   const formStartedAtRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileChooserRef = useRef<HTMLButtonElement>(null);
   const submissionInFlight = useRef(false);
 
   const resetForm = () => {
@@ -260,7 +261,7 @@ export function ApplyModal({ jobId, jobTitle, onOpen, controllerName }: ApplyMod
               </DialogDescription>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} aria-busy={isSubmitting} className="space-y-4 mt-2">
+            <form onSubmit={handleSubmit} aria-busy={isSubmitting} className="space-y-4 mt-2 min-w-0">
               <fieldset disabled={isSubmitting} className="space-y-4 min-w-0">
               <div className="absolute left-[-10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
                 <Label htmlFor="apply-website">Website</Label>
@@ -304,34 +305,48 @@ export function ApplyModal({ jobId, jobTitle, onOpen, controllerName }: ApplyMod
                   <p id="apply-cv-help" className="text-sm text-slate-600">PDF bis 4 MB. Bitte verwende einen CV mit Telefonnummer oder E-Mail-Adresse.</p>
                   {isValidatingFile && <p role="status" className="text-sm">PDF wird geprüft...</p>}
 
-                  {!cvFile ? (
-                    <button
-                      type="button"
-                      aria-label="PDF-Lebenslauf auswählen"
-                      onClick={() => fileInputRef.current?.click()}
-                      onDrop={handleDrop}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      className={`w-full border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center transition-colors cursor-pointer ${
-                        isDragging ? "border-primary bg-primary/5" : "border-slate-200 hover:bg-slate-50"
-                      }`}
-                    >
-                      <UploadCloud className="h-7 w-7 text-primary mb-2" />
-                      <span className="text-sm font-semibold text-slate-900">CV auswählen</span>
-                      <span className="text-xs text-slate-500 mt-1">Oder die PDF hier hineinziehen</span>
-                    </button>
-                  ) : (
-                    <div className="border border-slate-200 rounded-xl p-3 flex items-center gap-3">
-                      <FileText className="h-5 w-5 text-primary shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-slate-900 truncate">{cvFile.name}</p>
-                        <p className="text-xs text-slate-500">{formatFileSize(cvFile.size)}</p>
-                        <button type="button" onClick={() => fileInputRef.current?.click()} className="min-h-11 text-sm underline">Anderen CV wählen</button>
-                      </div>
+                  <p id="apply-cv-status" role="status" aria-atomic="true" className="sr-only">
+                    {cvFile ? `Ausgewählt: ${cvFile.name}` : "Kein PDF ausgewählt."}
+                  </p>
+
+                  <div className={cvFile ? "border border-slate-200 rounded-xl p-3 flex items-center gap-3" : undefined}>
+                    {cvFile && <FileText className="h-5 w-5 text-primary shrink-0" />}
+                    <div className={cvFile ? "min-w-0 flex-1" : undefined}>
+                      {cvFile && (
+                        <>
+                          <p className="text-sm font-medium text-slate-900 truncate">{cvFile.name}</p>
+                          <p className="text-xs text-slate-500">{formatFileSize(cvFile.size)}</p>
+                        </>
+                      )}
+                      {/* Keep the chooser mounted so file selection preserves keyboard focus. */}
+                      <button
+                        ref={fileChooserRef}
+                        type="button"
+                        aria-label={cvFile ? undefined : "PDF-Lebenslauf auswählen"}
+                        aria-describedby="apply-cv-help apply-cv-status"
+                        onClick={() => fileInputRef.current?.click()}
+                        onDrop={!cvFile ? handleDrop : undefined}
+                        onDragOver={!cvFile ? handleDragOver : undefined}
+                        onDragLeave={!cvFile ? handleDragLeave : undefined}
+                        className={`focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${cvFile ? "min-h-11 text-sm underline" : `w-full border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center transition-colors cursor-pointer ${
+                          isDragging ? "border-primary bg-primary/5" : "border-slate-200 hover:bg-slate-50"
+                        }`}`}
+                      >
+                        {cvFile ? "Anderen CV wählen" : (
+                          <>
+                            <UploadCloud className="h-7 w-7 text-primary mb-2" />
+                            <span className="text-sm font-semibold text-slate-900">CV auswählen</span>
+                            <span className="text-xs text-slate-500 mt-1">Oder die PDF hier hineinziehen</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    {cvFile && (
                       <button
                         type="button"
                         aria-label="PDF entfernen"
                         onClick={() => {
+                          fileChooserRef.current?.focus();
                           fileSelectionRef.current += 1;
                           setIsValidatingFile(false);
                           setCvFile(null);
@@ -341,8 +356,8 @@ export function ApplyModal({ jobId, jobTitle, onOpen, controllerName }: ApplyMod
                       >
                         <X className="h-4 w-4" />
                       </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
 
